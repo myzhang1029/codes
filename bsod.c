@@ -28,6 +28,7 @@
 #endif
 int SetUpWindowClass(char *, int, int, int, HINSTANCE);
 LRESULT CALLBACK WindowProcedure(HWND, unsigned int, WPARAM, LPARAM);
+unsigned redrawcount;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance __UNUSED, LPSTR lpCmdLine __UNUSED,
 		   int nCmdShow __UNUSED)
@@ -36,6 +37,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance __UNUSED, LPSTR 
 	MSG uMsg;
 	if (!SetUpWindowClass("1", 0, 0, 128, hInstance)) /* Navy blue */
 		return 1;
+	redrawcount = 0;
 	hwnd = CreateWindow("1", 0, WS_BORDER, 0, 0, 100, 100, NULL, NULL, hInstance, NULL);
 	SetWindowLongPtr(hwnd, GWL_STYLE, 0);
 	if (!hwnd)
@@ -43,6 +45,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance __UNUSED, LPSTR 
 
 	ShowWindow(hwnd, SW_SHOWMAXIMIZED);
 	FreeConsole(); /* remove the console window */
+	SetCursor(NULL);
 	while (GetMessage(&uMsg, NULL, 0, 0) > 0)
 	{
 		TranslateMessage(&uMsg);
@@ -76,13 +79,6 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, unsigned int uiMsg, WPARAM wParam, L
 {
 	switch (uiMsg)
 	{
-		case WM_SETCURSOR:
-			if (LOWORD(lParam) == HTCLIENT)
-			{
-				SetCursor(NULL);
-				return TRUE;
-			}
-			return FALSE;
 		case WM_KEYDOWN:
 			if (wParam != 0x51)
 				break;
@@ -148,15 +144,18 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, unsigned int uiMsg, WPARAM wParam, L
 			{
 				TextOut(hDC, 5, horipos, Text[count], strlen(Text[count]));
 			}
-			for (int count = 5; count <= 100; count += 5)
-			{
-				clock_t t = clock(); /* Delay a second */
-				while (1)
-					if ((int)((clock() - t) / CLOCKS_PER_SEC) >= 1)
-						break;
-				snprintf(dumpstatus, 37, "Dumping physical memory to disk: %d", count);
-				TextOut(hDC, 5, horipos - horiinc, dumpstatus, strlen(dumpstatus));
-			}
+			if (redrawcount == 0)/* Draw a increasing process if it's the first draw */
+				for (int count = 5; count <= 100; count += 5)
+				{
+					clock_t t = clock(); /* Delay a second */
+					while (1)
+						if ((int)((clock() - t) / CLOCKS_PER_SEC) >= 1)
+							break;
+					snprintf(dumpstatus, 37, "Dumping physical memory to disk: %d", count);
+					TextOut(hDC, 5, horipos - horiinc, dumpstatus, strlen(dumpstatus));
+				}
+			else
+				TextOut(hDC, 5, horipos - horiinc, "Dumping physical memory to disk: 100", 37);
 			TextOut(hDC, 5, horipos, "Physical memory dump complete.", 30);
 			TextOut(hDC, 5, horipos + horiinc,
 				"Contact your system admin or technical support group for further assistance.", 76);
