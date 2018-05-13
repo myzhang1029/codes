@@ -18,8 +18,8 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stdio.h>
 #include <Windows.h>
+#include <stdio.h>
 #ifndef __GNUC__
 #define __UNUSED
 #else
@@ -28,20 +28,20 @@
 int SetUpWindowClass(char *, int, int, int, HINSTANCE);
 LRESULT CALLBACK WindowProcedure(HWND, unsigned int, WPARAM, LPARAM);
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance __UNUSED, LPSTR lpCmdLine __UNUSED, int nCmdShow __UNUSED)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance __UNUSED, LPSTR lpCmdLine __UNUSED,
+		   int nCmdShow __UNUSED)
 {
 	HWND hwnd;
 	MSG uMsg;
-	if (!SetUpWindowClass("1", 0, 0, 128, hInstance))/* Navy blue */
+	if (!SetUpWindowClass("1", 0, 0, 128, hInstance)) /* Navy blue */
 		return 1;
 	hwnd = CreateWindow("1", 0, WS_BORDER, 0, 0, 100, 100, NULL, NULL, hInstance, NULL);
 	SetWindowLongPtr(hwnd, GWL_STYLE, 0);
-	SetWindowPos(hwnd, 0, 150, 100, 250, 250, SWP_FRAMECHANGED);
 	if (!hwnd)
 		return 1;
 
 	ShowWindow(hwnd, SW_SHOWMAXIMIZED);
-	FreeConsole();
+	FreeConsole(); /* remove the console window */
 	while (GetMessage(&uMsg, NULL, 0, 0) > 0)
 	{
 		TranslateMessage(&uMsg);
@@ -73,19 +73,27 @@ int SetUpWindowClass(char *Title, int bgRed, int bgGreen, int bgBlue, HINSTANCE 
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, unsigned int uiMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (uiMsg == WM_SETCURSOR && LOWORD(lParam) == HTCLIENT)
-	{
-		SetCursor(NULL);
-
-		return TRUE;
-	}
 	switch (uiMsg)
 	{
+		case WM_SETCURSOR:
+			if (LOWORD(lParam) == HTCLIENT)
+			{
+				SetCursor(NULL);
+				return TRUE;
+			}
+			return FALSE;
+		case WM_KEYDOWN:
+			if (wParam != 0x51)
+				break;
+			/* Pass down if 'Q' is hit */
 		case WM_CLOSE:
 			DestroyWindow(hWnd);
 			break;
 		case WM_DESTROY:
 			PostQuitMessage(0);
+			break;
+		case WM_WINDOWPOSCHANGING:
+			SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOSENDCHANGING);
 			break;
 		case WM_PAINT:
 		{
@@ -128,8 +136,10 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, unsigned int uiMsg, WPARAM wParam, L
 			RECT winrect;
 			HFONT font;
 			GetWindowRect(hWnd, &winrect);
-			horiinc = winrect.bottom/36;
-			font = CreateFont(winrect.bottom/48, winrect.right/84, 0, 0, 0, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DONTCARE, "consolas");
+			horiinc = winrect.bottom / 36;
+			font = CreateFont(winrect.bottom / 48, winrect.right / 84, 0, 0, 0, 0, 0, 0, ANSI_CHARSET,
+					  OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DONTCARE,
+					  "consolas");
 			SetTextColor(hDC, RGB(192, 192, 192));
 			SetBkColor(hDC, RGB(0, 0, 128));
 			SelectObject(hDC, font);
@@ -137,18 +147,20 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, unsigned int uiMsg, WPARAM wParam, L
 			{
 				TextOut(hDC, 5, horipos, Text[count], strlen(Text[count]));
 			}
-			for(int count = 5; count <= 100; count +=5)
+			for (int count = 5; count <= 100; count += 5)
 			{
-				Sleep(1000);
+				for (long c = 100000; c; --c)
+					; /* wait for a while */
 				snprintf(dumpstatus, 37, "Dumping physical memory to disk: %d", count);
 				TextOut(hDC, 5, horipos - horiinc, dumpstatus, strlen(dumpstatus));
 			}
 			TextOut(hDC, 5, horipos, "Physical memory dump complete.", 30);
-			TextOut(hDC, 5, horipos + horiinc, "Contact your system admin or technical support group for further assistance.", 76);
+			TextOut(hDC, 5, horipos + horiinc,
+				"Contact your system admin or technical support group for further assistance.", 76);
 			DeleteObject(font);
 			EndPaint(hWnd, &ps);
+			break;
 		}
-		break;
 		default:
 			return DefWindowProc(hWnd, uiMsg, wParam, lParam);
 	}
