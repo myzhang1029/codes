@@ -20,6 +20,7 @@
 
 #include <Windows.h>
 #include <stdio.h>
+#include <time.h>
 #ifndef __GNUC__
 #define __UNUSED
 #else
@@ -149,8 +150,10 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, unsigned int uiMsg, WPARAM wParam, L
 			}
 			for (int count = 5; count <= 100; count += 5)
 			{
-				for (long c = 100000; c; --c)
-					; /* wait for a while */
+				clock_t t = clock(); /* Delay a second */
+				while (1)
+					if ((int)((clock() - t) / CLOCKS_PER_SEC) >= 1)
+						break;
 				snprintf(dumpstatus, 37, "Dumping physical memory to disk: %d", count);
 				TextOut(hDC, 5, horipos - horiinc, dumpstatus, strlen(dumpstatus));
 			}
