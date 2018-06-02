@@ -1,7 +1,8 @@
 /* One man has n children, his children have n-1 children each, they have n-2 children each, how many people are there
- * in the family after n generations? */
-/* Does not include the mother side */
+ * in the family after n generations?
+ * the mother side not included */
 /* n specified in argv[1], defaults to 1 */
+/* UPDATE: this program actually calculates OEIS:A000522 */ 
 /*
  * generation.c
  * Copyright (C) 2017 Zhang Maiyun <myzhang1029@163.com>
