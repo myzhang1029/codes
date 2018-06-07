@@ -5,6 +5,7 @@
  * BASEDIR: directory for the tiles
  * URLBASE: the url without /{z}/{x}/{y}.png part
  * URLARGS: GET arguments for things like apikey
+ * USRAGNT: User-Agent
  * Maximum zoom level is 21
  * Only URLs like http://example.com/{z}/{x}/{y}.png are supported
  */
@@ -36,8 +37,11 @@
 #define MAXZOOM 1
 #define MINZOOM 0
 #define BASEDIR "map"
-#define URLBASE "https://tile.example.com/"
-#define URLARGS "?apikey=0123456789ABCDEF"
+#define URLBASE "https://tile.com"
+#define URLARGS "?apikey=123456789abcdef"
+#define USRAGNT                                                                                                        \
+	"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:58.0) Gecko/20100101 "                                             \
+	"Firefox/58.0"
 
 size_t write_data(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
@@ -97,8 +101,10 @@ int main(void)
 					exit(1);
 				}
 				curl_easy_setopt(curl, CURLOPT_URL, URI);
-				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, out);
+				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+				curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+				curl_easy_setopt(curl, CURLOPT_USERAGENT, USRAGNT);
 				res = curl_easy_perform(curl);
 				fclose(out);
 			}
