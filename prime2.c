@@ -1,7 +1,8 @@
-/* Program to count prime numbers greater than MINPRIME, less than MAXPRIME with THREADS threads */
+/* Program to count prime numbers greater than or equal to MINPRIME, less than MAXPRIME with THREADS threads */
+/* Prepared for p2gen.sh */
 /*
  * prime2.c
- * Copyright (C) 2017 Zhang Maiyun <myzhang1029@163.com>
+ * Copyright (C) 2017-2018 Zhang Maiyun <myzhang1029@163.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,8 +24,9 @@
 #include <stdatomic.h>
 #include <stdio.h>
 
-#define MINPRIME 100000000
-#define MAXPRIME 1000000000
+#define MINPRIME @p2gen_min@
+#define MAXPRIME @p2gen_max@
+#define PRINT
 
 #define THREADS 4
 
@@ -34,7 +36,7 @@ void *thrd_fct(void *arg)
 {
 	unsigned long long min = MINPRIME + ((unsigned long long)arg) * ((MAXPRIME - MINPRIME) / THREADS),
 			   max = MINPRIME + ((unsigned long long)arg + 1L) * ((MAXPRIME - MINPRIME) / THREADS) - 1;
-	for (; min < max; ++min)
+	for (; min <= max; ++min)
 	{
 		unsigned long long k = sqrtl(min), i = 3;
 		int add = 1;
