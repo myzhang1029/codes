@@ -93,7 +93,7 @@ int main()
 #endif
 	for (; countn < LINES && p <= jmpt[LINES - 1]; p++)
 	{
-		if (ispn(p))
+		if (slib_ispn(p))
 			fprintf(fp, "%dP", p);
 		else
 			fprintf(fp, "%dN", p);
