@@ -22,7 +22,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define MAXPRIME 10000000000UL
+/* This number will be the number of bytes the process will use */
+#define MAXPRIME 100000000UL
 
 int main(void)
 {
