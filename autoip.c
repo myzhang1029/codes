@@ -269,9 +269,9 @@ int main(int argc, char **argv)
 			int stat;
 			if (pinfo)
 				aiinfo(log, "Publish");
-			if ((siteddns = fopen(SITEDDNS "/README.md", "w")) == NULL)
+			if ((siteddns = fopen(SITEDDNS "/README", "w")) == NULL)
 			{
-				aierror(log, "fopen failed for README.md: %s", strerror(errno));
+				aierror(log, "fopen failed for README: %s", strerror(errno));
 
 				goto exithere;
 			}
