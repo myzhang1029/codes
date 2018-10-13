@@ -192,15 +192,16 @@ void commit_changes(git_repository *repo, git_index *index, FILE *log)
     git_fatal_error(git_index_add_all(index, &strarray, 0, NULL, NULL), log,
                     "git_index_add_all");
     git_fatal_error(git_index_write(index), log, "git_index_write");
+    git_fatal_error(git_index_write_tree(&tree_id, index), log,
+                    "git_index_write_tree");
+    git_index_free(index);
+    git_fatal_error(git_tree_lookup(&tree, repo, &tree_id), log,
+                    "git-tree_lookup");
 
     git_fatal_error(git_reference_name_to_id(&parent_id, repo, "HEAD"), log,
                     "git_reference_name_to_oid");
     git_fatal_error(git_commit_lookup(&parent, repo, &parent_id), log,
                     "git_commit_lookup");
-    git_fatal_error(git_commit_tree(&old_tree, parent), log, "git_commit_tree");
-    git_oid_cpy(&tree_id, git_tree_id(old_tree));
-    git_tree_free(old_tree);
-    git_tree_lookup(&tree, repo, &tree_id);
 
     git_fatal_error(git_signature_default(&author, repo), log,
                     "git_signature_default");
@@ -231,7 +232,8 @@ void push_refs(git_repository *repo, FILE *log)
     strarray.strings[0] = ref;
     strarray.count = 1;
 
-    git_remote_lookup(&remote, repo, "origin");
+    git_fatal_error(git_remote_lookup(&remote, repo, "origin"), log,
+                    "git_remote_lookup");
     git_fatal_error(git_push_init_options(&opts, GIT_PUSH_OPTIONS_VERSION), log,
                     "git_push_init_options");
     opts.callbacks.credentials = cred_cb;
