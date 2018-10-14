@@ -18,7 +18,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
+base=`dirname $0`
 while true
 do
 	read -p "Enter the minimum value:" min
@@ -62,7 +62,7 @@ done
 count=0
 for i in `seq $min $incr $(($max-$incr))`
 do
-	cp prime2.c prime2_${count}.c
+    cp ${base}/prime2.c prime2_${count}.c
 	sed -i "s/@p2gen_min@/$i/" prime2_${count}.c
 	sed -i "s/@p2gen_max@/$(($i+$incr))/" prime2_${count}.c
 	((count+=1))
