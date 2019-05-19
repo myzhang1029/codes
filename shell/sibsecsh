@@ -1,0 +1,115 @@
+#!/bin/bash
+
+trap 'exit 1' PIPE
+
+MY_IP=
+DEFAULT_EMAIL=
+
+SIB_COUNT=1
+SIB_HOME=$HOME
+SIB_EMAIL=$DEFAULT_EMAIL
+SIB_LOGIN='/bin/zsh --login'
+SIB_LOG='/var/log/sibsecsh.log'
+
+who="/usr/bin/who"
+mutt="/usr/local/bin/mutt"
+awk="/usr/bin/awk"
+sed="/usr/bin/sed"
+pcregrep="/usr/local/bin/pcregrep"
+
+[ -n "$SIB_FROM_IP" ] && SIB_FIRST_LOGIN=false || SIB_FIRST_LOGIN=true
+SIB_FROM_IP=`$who -u am i 2> /dev/null | $awk '{print $NF}' | $sed -e 's/[()]//g'` 
+[ ! -z "${SIB_FROM_IP##*.*}" ] && SIB_FROM_IP="$MY_IP" || true
+[ "$SIB_FROM_IP" = "$MY_IP" ] && SIB_FROM_IP="reverse shell" || true
+export SIB_FROM_IP
+
+# As a shell, we check for options
+for opt in "$@"
+do
+    case "$opt" in
+        -c) SIB_TARGET="${i#*=}"
+            # XXX: Execute that directly because there might be something
+            # important, like sftp or scp
+            exec $SIB_TARGET
+            ;;
+    esac
+done
+
+# Check for rc file
+if [ ! -f $SIB_HOME/.secrc ]
+then
+	echo "sibsecsh: WARNING: no $SIB_HOME/.secrc"
+else
+	. $SIB_HOME/.secrc
+fi
+
+# Check for $SIB_LOGIN and $SIB_EMAIL
+if ! echo $SIB_EMAIL | $pcregrep '^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$' > /dev/null
+then
+	echo "sibsecsh: ERROR: malformed \$SIB_EMAIL"
+	SIB_EMAIL=$DEFAULT_EMAIL
+fi
+
+# Accept second logins
+if [ "$SIB_FIRST_LOGIN" = "false" ]
+then
+	echo "WARNING: second login accepted, who output:" >> $SIB_LOG
+	$who >> $SIB_LOG
+	exec $SIB_LOGIN
+fi
+
+# Log
+echo login attempt at `/bin/date` from $SIB_FROM_IP for `/usr/bin/logname` >> $SIB_LOG
+
+# Accept local logins
+if [ "`echo $SIB_FROM_IP | cut -d . -f -3`" = "`echo $MY_IP | cut -d . -f -3`" ]
+then
+	echo "WARNING: local login accepted, who output:" >> $SIB_LOG
+	$who >> $SIB_LOG
+	exec $SIB_LOGIN
+fi
+
+# Disable sibsecsh check
+if [ -f $SIB_HOME/NoSec ]
+then
+	exec $SIB_LOGIN
+fi
+
+shadowmail=`echo $SIB_EMAIL | sed "s/......@/*****@/"`
+shadowed=`echo $SIB_EMAIL | sed "s/@.*//"`
+shadowed=${shadowed:${#shadowed}-6}
+# Match Email addr
+while true
+do
+	read -p "Enter your email match \"$shadowmail\": " SIB_INPUT
+	if [ "$SIB_INPUT" = "$SIB_EMAIL" ] || [ "$SIB_INPUT" = "$shadowed" ]
+    then
+		SIB_RAND=$RANDOM
+		echo "Your code($SIB_COUNT) is :$SIB_RAND" | $mutt -s "CodeEmail" $SIB_EMAIL
+		break
+	else
+		echo "Not match"
+		continue
+	fi
+done
+
+# Resend code or accept login 
+while true
+do
+	read -p 'Enter the code sent to your email address, 0 to resend:' SIB_INPUT
+	if [ "$SIB_INPUT" = "0" ]
+    then 
+		let SIB_COUNT+=1
+		echo "Your code($SIB_COUNT) is :$SIB_RAND" | $mutt -s 'CodeEmail' $SIB_EMAIL
+	else
+		if [ "$SIB_RAND" = "$SIB_INPUT" ]
+        then
+			echo "Logged in!"
+			exec $SIB_LOGIN
+		else
+			echo "Not Match"
+			continue
+		fi
+	fi
+done
+
