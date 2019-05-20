@@ -30,11 +30,11 @@ from requests import get
 def gencsv(lines, name):
     """ Generate a CSV file from the list. """
     nl = []
-    for i in range(0, len(lines)):
+    for i, l in enumerate(lines):
         if i % 2 == 0:
-            nl.append(lines[i][0:-1]+",")
+            nl.append(l[0:-1]+",")
         else:
-            nl.append(lines[i])
+            nl.append(l)
     open(name + ".csv", "w").writelines(nl)
 
 
