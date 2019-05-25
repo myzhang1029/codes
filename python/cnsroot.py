@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-# Print numbers that their nth root, n_2th root,... are all an interger
+# Print numbers that their nth root, n_2th root,... are all intergers
 # like 4096, 262144, 729 for 2 and 3
 #
 #
 #  cnsroot.py
-#  Copyright (C) 2018 Zhang Maiyun <myzhang1029@163.com>
+#  Copyright (C) 2018-present Zhang Maiyun <myzhang1029@163.com>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -20,43 +20,21 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from getopt import gnu_getopt, GetoptError
-from sys import argv, exit
+import argparse
+from sys import exit
 from sbl import lcm
 
-multiple = 1
-bmax = 3
-pmax = 3
+class LcmAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        old = namespace.add_multiple
+        namespace.add_multiple=lcm(values, old) if old is not None else values
 
+parser = argparse.ArgumentParser(description="Print numbers that their nth roots are all integers")
+parser.add_argument("-b", "--base-max", help="maximum of the base[3]", type=int, default=3)
+parser.add_argument("-p", "--power-max", help="maximum of the power[3]", type=int, default=3)
+parser.add_argument("-m", "--add-multiple", help="add a multiple", type=int, action=LcmAction, default=1)
+args = parser.parse_args()
 
-def usage(returncode):
-    print("options:\n")
-    print("-b, --base-max arg: maximum of the base\n")
-    print("-p, --power-max arg: maximum of power/multiple\n")
-    print("-m, --add-multiple arg: add a multiple\n")
-    print("-h, --help: show this\n")
-    exit(int(returncode))
-
-
-try:
-    opts, args = gnu_getopt(argv[1:], "b:p:m:h",
-                            ["base-max=", "power-max=", "add-multiple=", "help"])
-except GetoptError as err:
-    print(err)
-
-for o, a in opts:
-    if o in ("-b", "--base-max"):
-        bmax = long(a)
-    elif o in ("-p", "--power-max"):
-        pmax = long(a)
-    elif o in ("-m", "--add-multiple"):
-        multiple = lcm(multiple, long(a))
-    elif o in ("-h", "--help"):
-        usage(0)
-    else:
-        print("unknown option", o)
-        usage(1)
-
-for base in range(0, bmax+1):
-    for power in range(0, pmax+1):
-        print(base**(multiple * power))
+for base in range(0, args.base_max + 1):
+    for power in range(0, args.power_max + 1):
+        print(base ** (args.add_multiple * power))

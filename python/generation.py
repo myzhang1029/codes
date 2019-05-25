@@ -25,15 +25,16 @@
 from sys import argv
 
 try:
-    men = long(argv[1])
+    men = int(argv[1])
 except IndexError:
     men = 1
 
 count = men  # count for generations
 total = 1  # People in total
 total += men
-while count - 1 != 0:
+while count - 1:
     count -= 1
     men *= count
     total += men
+
 print(total)
