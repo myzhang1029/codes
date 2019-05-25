@@ -3,8 +3,8 @@
 # like 4096, 262144, 729 for 2 and 3
 #
 #
-# cnsroot.py
-# Copyright (C) 2017 Zhang Maiyun <myzhang1029@163.com>
+#  cnsroot.py
+#  Copyright (C) 2018 Zhang Maiyun <myzhang1029@163.com>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -17,8 +17,7 @@
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
 from getopt import gnu_getopt, GetoptError

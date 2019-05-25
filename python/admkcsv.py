@@ -1,8 +1,8 @@
 #!/usr/local/bin/env python3
 # Program to format the administrative division code page from website of the Ministry of Civil Affairs of the People's Republic of China into CSV files
 #
-# admkcsv.py
-# Copyright (C) 2019 Zhang Maiyun <myzhang1029@163.com>
+#  admkcsv.py
+#  Copyright (C) 2019 Zhang Maiyun <myzhang1029@163.com>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -15,8 +15,7 @@
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
 
