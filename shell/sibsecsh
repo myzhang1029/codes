@@ -2,53 +2,97 @@
 
 trap 'exit 1' PIPE
 
-MY_IP=
-DEFAULT_EMAIL=
+DEFAULT_EMAIL=myzhang1029@163.com
 
+# All of these could be overridden in ~/.secrc
+SIB_MY_IP=192.168.2.112
 SIB_COUNT=1
 SIB_HOME=$HOME
 SIB_EMAIL=$DEFAULT_EMAIL
 SIB_LOGIN='/bin/zsh --login'
 SIB_LOG='/var/log/sibsecsh.log'
+SIB_TMPDIR="$SIB_HOME/.cache/sibsecsh"
 
-who="/usr/bin/who"
+who="/usr/bin/who -u am i"
 mutt="/usr/local/bin/mutt"
+simplesh="/bin/bash"
 awk="/usr/bin/awk"
 sed="/usr/bin/sed"
 pcregrep="/usr/local/bin/pcregrep"
 
 [ -n "$SIB_FROM_IP" ] && SIB_FIRST_LOGIN=false || SIB_FIRST_LOGIN=true
-SIB_FROM_IP=`$who -u am i 2> /dev/null | $awk '{print $NF}' | $sed -e 's/[()]//g'` 
-[ ! -z "${SIB_FROM_IP##*.*}" ] && SIB_FROM_IP="$MY_IP" || true
-[ "$SIB_FROM_IP" = "$MY_IP" ] && SIB_FROM_IP="reverse shell" || true
+SIB_FROM_IP=`$who 2> /dev/null | $awk '{print $NF}' | $sed -e 's/[()]//g'`
+#[ ! -z "${SIB_FROM_IP##*.*}" ] && SIB_FROM_IP="$SIB_MY_IP" || true
+#[ "$SIB_FROM_IP" = "$SIB_MY_IP" ] && SIB_FROM_IP="reverse shell" || true
+[ ! -z "${SIB_FROM_IP##*.*}" ] && SIB_FROM_IP="reverse shell" || true
 export SIB_FROM_IP
 
-# As a shell, we check for options
-for opt in "$@"
-do
-    case "$opt" in
-        -c) SIB_TARGET="${i#*=}"
-            # XXX: Execute that directly because there might be something
-            # important, like sftp or scp
-            exec $SIB_TARGET
-            ;;
-    esac
-done
+function islocal()
+{
+    [ "`echo $SIB_FROM_IP | cut -d . -f -3`" = "`echo $SIB_MY_IP | cut -d . -f -3`" ]
+    return $?
+}
 
-# Check for rc file
+# Startup
+#  Check for rc file
 if [ ! -f $SIB_HOME/.secrc ]
 then
 	echo "sibsecsh: WARNING: no $SIB_HOME/.secrc"
 else
+    # This should be written by the user, so we trust it
 	. $SIB_HOME/.secrc
 fi
 
-# Check for $SIB_LOGIN and $SIB_EMAIL
+#  Check for $SIB_LOGIN and $SIB_EMAIL
 if ! echo $SIB_EMAIL | $pcregrep '^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$' > /dev/null
 then
 	echo "sibsecsh: ERROR: malformed \$SIB_EMAIL"
 	SIB_EMAIL=$DEFAULT_EMAIL
 fi
+
+mkdir -p $SIB_TMPDIR
+shadowmail=`echo $SIB_EMAIL | sed "s/......@/*****@/"`
+shadowed=`echo $SIB_EMAIL | sed "s/@.*//"`
+shadowed=${shadowed:${#shadowed}-6}
+
+while [[ $# -gt 0 ]]
+do
+    case "$1" in
+        -c)
+            # As a shell, for security, instead of executing directly,
+            # the email code is requested with the first connection,
+            # and the code should be included in the second connection.
+            if [ -f $SIB_HOME/NoSec ] || islocal
+            then
+                exec $simplesh -c $2
+            elif [ "$2" = "$SIB_EMAIL" ]
+            then
+		        SIB_RAND=$RANDOM
+		        echo "Your code is :$SIB_RAND, prepend it to the cmdline." | $mutt -s "CodeEmail" $SIB_EMAIL
+                echo $SIB_RAND > $SIB_TMPDIR/sib_code
+                exit 0
+            elif [ -f $SIB_TMPDIR/sib_code ] # XXX: reentrant
+            then
+                SIB_RAND=`cat $SIB_TMPDIR/sib_code`
+                SIB_INPUT=${2:0:${#SIB_RAND}}
+		        if [ "$SIB_RAND" = "$SIB_INPUT" ]
+                then
+                    exec $simplesh -c ${2:${#SIB_RAND}}
+                else
+                    echo "ERROR1: Wrong or missing code"
+                fi
+                exit 0
+            else
+                echo "ERROR2: Request a email code"
+                exit 0
+            fi
+            ;;
+        -tr)
+            SIB_TRUSTED_ENV="true"
+            ;;
+    esac
+    shift
+done
 
 # Accept second logins
 if [ "$SIB_FIRST_LOGIN" = "false" ]
@@ -62,7 +106,7 @@ fi
 echo login attempt at `/bin/date` from $SIB_FROM_IP for `/usr/bin/logname` >> $SIB_LOG
 
 # Accept local logins
-if [ "`echo $SIB_FROM_IP | cut -d . -f -3`" = "`echo $MY_IP | cut -d . -f -3`" ]
+if islocal
 then
 	echo "WARNING: local login accepted, who output:" >> $SIB_LOG
 	$who >> $SIB_LOG
@@ -70,14 +114,11 @@ then
 fi
 
 # Disable sibsecsh check
-if [ -f $SIB_HOME/NoSec ]
+if [ -f $SIB_HOME/NoSec ] || [ "$SIB_TRUSTED_ENV" = "true" ]
 then
 	exec $SIB_LOGIN
 fi
 
-shadowmail=`echo $SIB_EMAIL | sed "s/......@/*****@/"`
-shadowed=`echo $SIB_EMAIL | sed "s/@.*//"`
-shadowed=${shadowed:${#shadowed}-6}
 # Match Email addr
 while true
 do
