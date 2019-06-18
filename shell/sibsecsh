@@ -51,6 +51,8 @@ then
 fi
 
 mkdir -p $SIB_TMPDIR
+#  These values shouldn't be set in the rc
+SIB_TRUSTED_ENV="false"
 shadowmail=`echo $SIB_EMAIL | sed "s/......@/*****@/"`
 shadowed=`echo $SIB_EMAIL | sed "s/@.*//"`
 shadowed=${shadowed:${#shadowed}-6}
