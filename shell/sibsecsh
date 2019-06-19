@@ -9,13 +9,13 @@ SIB_MY_IP=192.168.2.112
 SIB_COUNT=1
 SIB_HOME=$HOME
 SIB_EMAIL=$DEFAULT_EMAIL
-SIB_LOGIN='/bin/zsh --login'
+SIB_SHELL='/bin/zsh'
+SIB_SHELL_ARGS='--login'
 SIB_LOG='/var/log/sibsecsh.log'
 SIB_TMPDIR="$SIB_HOME/.cache/sibsecsh"
 
 who="/usr/bin/who -u am i"
 mutt="/usr/local/bin/mutt"
-simplesh="/bin/bash"
 awk="/usr/bin/awk"
 sed="/usr/bin/sed"
 pcregrep="/usr/local/bin/pcregrep"
@@ -66,7 +66,7 @@ do
             # and the code should be included in the second connection.
             if [ -f $SIB_HOME/NoSec ] || islocal
             then
-                exec $simplesh -c $2
+                exec $SIB_SHELL -c "$2"
             elif [ "$2" = "$SIB_EMAIL" ]
             then
 		        SIB_RAND=$RANDOM
@@ -79,7 +79,7 @@ do
                 SIB_INPUT=${2:0:${#SIB_RAND}}
 		        if [ "$SIB_RAND" = "$SIB_INPUT" ]
                 then
-                    exec $simplesh -c ${2:${#SIB_RAND}}
+                    exec $SIB_SHELL -c "${2:${#SIB_RAND}}"
                 else
                     echo "ERROR1: Wrong or missing code"
                 fi
@@ -92,6 +92,9 @@ do
         -tr)
             SIB_TRUSTED_ENV="true"
             ;;
+        *)
+            # Pass the rest directly to the shell
+            SIB_SHELL_ARGS="$SIB_SHELL_ARGS $1"
     esac
     shift
 done
@@ -101,7 +104,7 @@ if [ "$SIB_FIRST_LOGIN" = "false" ]
 then
 	echo "WARNING: second login accepted, who output:" >> $SIB_LOG
 	$who >> $SIB_LOG
-	exec $SIB_LOGIN
+	exec $SIB_SHELL $SIB_SHELL_ARGS
 fi
 
 # Log
@@ -112,13 +115,13 @@ if islocal
 then
 	echo "WARNING: local login accepted, who output:" >> $SIB_LOG
 	$who >> $SIB_LOG
-	exec $SIB_LOGIN
+	exec $SIB_SHELL $SIB_SHELL_ARGS
 fi
 
 # Disable sibsecsh check
 if [ -f $SIB_HOME/NoSec ] || [ "$SIB_TRUSTED_ENV" = "true" ]
 then
-	exec $SIB_LOGIN
+	exec $SIB_SHELL $SIB_SHELL_ARGS
 fi
 
 # Match Email addr
@@ -148,7 +151,8 @@ do
 		if [ "$SIB_RAND" = "$SIB_INPUT" ]
         then
 			echo "Logged in!"
-			exec $SIB_LOGIN
+			exec $SIB_SHELL $SIB_SHELL_ARGS
+
 		else
 			echo "Not Match"
 			continue
