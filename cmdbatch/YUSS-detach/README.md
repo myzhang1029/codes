@@ -13,7 +13,9 @@ The process is special, we can't kill it using the `taskmgr` command or the
 Then I made a simple bat script to automate that process, but then I found that
 sometimes the system had two `StudentMain.exe` processes, one started by SYSTEM
 and the other by Administrator. ntsd.exe doesn't know how to handle that,
-so I added a `taskkill` before the `ntsd` so both processes would be killed.
+so I added a `taskkill` before the `ntsd` so both processes would be killed.(2019.6.24)
+After that, on June 28th, I changed `ntsd.exe` to `cdb.exe` because it does not
+start a new window, so users won't get confused.
 # The future
 When you see this text, we have already finished our computer classes and
 we're now heading towards the high school entrance exam. If you are our junior
@@ -31,6 +33,7 @@ with you guys... finger heart...
 `ntsd.exe`，它可以“干掉”学生端程序。
 但是光光这样还不行。有些时候会有两个“学生端程序”，一个是SYSTEM用户启动的，另一个属于Administrator
 这种情况`ntsd.exe` 就不行了。所以我在程序里加了一行`taskkill`，这样就可以分别杀掉两个进程。
+然后，后来我又把`ntsd.exe`换成了`cdb.exe`，因为这样就不会启动一个新的窗口。
 ## 未来
 现在，我们已经没有信息技术课了。我们所面对的是中考。假如你是我们的学弟，然后想上外网，插U盘，打游戏……
 欢迎你使用这个软件。我们也把它上传到了考试酷班级248535，你也可以申请加入这个班级，这样哪怕老师

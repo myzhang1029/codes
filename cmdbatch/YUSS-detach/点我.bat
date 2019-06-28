@@ -1,5 +1,5 @@
+:: -*- coding: GBK -*-
 @echo off
-rem -*- coding: gb2312 -*-
 rem Automatically escape from the teacher's control.
 rem Copyright (C) 2018-2019  Zhang Maiyun.
 rem
@@ -15,17 +15,18 @@ rem GNU General Public License for more details.
 rem
 rem You should have received a copy of the GNU General Public License
 rem along with this program.  If not, see <https://www.gnu.org/licenses/>.
-echo è„±æ§é­”æœ¯æ‰‹ ver 20190624
-echo ä¸“ä¸šè„±ç¦»StudentMain.exeæ§åˆ¶
-echo è‡ªåŠ¨é€‚åº”æ‰€æœ‰æƒ…å†µ
-echo æŠ¥é”™å¯å¿½ç•¥
-echo è„±æ§é­”æœ¯æ‰‹  Copyright (C) 2018-2019 Zhang Maiyun.
+echo ÍÑ¿ØÄ§ÊõÊÖ ver 20190628
+echo ×¨ÒµÍÑÀëStudentMain.exe¿ØÖÆ
+echo ×Ô¶¯ÊÊÓ¦ËùÓĞÇé¿ö
+echo ±¨´í¿ÉºöÂÔ
+echo ÍÑ¿ØÄ§ÊõÊÖ  Copyright (C) 2018-2019 Zhang Maiyun.
 echo This program comes with ABSOLUTELY NO WARRANTY; for details,
-echo visit <https://www.gnu.org/licenses/>
+echo visit "<https://www.gnu.org/licenses/>"
 echo This is free software, and you are welcome to redistribute it
 echo under certain conditions.
 
-taskkill /F /IM StudentMain.exe 2> nul
-ntsd -c q -pn StudentMain.exe
+taskkill /F /IM StudentMain.exe 2>NUL
+cdb -c q -pn StudentMain.exe >NUL 2>NUL
 
-echo å®Œæˆ
+echo Íê³É£¬°´ÈÎÒâ¼ü½áÊø
+pause >NUL
