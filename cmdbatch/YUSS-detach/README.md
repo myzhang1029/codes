@@ -1,4 +1,5 @@
 # YUSS-detach
+[中文介绍](#脱控魔术手)
 ## The origin
 In the computer room of YUSS, the teacher uses a software called `StudentMain.exe`
 to control the students' computers. It's developed by a company called Mythware.
@@ -30,9 +31,9 @@ with you guys... finger heart...
 但是如果老师来了，这样你就完了。所以我决定探索另一条路：杀死进程。
 ## 制作
 这个`StudentMain.exe`很特别，用任务管理器和`taskkill`命令都杀不死，百度发现，有个东西叫
-`ntsd.exe`，它可以“干掉”学生端程序。
-但是光光这样还不行。有些时候会有两个“学生端程序”，一个是SYSTEM用户启动的，另一个属于Administrator
-这种情况`ntsd.exe` 就不行了。所以我在程序里加了一行`taskkill`，这样就可以分别杀掉两个进程。
+`ntsd.exe`，它可以“干掉”学生端程序。  
+但是光光使用`ntsd.exe`还不行。有些时候会有两个“学生端程序”，一个是SYSTEM用户启动的，另一个属于Administrator。
+这种情况`ntsd.exe` 就搞不定了。所以我在程序里加了一行`taskkill`，这样就可以分别杀掉两个进程。
 然后，后来我又把`ntsd.exe`换成了`cdb.exe`，因为这样就不会启动一个新的窗口。
 ## 未来
 现在，我们已经没有信息技术课了。我们所面对的是中考。假如你是我们的学弟，然后想上外网，插U盘，打游戏……
