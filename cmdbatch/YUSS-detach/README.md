@@ -1,4 +1,5 @@
 # YUSS-detach
+[中文介绍](#脱控魔术手)
 ## The origin
 In the computer room of YUSS, the teacher uses a software called `StudentMain.exe`
 to control the students' computers. It's developed by a company called Mythware.
