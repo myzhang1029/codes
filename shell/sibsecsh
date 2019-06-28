@@ -2,20 +2,24 @@
 
 trap 'exit 1' PIPE
 
-DEFAULT_EMAIL=myzhang1029@163.com
 
 # All of these could be overridden in ~/.secrc
 SIB_MY_IP=192.168.2.112
 SIB_COUNT=1
 SIB_HOME=$HOME
-SIB_EMAIL=$DEFAULT_EMAIL
+SIB_EMAIL='target@example.com'
 SIB_SHELL='/bin/zsh'
 SIB_SHELL_ARGS='--login'
 SIB_LOG='/var/log/sibsecsh.log'
 SIB_TMPDIR="$SIB_HOME/.cache/sibsecsh"
+SIB_MAIL_HOST="example.com"
+SIB_MAIL_FROM="none@example.com"
+SIB_MAIL_PASSWORDEVAL="echo 123456"
+SIB_MAIL_USERNAME="none"
+
 
 who="/usr/bin/who -u am i"
-mutt="/usr/local/bin/mutt"
+msmtp="/usr/local/bin/msmtp"
 awk="/usr/bin/awk"
 sed="/usr/bin/sed"
 pcregrep="/usr/local/bin/pcregrep"
@@ -37,7 +41,8 @@ function islocal()
 #  Check for rc file
 if [ ! -f $SIB_HOME/.secrc ]
 then
-	echo "sibsecsh: WARNING: no $SIB_HOME/.secrc"
+	echo "sibsecsh: ERROR: no $SIB_HOME/.secrc"
+    exec /bin/bash
 else
     # This should be written by the user, so we trust it
 	. $SIB_HOME/.secrc
@@ -47,7 +52,7 @@ fi
 if ! echo $SIB_EMAIL | $pcregrep '^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$' > /dev/null
 then
 	echo "sibsecsh: ERROR: malformed \$SIB_EMAIL"
-	SIB_EMAIL=$DEFAULT_EMAIL
+    exec /bin/bash
 fi
 
 mkdir -p $SIB_TMPDIR
@@ -70,7 +75,13 @@ do
             elif [ "$2" = "$SIB_EMAIL" ]
             then
 		        SIB_RAND=$RANDOM
-		        echo "Your code is :$SIB_RAND, prepend it to the cmdline." | $mutt -s "CodeEmail" $SIB_EMAIL
+                $msmtp --host="$SIB_MAIL_HOST" --from="$SIB_MAIL_FROM" --passwordeval="$SIB_MAIL_PASSWORDEVAL" --user="$SIB_MAIL_USERNAME" --auth=plain -t << ENDMAIL
+From: SIB Secure Shell <$SIB_MAIL_FROM>
+To: $SIB_EMAIL
+Subject: Login Code
+
+Your code is :$SIB_RAND, prepend it to the cmdline.
+ENDMAIL
                 echo $SIB_RAND > $SIB_TMPDIR/sib_code
                 exit 0
             elif [ -f $SIB_TMPDIR/sib_code ] # XXX: reentrant
@@ -131,7 +142,13 @@ do
 	if [ "$SIB_INPUT" = "$SIB_EMAIL" ] || [ "$SIB_INPUT" = "$shadowed" ]
     then
 		SIB_RAND=$RANDOM
-		echo "Your code($SIB_COUNT) is :$SIB_RAND" | $mutt -s "CodeEmail" $SIB_EMAIL
+        $msmtp --host="$SIB_MAIL_HOST" --from="$SIB_MAIL_FROM" --passwordeval="$SIB_MAIL_PASSWORDEVAL" --user="$SIB_MAIL_USERNAME" --auth=plain -t << ENDMAIL
+From: SIB Secure Shell <$SIB_MAIL_FROM>
+To: $SIB_EMAIL
+Subject: Login Code
+
+Your code($SIB_COUNT) is $SIB_RAND.
+ENDMAIL
 		break
 	else
 		echo "Not match"
@@ -146,7 +163,13 @@ do
 	if [ "$SIB_INPUT" = "0" ]
     then 
 		let SIB_COUNT+=1
-		echo "Your code($SIB_COUNT) is :$SIB_RAND" | $mutt -s 'CodeEmail' $SIB_EMAIL
+        $msmtp --host="$SIB_MAIL_HOST" --from="$SIB_MAIL_FROM" --passwordeval="$SIB_MAIL_PASSWORDEVAL" --user="$SIB_MAIL_USERNAME" --auth=plain -t << ENDMAIL
+From: SIB Secure Shell <$SIB_MAIL_FROM>
+To: $SIB_EMAIL
+Subject: Login Code
+
+Your code($SIB_COUNT) is $SIB_RAND.
+ENDMAIL
 	else
 		if [ "$SIB_RAND" = "$SIB_INPUT" ]
         then
