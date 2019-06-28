@@ -16,7 +16,7 @@ and the other by Administrator. ntsd.exe doesn't know how to handle that,
 so I added a `taskkill` before the `ntsd` so both processes would be killed.(2019.6.24)
 After that, on June 28th, I changed `ntsd.exe` to `cdb.exe` because it does not
 start a new window, so users won't get confused.
-# The future
+## The future
 When you see this text, we have already finished our computer classes and
 we're now heading towards the high school entrance exam. If you are our junior
 ones, feel free to use this pack. Otherwise, it's just kept as a sweet memory
