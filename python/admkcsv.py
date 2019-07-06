@@ -1,4 +1,4 @@
-#!/usr/local/bin/env python3
+#!/usr/bin/env python3
 # Program to format the administrative division code page from website of the Ministry of Civil Affairs of the People's Republic of China into CSV files
 #
 #  admkcsv.py
