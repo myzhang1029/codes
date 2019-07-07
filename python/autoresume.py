@@ -54,9 +54,9 @@ class AutoResume(object):
             self.proc_list.append({
                 "command": command,
                 "pid": int(pid),
-                "stdin": str(stdin),
-                "stdout": str(stdout),
-                "stderr": str(stderr),
+                "stdin": str(stdin) if stdin else None,
+                "stdout": str(stdout) if stdout else None,
+                "stderr": str(stderr) if stdout else None,
                 "cwd": str(cwd)
             })
 
