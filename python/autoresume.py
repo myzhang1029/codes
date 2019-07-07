@@ -26,6 +26,14 @@ import argparse
 import json
 
 
+def pathlookup(cmd):
+    for path in os.getenv("PATH").split(':'):
+        cmdpath = Path(path) / cmd
+        if cmdpath.exists():
+            return cmdpath.absolute()
+    raise FileNotFoundError(f"No such file or directory: '{cmd}'")
+
+
 class AutoResume(object):
     """ The app. """
     class ARDatabase(object):
@@ -133,7 +141,8 @@ class AutoResume(object):
         parser.add_argument("args", help="the arguments",
                             nargs=argparse.REMAINDER)
         args = parser.parse_args(sys.argv[2:])
-        args.args[:0] = [args.command]
+        command = pathlookup(args.command)
+        args.args[:0] = [str(command)]
         stdin = Path(args.stdin).absolute() if args.stdin else None
         stdout = Path(args.stdout).absolute() if args.stdout else None
         stderr = Path(args.stderr).absolute() if args.stdout else None
