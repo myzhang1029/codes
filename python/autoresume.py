@@ -150,10 +150,10 @@ class AutoResume(object):
         pid = self.execute_command(
             args.args, stdin, stdout, stderr, cwd)
         self.database.add(pid, args.args, stdin, stdout, stderr, cwd)
-        self.prune_processes()
+        #self.prune_processes()
 
     def prune_processes(self):
-        for idx in range(len(self.database.proc_list)-1, -1, -1):
+        for idx in range(len(self.database.proc_list)).__reversed__():
             # Traverse from high to low so that the one after the deleted one won't be missed
             cmd = self.database.proc_list[idx]
             try:
