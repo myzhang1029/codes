@@ -53,11 +53,11 @@ class AutoResume(object):
         def add(self, pid, command, stdin, stdout, stderr, cwd):
             self.proc_list.append({
                 "command": command,
-                "pid": pid,
-                "stdin": stdin,
-                "stdout": stdout,
-                "stderr": stderr,
-                "cwd": cwd
+                "pid": int(pid),
+                "stdin": str(stdin),
+                "stdout": str(stdout),
+                "stderr": str(stderr),
+                "cwd": str(cwd)
             })
 
         def delete(self, index):
@@ -134,10 +134,13 @@ class AutoResume(object):
                             nargs=argparse.REMAINDER)
         args = parser.parse_args(sys.argv[2:])
         args.args[:0] = [args.command]
+        stdin = Path(args.stdin).absolute() if args.stdin else None
+        stdout = Path(args.stdout).absolute() if args.stdout else None
+        stderr = Path(args.stderr).absolute() if args.stdout else None
+        cwd = Path(args.cwd).absolute() if args.cwd else Path.cwd()
         pid = self.execute_command(
-            args.args, args.stdin, args.stdout, args.stderr, args.cwd)
-        self.database.add(pid, args.args, args.stdin, args.stdout,
-                          args.stderr, args.cwd if args.cwd else os.getcwd())
+            args.args, stdin, stdout, stderr, cwd)
+        self.database.add(pid, args.args, stdin, stdout, stderr, cwd)
         self.prune_processes()
 
     def prune_processes(self):
