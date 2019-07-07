@@ -27,6 +27,8 @@ import json
 
 
 def pathlookup(cmd):
+    if cmd.find("/"):
+        return Path(cmd).absolute()
     for path in os.getenv("PATH").split(':'):
         cmdpath = Path(path) / cmd
         if cmdpath.exists():
@@ -112,7 +114,6 @@ class AutoResume(object):
             pid = self.execute_command(
                 cmd["command"], cmd["stdin"], cmd["stdout"], cmd["stderr"], cmd["cwd"])
             self.database.proc_list[idx]["pid"] = pid
-        self.prune_processes()
 
     def delete(self):
         parser = argparse.ArgumentParser(
@@ -121,14 +122,20 @@ class AutoResume(object):
             "idx", help="the command to delete", type=int)
         args = parser.parse_args(sys.argv[2:])
         self.database.delete(args.idx)
-        self.prune_processes()  # Prune after delete
 
     def list(self):
-        self.prune_processes()
         parser = argparse.ArgumentParser(
             prog=f"{sys.argv[0]} list", description="list saved commands")
         args = parser.parse_args(sys.argv[2:])
-        print(json.dumps(self.database.proc_list, sort_keys=True, indent=4))
+        for idx, cmd in enumerate(self.database.proc_list):
+            print("""command {}: {}
+            cwd: {}
+            pid: {}
+            stdin: {}
+            stdout: {}
+            stderr: {}
+            """.format(idx, ' '.join(cmd["command"]), cmd["cwd"], cmd["pid"],
+                       cmd["stdin"], cmd["stdout"], cmd["stderr"]))
 
     def run(self):
         parser = argparse.ArgumentParser(
@@ -150,9 +157,11 @@ class AutoResume(object):
         pid = self.execute_command(
             args.args, stdin, stdout, stderr, cwd)
         self.database.add(pid, args.args, stdin, stdout, stderr, cwd)
-        #self.prune_processes()
 
-    def prune_processes(self):
+    def prune(self):
+        parser = argparse.ArgumentParser(
+            prog=f"{sys.argv[0]} prune", description="prune dead commands")
+        args = parser.parse_args(sys.argv[2:])
         for idx in range(len(self.database.proc_list)).__reversed__():
             # Traverse from high to low so that the one after the deleted one won't be missed
             cmd = self.database.proc_list[idx]
