@@ -19,7 +19,7 @@
 #
 
 from pathlib import Path
-from subprocess import Popen
+import subprocess as sp
 import sys
 import os
 import argparse
@@ -27,7 +27,7 @@ import json
 
 
 def pathlookup(cmd):
-    if cmd.find("/"):
+    if cmd.find("/") != -1:
         return Path(cmd).absolute()
     for path in os.getenv("PATH").split(':'):
         cmdpath = Path(path) / cmd
@@ -174,12 +174,18 @@ class AutoResume(object):
     def execute_command(argv, stdin, stdout, stderr, cwd):
         stdin = open(stdin, "rb") if stdin else None
         stdout = open(stdout, "wb") if stdout else None
-        stderr = open(stderr, "wb") if stderr else None
-        pid = Popen(argv, stdin=stdin, stdout=stdout,
+        if not stderr:
+            pass
+        elif stderr == stdout:
+            print("yes!")
+            stderr = sp.STDOUT
+        else: # Not None and not stdout
+            stderr = open(stderr, "wb")
+        pid = sp.Popen(argv, stdin=stdin, stdout=stdout,
                     stderr=stderr, cwd=cwd).pid
-        stdin.close() if stdin else None
-        stdout.close() if stdout else None
-        stderr.close() if stderr else None
+        for fp in [stdin, stdout, stderr]:
+            if hasattr(fp, "close"):
+                fp.close()
         return pid
 
 
