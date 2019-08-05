@@ -1,4 +1,5 @@
-/* Program to print prime numbers less than MAXPRIME with Sieve of Eratosthenes algorithm */
+/* Program to print prime numbers less than MAXPRIME with Sieve of Eratosthenes
+ * algorithm */
 /*
  * prime3.c
  * Copyright (C) 2018 Zhang Maiyun <myzhang1029@163.com>
@@ -26,23 +27,23 @@
 
 int main(void)
 {
-	unsigned long i, j;
-	bool *primes = malloc(MAXPRIME);
-	if (primes == NULL)
-		exit((fprintf(stderr, "malloc failed\n"), 1));
-	for (i = 2; i < MAXPRIME; i++)
-		primes[i] = true;
-	primes[0] = primes[1] = false;
+    unsigned long i, j;
+    bool *primes = malloc(MAXPRIME);
+    if (primes == NULL)
+        exit((fprintf(stderr, "malloc failed\n"), 1));
+    for (i = 2; i < MAXPRIME; i++)
+        primes[i] = true;
+    primes[0] = primes[1] = false;
 
 #pragma omp for
-	for (i = 2; i < sqrt(MAXPRIME); i++)
-		for (j = i * i; j < MAXPRIME; j += i)
-			primes[j] = false;
+    for (i = 2; i < sqrt(MAXPRIME); i++)
+        for (j = i * i; j < MAXPRIME; j += i)
+            primes[j] = false;
 
-	for (i = 0; i < MAXPRIME; i++)
-		if (primes[i] == true)
-			printf("%lu\n", i);
+    for (i = 0; i < MAXPRIME; i++)
+        if (primes[i] == true)
+            printf("%lu\n", i);
 
-	free(primes);
-	return 0;
+    free(primes);
+    return 0;
 }

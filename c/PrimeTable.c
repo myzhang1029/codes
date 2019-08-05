@@ -32,8 +32,9 @@
 #include <slib/math.h>
 
 #define LINES lines /* Replace to a constant value if no VLA support*/
-#define USE_NUMBERS /* Whether have the first row and the first column empty */
-#undef _NC	  /* ncurses support */
+#define USE_NUMBERS /* Whether have the first row and the first column empty   \
+                     */
+#undef _NC          /* ncurses support */
 
 #ifdef _NC
 #include <ncurses.h>
@@ -42,76 +43,78 @@
 
 int main()
 {
-	unsigned int lines, p = 1, countn = 0;
-	FILE *fp;
+    unsigned int lines, p = 1, countn = 0;
+    FILE *fp;
 #ifdef _NC
-	int row, col;
-	initscr();
-	getmaxyx(stdscr, row, col);
+    int row, col;
+    initscr();
+    getmaxyx(stdscr, row, col);
 #endif
 
 #ifdef _NC
-	{
-		char mesg[] = "Type the amount of lines you need:", mesg2[] = "Prime table generater";
-		mvprintw(1, (col - strlen(mesg2)) / 2, "%s", mesg2);
-		mvprintw(row / 2, (col - strlen(mesg)) / 2, "%s", mesg);
-		refresh();
-	}
+    {
+        char mesg[] = "Type the amount of lines you need:",
+             mesg2[] = "Prime table generater";
+        mvprintw(1, (col - strlen(mesg2)) / 2, "%s", mesg2);
+        mvprintw(row / 2, (col - strlen(mesg)) / 2, "%s", mesg);
+        refresh();
+    }
 #else
-	printf("Type the amount of lines you need:");
+    printf("Type the amount of lines you need:");
 #endif
 #ifdef _NC
-	scanw("%u", &lines);
+    scanw("%u", &lines);
 #else
-	scanf("%u", &lines);
+    scanf("%u", &lines);
 #endif
-	unsigned int jmpt[LINES];
-	if ((fp = fopen("output.csv", "w")) == NULL)
-	{
+    unsigned int jmpt[LINES];
+    if ((fp = fopen("output.csv", "w")) == NULL)
+    {
 #ifdef _NC
-		endwin();
+        endwin();
 #endif
-		fprintf(stderr, "Fopen call failed, please try again!");
-		exit(1);
-	}
-	{
-		unsigned int curp = 0, addp = 0, count = 0;
-		for (; count < LINES; addp++)
-		{
-			if (slib_ispn(addp))
-			{
-				curp += addp;
-				jmpt[count] = curp;
-				count++;
-			}
-		}
-	}
+        fprintf(stderr, "Fopen call failed, please try again!");
+        exit(1);
+    }
+    {
+        unsigned int curp = 0, addp = 0, count = 0;
+        for (; count < LINES; addp++)
+        {
+            if (slib_ispn(addp))
+            {
+                curp += addp;
+                jmpt[count] = curp;
+                count++;
+            }
+        }
+    }
 #ifdef USE_NUMBERS
-	fprintf(fp, "\n,");
+    fprintf(fp, "\n,");
 #endif
-	for (; countn < LINES && p <= jmpt[LINES - 1]; p++)
-	{
-		if (slib_ispn(p))
-			fprintf(fp, "%dP", p);
-		else
-			fprintf(fp, "%dN", p);
-		if (jmpt[countn] == p)
-		{
-			fprintf(fp, "\n");
+    for (; countn < LINES && p <= jmpt[LINES - 1]; p++)
+    {
+        if (slib_ispn(p))
+            fprintf(fp, "%dP", p);
+        else
+            fprintf(fp, "%dN", p);
+        if (jmpt[countn] == p)
+        {
+            fprintf(fp, "\n");
 #ifdef USE_NUMBERS
-			fprintf(fp, ",");
+            fprintf(fp, ",");
 #endif
-			countn++;
-		}
-		else
-			fprintf(fp, ",");
-	}
+            countn++;
+        }
+        else
+            fprintf(fp, ",");
+    }
 
 #ifdef _NC
-	endwin();
+    endwin();
 #endif
 
-	printf("\n\n\n\nGenerating done.\nPlease send out.csv to Numbers/Excel\nThen color cells ends with 'P'.\n\n\n");
-	fclose(fp);
-	return 0;
+    printf("\n\n\n\nGenerating done.\nPlease send out.csv to "
+           "Numbers/Excel\nThen color cells ends with 'P'.\n\n\n");
+    fclose(fp);
+    return 0;
 }

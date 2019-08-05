@@ -20,16 +20,16 @@
 #include <stdio.h>
 int main(int d, char **e)
 {
-	double a, b, ebp, esp;
-	int f = 32;
-	ebp = 0.0;
-	esp = 9000.0;
-	while (f--)
-	{
-		a = esp;
-		ebp = ebp + (b = (a - ebp) / 4.0);
-		esp = ebp + b;
-	}
-	printf("%.10f\n", ebp);
-	return 0;
+    double a, b, ebp, esp;
+    int f = 32;
+    ebp = 0.0;
+    esp = 9000.0;
+    while (f--)
+    {
+        a = esp;
+        ebp = ebp + (b = (a - ebp) / 4.0);
+        esp = ebp + b;
+    }
+    printf("%.10f\n", ebp);
+    return 0;
 }

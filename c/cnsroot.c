@@ -26,45 +26,45 @@
 #include <slib/math.h>
 int main(int argc, char **argv)
 {
-	struct optionGS options[] = {{"base-max", 1, NULL, 'b'},
-				     {"power-max", 1, NULL, 'p'},
-				     {"add-multiple", 1, NULL, 'm'},
-				     {"help", 0, NULL, 'h'},
-				     {NULL, 0, NULL, 0}};
-	char *sopts = ":b:p:m:h";
-	int opt;
-	unsigned long multiple = 1, bmax = 3, pmax = 3;
-	while ((opt = getopt_longGS(argc, argv, sopts, options, NULL)) != -1)
-	{
-		switch (opt)
-		{
-			case 'b':
-				bmax = atol(optargGS);
-				break;
-			case 'p':
-				pmax = atol(optargGS);
-				break;
-			case 'm':
-				multiple = slib_lcm(multiple, atol(optargGS));
-				break;
-			case 'h':
-				printf("Options:\n"
-				       "-b, --base-max ARG: maximum of the base\n"
-				       "-p, --power-max ARG: maximum of power/multiple\n"
-				       "-m, --add-multiple ARG: add a multiple\n"
-				       "-h, --help: show this\n");
-				exit(0);
-			case ':':
-				printf("missing arg for -%c\n", optoptGS);
-				exit(1);
-			default:
-				printf("not an arg: -%c\n", optoptGS);
-				exit(1);
-		}
-	}
-	unsigned long base, power;
-	for (base = 0; base <= bmax; ++base)
-		for (power = 0; power <= pmax; ++power)
-			printf("%ld\n", (long)pow(base, multiple * power));
-	return 0;
+    struct optionGS options[] = {{"base-max", 1, NULL, 'b'},
+                                 {"power-max", 1, NULL, 'p'},
+                                 {"add-multiple", 1, NULL, 'm'},
+                                 {"help", 0, NULL, 'h'},
+                                 {NULL, 0, NULL, 0}};
+    char *sopts = ":b:p:m:h";
+    int opt;
+    unsigned long multiple = 1, bmax = 3, pmax = 3;
+    while ((opt = getopt_longGS(argc, argv, sopts, options, NULL)) != -1)
+    {
+        switch (opt)
+        {
+            case 'b':
+                bmax = atol(optargGS);
+                break;
+            case 'p':
+                pmax = atol(optargGS);
+                break;
+            case 'm':
+                multiple = slib_lcm(multiple, atol(optargGS));
+                break;
+            case 'h':
+                printf("Options:\n"
+                       "-b, --base-max ARG: maximum of the base\n"
+                       "-p, --power-max ARG: maximum of power/multiple\n"
+                       "-m, --add-multiple ARG: add a multiple\n"
+                       "-h, --help: show this\n");
+                exit(0);
+            case ':':
+                printf("missing arg for -%c\n", optoptGS);
+                exit(1);
+            default:
+                printf("not an arg: -%c\n", optoptGS);
+                exit(1);
+        }
+    }
+    unsigned long base, power;
+    for (base = 0; base <= bmax; ++base)
+        for (power = 0; power <= pmax; ++power)
+            printf("%ld\n", (long)pow(base, multiple * power));
+    return 0;
 }

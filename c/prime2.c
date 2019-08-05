@@ -1,4 +1,5 @@
-/* Program to count prime numbers greater than or equal to MINPRIME, less than MAXPRIME with THREADS threads */
+/* Program to count prime numbers greater than or equal to MINPRIME, less than
+ * MAXPRIME with THREADS threads */
 /* Prepared for p2gen.sh */
 /*
  * prime2.c
@@ -23,8 +24,8 @@
 #include <stdatomic.h>
 #include <stdio.h>
 
-#define MINPRIME @p2gen_min@
-#define MAXPRIME @p2gen_max@
+#define MINPRIME @p2gen_min @
+#define MAXPRIME @p2gen_max @
 #define PRINT
 
 #define THREADS 4
@@ -33,43 +34,47 @@ atomic_int count = 0;
 
 void *thrd_fct(void *arg)
 {
-	unsigned long long min = MINPRIME + ((unsigned long long)arg) * ((MAXPRIME - MINPRIME) / THREADS),
-			   max = MINPRIME + ((unsigned long long)arg + 1L) * ((MAXPRIME - MINPRIME) / THREADS) - 1;
-	for (; min <= max; ++min)
-	{
-		unsigned long long k = sqrtl(min), i = 3;
-		int add = 1;
+    unsigned long long min = MINPRIME + ((unsigned long long)arg) *
+                                            ((MAXPRIME - MINPRIME) / THREADS),
+                       max = MINPRIME +
+                             ((unsigned long long)arg + 1L) *
+                                 ((MAXPRIME - MINPRIME) / THREADS) -
+                             1;
+    for (; min <= max; ++min)
+    {
+        unsigned long long k = sqrtl(min), i = 3;
+        int add = 1;
 
-		if (!(min == 1 || (!(min & 1) && min != 2)))
-		{
-			for (; i <= k; i++)
-				if (min % i == 0)
-				{
-					add = 0;
-					break;
-				}
-		}
-		else
-			add = 0;
-		if (add)
-		{
+        if (!(min == 1 || (!(min & 1) && min != 2)))
+        {
+            for (; i <= k; i++)
+                if (min % i == 0)
+                {
+                    add = 0;
+                    break;
+                }
+        }
+        else
+            add = 0;
+        if (add)
+        {
 #ifdef PRINT
-			printf("%llu\n", min);
+            printf("%llu\n", min);
 #endif
-			++count;
-		}
-	}
-	return NULL;
+            ++count;
+        }
+    }
+    return NULL;
 }
 
 int main(void)
 {
-	int i;
-	pthread_t threads[THREADS];
-	for (i = 0; i < THREADS; ++i)
-		pthread_create(&(threads[i]), NULL, thrd_fct, (void *)i);
-	for (i = 0; i < THREADS; ++i)
-		pthread_join(threads[i], NULL);
-	printf("\n\033[31m%d\033[0m\n", count);
-	return 0;
+    int i;
+    pthread_t threads[THREADS];
+    for (i = 0; i < THREADS; ++i)
+        pthread_create(&(threads[i]), NULL, thrd_fct, (void *)i);
+    for (i = 0; i < THREADS; ++i)
+        pthread_join(threads[i], NULL);
+    printf("\n\033[31m%d\033[0m\n", count);
+    return 0;
 }

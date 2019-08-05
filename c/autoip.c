@@ -27,9 +27,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <curl/curl.h>
 #include <git2.h>
 #include <slib.h>
-#include <curl/curl.h>
 #include <slib/getopt.h>
 
 #define LFILE "/var/log/autoip.log"

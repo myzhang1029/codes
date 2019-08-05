@@ -16,4 +16,5 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-int _(char*j){return(*j?putchar(*j),_(++j):putchar(10));}int main(int i,char**j){return(i?_(*j),main(--i,++j):i);}
+int _(char *j) { return (*j ? putchar(*j), _(++j) : putchar(10)); }
+int main(int i, char **j) { return (i ? _(*j), main(--i, ++j) : i); }

@@ -1,5 +1,5 @@
-/* One man has n children, his children have n-1 children each, they have n-2 children each, how many people are there
- * in the family after n generations?
+/* One man has n children, his children have n-1 children each, they have n-2
+ * children each, how many people are there in the family after n generations?
  * the mother side not included */
 /* n specified in argv[1], defaults to 1 */
 /* UPDATE: this program actually calculates OEIS:A000522 */
@@ -26,15 +26,15 @@
 
 int main(int argc, char **argv)
 {
-	unsigned long long men = atoi(argc > 1 ? argv[1] : "1");
-	unsigned count = men;	 /* count for generations */
-	unsigned long long total = 1; /* People in total */
-	total += men;
-	while (--count)
-	{
-		men *= count;
-		total += men;
-	}
-	printf("%lld\n", total);
-	return 0;
+    unsigned long long men = atoi(argc > 1 ? argv[1] : "1");
+    unsigned count = men;         /* count for generations */
+    unsigned long long total = 1; /* People in total */
+    total += men;
+    while (--count)
+    {
+        men *= count;
+        total += men;
+    }
+    printf("%lld\n", total);
+    return 0;
 }
