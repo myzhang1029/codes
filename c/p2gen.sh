@@ -63,7 +63,7 @@ count=0
 for i in `seq $min $incr $(($max-$incr))`
 do
     cp ${base}/prime2.c prime2_${count}.c
-	sed -i "s/@p2gen_min@/$i/" prime2_${count}.c
-	sed -i "s/@p2gen_max@/$(($i+$incr))/" prime2_${count}.c
+	gsed -i "s/@p2gen_min @/$i/" prime2_${count}.c
+	gsed -i "s/@p2gen_max @/$(($i+$incr))/" prime2_${count}.c
 	((count+=1))
 done
