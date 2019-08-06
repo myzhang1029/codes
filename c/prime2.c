@@ -19,9 +19,11 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <inttypes.h>
 #include <math.h>
 #include <pthread.h>
 #include <stdatomic.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #define MINPRIME @p2gen_min @
@@ -30,36 +32,34 @@
 
 #define THREADS 4
 
-atomic_int count = 0;
+_Atomic uint32_t count = 0;
 
 void *thrd_fct(void *arg)
 {
-    unsigned long long min = MINPRIME + ((unsigned long long)arg) *
-                                            ((MAXPRIME - MINPRIME) / THREADS),
-                       max = MINPRIME +
-                             ((unsigned long long)arg + 1L) *
-                                 ((MAXPRIME - MINPRIME) / THREADS) -
-                             1;
+    uint64_t min =
+                 MINPRIME + ((uint64_t)arg) * ((MAXPRIME - MINPRIME) / THREADS),
+             max = MINPRIME +
+                   ((uint64_t)arg + 1L) * ((MAXPRIME - MINPRIME) / THREADS) - 1;
     for (; min <= max; ++min)
     {
-        unsigned long long k = sqrtl(min), i = 3;
-        int add = 1;
+        uint64_t k = sqrt(min), i = 3;
+        bool add = true;
 
         if (!(min == 1 || (!(min & 1) && min != 2)))
         {
             for (; i <= k; i++)
                 if (min % i == 0)
                 {
-                    add = 0;
+                    add = false;
                     break;
                 }
         }
         else
-            add = 0;
+            add = false;
         if (add)
         {
 #ifdef PRINT
-            printf("%llu\n", min);
+            printf("%" PRIu64 "\n", min);
 #endif
             ++count;
         }
@@ -75,6 +75,6 @@ int main(void)
         pthread_create(&(threads[i]), NULL, thrd_fct, (void *)i);
     for (i = 0; i < THREADS; ++i)
         pthread_join(threads[i], NULL);
-    printf("\n\033[31m%d\033[0m\n", count);
+    printf("\n\033[31m%" PRIu32 "\033[0m\n", count);
     return 0;
 }

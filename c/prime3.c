@@ -28,20 +28,18 @@
 int main(void)
 {
     unsigned long i, j;
-    bool *primes = malloc(MAXPRIME);
-    if (primes == NULL)
-        exit((fprintf(stderr, "malloc failed\n"), 1));
-    for (i = 2; i < MAXPRIME; i++)
-        primes[i] = true;
-    primes[0] = primes[1] = false;
+    /* Reversed bool, true is false, false is true */
+    bool *primes = calloc(MAXPRIME, sizeof(bool));
+    if (!primes)
+        return fprintf(stderr, "malloc failed\n"); /* 15 */
 
 #pragma omp for
-    for (i = 2; i < sqrt(MAXPRIME); i++)
+    for (i = 2; i < sqrt(MAXPRIME); ++i)
         for (j = i * i; j < MAXPRIME; j += i)
-            primes[j] = false;
+            primes[j] = true;
 
-    for (i = 0; i < MAXPRIME; i++)
-        if (primes[i] == true)
+    for (i = 2; i < MAXPRIME; ++i)
+        if (primes[i] == false) /* is prime */
             printf("%lu\n", i);
 
     free(primes);
