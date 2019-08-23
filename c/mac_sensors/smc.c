@@ -41,7 +41,7 @@ UInt32 _strtoul(char *str, int size, int base)
     return total;
 }
 
-float _flttof(unsigned char *str)
+float _flttof(SMCBytes_t str)
 {
     fltUnion flt;
     flt.b[0] = str[0];
@@ -153,7 +153,7 @@ kern_return_t SMCReadKey(UInt32Char_t key, SMCVal_t *val)
     return kIOReturnSuccess;
 }
 
-double SMCGetTemperature(UInt32Char_t key)
+float SMCGetTemperature(UInt32Char_t key)
 {
     SMCVal_t val;
     kern_return_t result;
@@ -196,9 +196,28 @@ float SMCGetFanSpeed(UInt32Char_t key)
             }
             else if (strcmp(val.dataType, DATATYPE_FLT) == 0)
             {
-                // 2018 models have the ftp type for this key
-                return _flttof((unsigned char *)val.bytes);
+                // 2018 models have the flt type for this key
+                return _flttof(val.bytes);
             }
+        }
+    }
+    // read failed
+    return 0.0;
+}
+
+float SMCGetVoltageCurrent(UInt32Char_t key)
+{
+    SMCVal_t val;
+    kern_return_t result;
+
+    result = SMCReadKey(key, &val);
+    if (result == kIOReturnSuccess)
+    {
+        // read succeeded - check returned value
+        if (val.dataSize > 0)
+        {
+            if (strcmp(val.dataType, DATATYPE_FLT) == 0)
+                return _flttof(val.bytes);
         }
     }
     // read failed

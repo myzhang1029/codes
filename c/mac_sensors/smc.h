@@ -103,6 +103,7 @@ kern_return_t SMCClose(void);
 
 float SMCGetFanSpeed(UInt32Char_t key);
 int SMCGetFanNumber(UInt32Char_t key);
-double SMCGetTemperature(UInt32Char_t key);
+float SMCGetTemperature(UInt32Char_t key);
+float SMCGetVoltageCurrent(UInt32Char_t key);
 
 #endif // __SMC_H__
