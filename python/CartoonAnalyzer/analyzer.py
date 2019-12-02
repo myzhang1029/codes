@@ -124,7 +124,7 @@ def readppt(address, numbering):
                 # The row number, which is a alphabet
                 coord = row.cells[label].text[-1]
                 # add the column number
-                coord += table.table.rows[0].cells[nc].text
+                coord += table.rows[0].cells[nc].text
                 result.append({
                     "color": color,
                     "colorcode": code,
