@@ -156,7 +156,6 @@ Subject: Login Code
 Your code is {code}{moreinfo}.
 """
         ctx = ssl.create_default_context()
-        print(self.conf["mail_host"])
         with smtplib.SMTP_SSL(self.conf["mail_host"], 465, context=ctx) as server:
             server.login(self.conf["mail_from"], self.password)
             server.sendmail(self.conf["mail_from"],
@@ -221,12 +220,11 @@ def main():
 
 
 if __name__ == '__main__':
-    #try:
-    #    loginip()
-    #    main()
-    #except Exception as e:
-    #    print(
-    #        f"Exception {e} occured, check your configuration.", file=sys.stderr)
-    #    # Start a restricted environment
-    #    execv(["/bin/bash", "-r"])
-    main()
+    try:
+        loginip()
+        main()
+    except Exception as e:
+        print(
+            f"Exception {e} occured, check your configuration.", file=sys.stderr)
+        # Start a restricted environment
+        execv(["/bin/bash", "-r"])
