@@ -171,21 +171,25 @@ def main():
                 # For security, instead of executing directly,
                 # the email code is requested with the first connection,
                 # and the code should be included in the second connection.
-                if cf.is_accepted():
-                    execv(sys.argv[i+1].split())
-                if sys.argv[i+1] == email:
-                    code = random.SystemRandom().randint(10000,100000) # 5-digit
-                    cf.send_email(code, ", prepend it to cmdline")
-                    open(cf.conf["tmpdir"]/"sib_code", "w").write(str(code))
-                elif (cf.conf["tmpdir"]/"sib_code").exists():
-                    code = open(cf.conf["tmpdir"]/"sib_code").read().strip()
-                    inp = sys.argv[i+1][:len(code)]
-                    if code == inp:
-                        execv(sys.argv[i+1][len(code):].split())
+                try:
+                    if cf.is_accepted():
+                        execv([cf.conf["shell"], "-c"] + sys.argv[i+1].split())
+                    if sys.argv[i+1] == email:
+                        code = random.SystemRandom().randint(10000,100000) # 5-digit
+                        cf.send_email(code, ", prepend it to cmdline")
+                        open(cf.conf["tmpdir"]/"sib_code", "w").write(str(code))
+                    elif (cf.conf["tmpdir"]/"sib_code").exists():
+                        code = open(cf.conf["tmpdir"]/"sib_code").read().strip()
+                        inp = sys.argv[i+1][:len(code)]
+                        if code == inp:
+                            execv([cf.conf["shell"], "-c"] + sys.argv[i+1][len(code):].split())
+                        else:
+                            print("ERROR: Wrong or missing code", file=sys.stderr)
                     else:
-                        print("ERROR: Wrong or missing code", file=sys.stderr)
-                else:
-                    print("ERROR: Request an email code first", file=sys.stderr)
+                        print("ERROR: Request an email code first", file=sys.stderr)
+                except Exception as e:
+                    print(e, file=sys.stderr)
+                    exit(1)
                 sys.exit(0)
         cf.logfile.writelines(
             f"login attempt at {time.asctime()} from {loginip()} for {getpass.getuser()}")
