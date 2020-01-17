@@ -46,8 +46,10 @@ def loginip():
     if match:
         start, end = match.span()
         return line[start+1:end-1]  # Remove brackets
+    elif os.getenv("SSH_CONNECTION"):
+        return os.getenv("SSH_CONNECTION").split()[0]
     else:
-        # Either it's a local login, or it's a mosh login(SIP TODO)
+        # Reverse shell login
         return ""
 
 
@@ -173,6 +175,8 @@ def main():
                 # and the code should be included in the second connection.
                 try:
                     if cf.is_accepted():
+                        os.environ["SIB_FROM_IP"] = loginip()
+                        cf.close()
                         execv([cf.conf["shell"], "-c"] + sys.argv[i+1].split())
                     if sys.argv[i+1] == email:
                         code = random.SystemRandom().randint(10000,100000) # 5-digit
@@ -182,6 +186,8 @@ def main():
                         code = open(cf.conf["tmpdir"]/"sib_code").read().strip()
                         inp = sys.argv[i+1][:len(code)]
                         if code == inp:
+                            os.environ["SIB_FROM_IP"] = loginip()
+                            cf.close()
                             execv([cf.conf["shell"], "-c"] + sys.argv[i+1][len(code):].split())
                         else:
                             print("ERROR: Wrong or missing code", file=sys.stderr)
@@ -189,13 +195,15 @@ def main():
                         print("ERROR: Request an email code first", file=sys.stderr)
                 except Exception as e:
                     print(e, file=sys.stderr)
-                    exit(1)
+                    sys.exit(1)
                 sys.exit(0)
         cf.logfile.writelines(
-            f"login attempt at {time.asctime()} from {loginip()} for {getpass.getuser()}")
+            f"login attempt at {time.asctime()} from {loginip()} for {getpass.getuser()}\n")
         if cf.is_accepted():
             # Accept directly
+            os.environ["SIB_FROM_IP"] = loginip()
             cmd = cf.conf["shell"] + " " + cf.conf["shell_args"]
+            cf.close()
             execv(cmd.split())
         # The main functions
         namelen = email.rfind('@')
@@ -218,17 +226,18 @@ def main():
             if code == inp:
                 print("Logged in!")
                 break
-    cmd = cf.conf["shell"] + " " + cf.conf["shell_args"]
-    os.environ["SIB_FROM_IP"] = loginip()
-    execv(cmd.split())
+        os.environ["SIB_FROM_IP"] = loginip()
+        cmd = cf.conf["shell"] + " " + cf.conf["shell_args"]
+        cf.close()
+        execv(cmd.split())
 
 
 if __name__ == '__main__':
-    try:
-        loginip()
-        main()
-    except Exception as e:
-        print(
-            f"Exception {e} occured, check your configuration.", file=sys.stderr)
-        # Start a restricted environment
-        execv(["/bin/bash", "-r"])
+    #try:
+    #    main()
+    #except Exception as e:
+    #    print(
+    #        f"Exception {e} occured, check your configuration.", file=sys.stderr)
+    #    # Start a restricted environment
+    #    execv(["/bin/bash", "-r"])
+    main()
