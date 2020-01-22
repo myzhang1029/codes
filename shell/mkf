@@ -21,15 +21,15 @@ tf=`mktemp tmp-mkf.XXXX`
 
 while read line
 do
-    echo $line>>$tf
+    echo "$line" >> "$tf"
 done
 
 if [ "$*" = "" ]; then
-    cat $tf
-    rm $tf
+    cat "$tf"
+    rm "$tf"
     exit 1
 fi
 
 $* "$tf"
-rm $tf
+rm "$tf"
 

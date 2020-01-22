@@ -44,7 +44,7 @@ def readhtml(lines):
     """
     out = []
     html = ""
-    _ = 0
+    isfirstline = True
     if isinstance(lines, list):
         for str in lines:
             html += str
@@ -56,12 +56,13 @@ def readhtml(lines):
             child.decompose()
     for line in soup.body.get_text().split("\n"):  # extract text
         stripped = line.strip()
-        if stripped != "":  # skip empty lines
-            if _ == 0:  # skip the first line
-                _ = 1
-                continue
-            if stripped.find("注") != -1:  # end reached
-                break
+        if stripped == "":  # skip empty lines
+            continue
+        if isfirstine:  # skip the first line
+            isfirstline = False
+            continue
+        if stripped.find("注") != -1:  # end reached
+            break
             out.append(stripped + "\n")
     return out
 

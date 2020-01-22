@@ -74,7 +74,7 @@ class ConfigFile(object):
     def __enter__(self):
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, type, value, traceback):
         self.close()
 
     def validate(self):
