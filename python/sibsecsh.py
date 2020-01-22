@@ -77,8 +77,24 @@ class ConfigFile(object):
     def __exit__(self, *args):
         self.close()
 
-    def close(self):
-        self.logfile.close()
+    def validate(self):
+        """Validate config."""
+        # see if this shell is accepted system shell
+        shellfile = Path("/etc/shells")
+        if shellfile.exists():
+            shells = shellfile.open().readlines()
+            commentphr = re.compile(r"#")
+            # remove comments and search for conf["shell"]
+            for sh in shells:
+                match = commentphr.search(sh)
+                if match:
+                    sh = sh[0:match.pos]
+                if self.conf["shell"] == sh.strip():
+                    break
+            else:  # No shell matches
+                raise ValueError("non-standard shell")
+        if not re.fullmatch('[^@]+@[^@]+\.[^@]+', self.conf["email"]):
+            raise ValueError(f"malformed email: {self.conf['email']}")
 
     def __init__(self):
         """Load system and user configuration file.
@@ -97,11 +113,7 @@ class ConfigFile(object):
                 continue
             for key, val in config.items():
                 self.conf[key] = val
-        # Checks
-        if not re.fullmatch('[^@]+@[^@]+\.[^@]+', self.conf["email"]):
-            print(
-                f"error: malformed email: {self.conf['email']}", file=sys.stderr)
-            raise ValueError
+        self.validate()
         # Post-read modifications
         # Path objects are easier to operate
         self.conf["log_file"], self.conf["tmpdir"] = Path(
@@ -115,6 +127,9 @@ class ConfigFile(object):
         self.password = cmd.stdout.read().decode("utf-8").strip()
         # Open the log file
         self.logfile = self.conf["log_file"].open("a")
+
+    def close(self):
+        self.logfile.close()
 
     def check_ip(self, ip):
         """Check ip to see if it is accepted.
@@ -179,20 +194,25 @@ def main():
                         cf.close()
                         execv([cf.conf["shell"], "-c"] + sys.argv[i+1].split())
                     if sys.argv[i+1] == email:
-                        code = random.SystemRandom().randint(10000,100000) # 5-digit
+                        code = random.SystemRandom().randint(10000, 100000)  # 5-digit
                         cf.send_email(code, ", prepend it to cmdline")
-                        open(cf.conf["tmpdir"]/"sib_code", "w").write(str(code))
+                        open(cf.conf["tmpdir"]/"sib_code",
+                             "w").write(str(code))
                     elif (cf.conf["tmpdir"]/"sib_code").exists():
-                        code = open(cf.conf["tmpdir"]/"sib_code").read().strip()
+                        code = open(cf.conf["tmpdir"] /
+                                    "sib_code").read().strip()
                         inp = sys.argv[i+1][:len(code)]
                         if code == inp:
                             os.environ["SIB_FROM_IP"] = loginip()
                             cf.close()
-                            execv([cf.conf["shell"], "-c"] + sys.argv[i+1][len(code):].split())
+                            execv([cf.conf["shell"], "-c"] +
+                                  sys.argv[i+1][len(code):].split())
                         else:
-                            print("ERROR: Wrong or missing code", file=sys.stderr)
+                            print("ERROR: Wrong or missing code",
+                                  file=sys.stderr)
                     else:
-                        print("ERROR: Request an email code first", file=sys.stderr)
+                        print("ERROR: Request an email code first",
+                              file=sys.stderr)
                 except Exception as e:
                     print(e, file=sys.stderr)
                     sys.exit(1)
@@ -216,10 +236,11 @@ def main():
                 print("Not match")
                 continue
             break
-        code = str(random.SystemRandom().randint(10000,100000)) # 5-digit
+        code = str(random.SystemRandom().randint(10000, 100000))  # 5-digit
         cf.send_email(code, "")
         while True:
-            inp = input("Enter the code sent to your email address, 0 to resend: ")
+            inp = input(
+                "Enter the code sent to your email address, 0 to resend: ")
             if inp == "0":
                 cf.send_email(code, "")
                 continue
@@ -233,9 +254,9 @@ def main():
 
 
 if __name__ == '__main__':
-    #try:
+    # try:
     #    main()
-    #except Exception as e:
+    # except Exception as e:
     #    print(
     #        f"Exception {e} occured, check your configuration.", file=sys.stderr)
     #    # Start a restricted environment
