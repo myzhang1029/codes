@@ -33,7 +33,7 @@ def geturl(url):
     temp = tempfile.NamedTemporaryFile()
     r = requests.get(url)
     if r.status_code != 200:
-        raise Exception
+        r.raise_for_status()
     temp.write(r.content)
     return temp
 
