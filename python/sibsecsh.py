@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 #
 #  sibsecsh
 #  Copyright (C) 2019-2020 Zhang Maiyun <myzhang1029@163.com>
