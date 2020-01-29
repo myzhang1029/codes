@@ -56,26 +56,32 @@ def getresult(xlsfile):
 
 
 def kickrep(healthlist):
-    """Kick out repeted reports."""
+    """Kick out repeated reports."""
     healthlist.sort()
     oldnum = 0
-    for idx, rep in enumerate(healthlist):
+    for idx in reversed(range(len(healthlist))):
+        rep = healthlist[idx]
         thisnum = rep[0:2]
         thisline = rep
+    #    print(idx, rep, thisnum)
         if thisnum == oldnum:
-            print(f"""发现重复项:
-1: {oldline};
+            # Skip verification for identical lines
+            if thisline == oldline:
+                del healthlist[idx]
+            else:
+                print(f"""发现重复项:
+1: {oldline}
 2: {thisline}""")
-            while True:
-                keep = input("保留哪一项: ")
-                # Delete the opposing one
-                if keep == "2":
-                    del healthlist[idx-1]
-                elif keep == "1":
-                    del healthlist[idx]
-                else:
-                    continue
-                break
+                while True:
+                    keep = input("保留哪一项: ")
+                    # Delete the opposing one
+                    if keep == "2":
+                        del healthlist[idx+1]
+                    elif keep == "1":
+                        del healthlist[idx]
+                    else:
+                        continue
+                    break
         oldnum = thisnum
         oldline = thisline
     return healthlist
