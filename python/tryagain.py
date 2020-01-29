@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# Run something until it succeeds.
 #
 #  tryagain.py
 #  Copyright (C) 2019 Zhang Maiyun <myzhang1029@163.com>
@@ -17,6 +16,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+"""Run something until it succeeds."""
 
 import subprocess
 import sys

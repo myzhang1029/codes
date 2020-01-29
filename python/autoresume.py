@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# Program to automatically resume a resumable program after a reboot
 #
 #  autoresume.py
+#
 #  Copyright (C) 2019 Zhang Maiyun <myzhang1029@163.com>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -17,6 +17,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+"""Automatically resume a resumable program after a reboot."""
 
 from pathlib import Path
 import subprocess as sp
@@ -57,7 +59,7 @@ class AutoResume(object):
         def __enter__(self):
             return self
 
-        def __exit__(self):
+        def __exit__(self, type, val, traceback):
             self.save()
 
         def add(self, pid, command, stdin, stdout, stderr, cwd):
@@ -179,10 +181,10 @@ class AutoResume(object):
         elif stderr == stdout:
             print("yes!")
             stderr = sp.STDOUT
-        else: # Not None and not stdout
+        else:  # Not None and not stdout
             stderr = open(stderr, "wb")
         pid = sp.Popen(argv, stdin=stdin, stdout=stdout,
-                    stderr=stderr, cwd=cwd).pid
+                       stderr=stderr, cwd=cwd).pid
         for fp in [stdin, stdout, stderr]:
             if hasattr(fp, "close"):
                 fp.close()

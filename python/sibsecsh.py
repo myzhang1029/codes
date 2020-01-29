@@ -1,6 +1,6 @@
 #!/usr/local/bin/python3
 #
-#  sibsecsh - 2FA shell
+#  sibsecsh
 #  Copyright (C) 2019-2020 Zhang Maiyun <myzhang1029@163.com>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+"""Python 2FA shell."""
 
 import toml  # Non-stdlib
 import sys

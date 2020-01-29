@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
-# Print numbers that their nth root, n_2th root,... are all intergers
-# like 4096, 262144, 729 for 2 and 3
-#
 #
 #  cnsroot.py
+#
 #  Copyright (C) 2018-present Zhang Maiyun <myzhang1029@163.com>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -19,6 +17,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+"""Print numbers that their nth root, n_2th root,... are all intergers
+like 4096, 262144, 729 for 2 and 3."""
 
 import argparse
 from sys import exit

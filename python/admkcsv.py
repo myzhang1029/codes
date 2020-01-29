@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# Program to format the administrative division code page from website of the Ministry of Civil Affairs of the People's Republic of China into CSV files
 #
 #  admkcsv.py
+#
 #  Copyright (C) 2019 Zhang Maiyun <myzhang1029@163.com>
 #
 #  This program is free software; you can redistribute it and/or modify
@@ -18,6 +18,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+"""Format the administrative division code page from website of the Ministry of Civil Affairs of the People's Republic of China into CSV files."""
 
 from sys import argv
 from pathlib import Path

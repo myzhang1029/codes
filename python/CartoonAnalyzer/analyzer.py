@@ -18,6 +18,7 @@
 #
 
 """Analyze YUSS 2020 cartoon specs and make instruction tables."""
+
 import pptx
 import docx
 from docx.shared import Cm
