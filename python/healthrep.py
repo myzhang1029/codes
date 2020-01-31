@@ -63,7 +63,6 @@ def kickrep(healthlist):
         rep = healthlist[idx]
         thisnum = rep[0:2]
         thisline = rep
-    #    print(idx, rep, thisnum)
         if thisnum == oldnum:
             # Skip verification for identical lines
             if thisline == oldline:
