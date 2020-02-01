@@ -147,13 +147,6 @@ class ConfigFile(object):
         Only used when it's about to call exec.
         """
         ip = loginip()
-        if not ip:
-            # Empty IP
-            return False
-        if self.check_ip(ip):
-            self.logfile.writelines("WARNING: local login accepted, who output:\n"
-                                    + sp.Popen(["/usr/bin/who"], stdout=sp.PIPE).stdout.read().decode("utf-8"))
-            return True
         if os.getenv("SIB_FROM_IP"):
             # Second use of the shell e.g. screen
             self.logfile.writelines("WARNING: second login accepted, who output:\n"
@@ -161,6 +154,13 @@ class ConfigFile(object):
             return True
         if (home_addr / "NoSec").exists():
             # Temporary disable sibsecsh
+            return True
+        if not ip:
+            # Empty IP
+            return False
+        if self.check_ip(ip):
+            self.logfile.writelines("WARNING: local login accepted, who output:\n"
+                                    + sp.Popen(["/usr/bin/who"], stdout=sp.PIPE).stdout.read().decode("utf-8"))
             return True
 
     def send_email(self, code, moreinfo):
