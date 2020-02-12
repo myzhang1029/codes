@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Auto generate prime2_n.c for multi-process calculating
 
@@ -18,11 +18,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-base=`dirname $0`
+
+base="$(dirname "$0")"
 while true
 do
-	read -p "Enter the minimum value:" min
-	if [ "$(echo $min | bc)" = "$min" ]; then
+	echo -n "Enter the minimum value:"
+    read -r min
+    if [ "$((min))" = "$min" ]; then
 		break
 	else
 		echo Must be an integer
@@ -30,21 +32,23 @@ do
 done
 while true
 do
-	read -p "Enter the maximum value (this value will not be included):" max
-	if [ "$(echo $max | bc)" = "$max" ]; then
+	echo -n "Enter the maximum value (this value will not be included):"
+    read -r max
+    if [ "$((max))" = "$max" ]; then
 		break
 	else
 		echo Must be an integer
 	fi
 done
-diff=`echo ${max}-${min} | bc`
+diff="$((max-min))"
 while true
 do
-	read -p "Enter increase value:" incr
-	if [ "$(echo $incr | bc)" = "$incr" ]; then
-		if [ "$(echo ${incr}%4 | bc)" = "0" ]; then
-			if [ $incr -le $diff ]; then
-				if [ "$(echo ${diff}%${incr} | bc)" = "0" ]; then
+    echo -n "Enter increase value:"
+    read -r incr
+    if [ "$((incr))" = "$incr" ]; then
+        if [ "$((incr%4))" = "0" ]; then
+			if [ "$incr" -le "$diff" ]; then
+                if [ "$((diff%incr))" = "0" ]; then
 					break
 				else
 					echo Must be a factor of max-min
@@ -60,10 +64,10 @@ do
 	fi
 done
 count=0
-for i in `seq $min $incr $(($max-$incr))`
+for i in $(seq "$min" "$incr" $((max-incr)))
 do
-    cp ${base}/prime2.c prime2_${count}.c
+    cp "${base}"/prime2.c prime2_"${count}".c
 	gsed -i "s/@p2gen_min @/$i/" prime2_${count}.c
-	gsed -i "s/@p2gen_max @/$(($i+$incr))/" prime2_${count}.c
-	((count+=1))
+	gsed -i "s/@p2gen_max @/$((i+incr))/" prime2_${count}.c
+	count="$((count+1))"
 done

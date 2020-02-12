@@ -16,6 +16,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+# shellcheck disable=SC1090,SC2001,SC2015,SC2016,SC2086,SC2219,SC2236
 
 trap 'exit 1' PIPE
 
@@ -42,7 +43,7 @@ sed="/usr/bin/sed"
 pcregrep="/usr/local/bin/pcregrep"
 
 [ -n "$SIB_FROM_IP" ] && SIB_FIRST_LOGIN=false || SIB_FIRST_LOGIN=true
-SIB_FROM_IP=`$who 2> /dev/null | $awk '{print $NF}' | $sed -e 's/[()]//g'`
+SIB_FROM_IP=$($who 2> /dev/null | $awk '{print $NF}' | $sed -e 's/[()]//g')
 #[ ! -z "${SIB_FROM_IP##*.*}" ] && SIB_FROM_IP="$SIB_MY_IP" || true
 #[ "$SIB_FROM_IP" = "$SIB_MY_IP" ] && SIB_FROM_IP="reverse shell" || true
 [ ! -z "${SIB_FROM_IP##*.*}" ] && SIB_FROM_IP="reverse shell" || true
@@ -50,33 +51,33 @@ export SIB_FROM_IP
 
 function islocal()
 {
-    [ "`echo $SIB_FROM_IP | cut -d . -f -3`" = "`echo $SIB_MY_IP | cut -d . -f -3`" ]
+    [ "$(echo "$SIB_FROM_IP" | cut -d . -f -3)" = "$(echo $SIB_MY_IP | cut -d . -f -3)" ]
     return $?
 }
 
 # Startup
 #  Check for rc file
-if [ ! -f $SIB_HOME/.secrc ]
+if [ ! -f "$SIB_HOME"/.secrc ]
 then
-	echo "sibsecsh: ERROR: no $SIB_HOME/.secrc"
+    echo "sibsecsh: ERROR: no $SIB_HOME/.secrc"
     exec /bin/bash
 else
     # This should be written by the user, so we trust it
-	. $SIB_HOME/.secrc
+    . "$SIB_HOME"/.secrc
 fi
 
 #  Check for $SIB_LOGIN and $SIB_EMAIL
 if ! echo $SIB_EMAIL | $pcregrep '^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$' > /dev/null
 then
-	echo "sibsecsh: ERROR: malformed \$SIB_EMAIL"
+    echo "sibsecsh: ERROR: malformed \$SIB_EMAIL"
     exec /bin/bash
 fi
 
-mkdir -p $SIB_TMPDIR
+mkdir -p "$SIB_TMPDIR"
 #  These values shouldn't be set in the rc
 SIB_TRUSTED_ENV="false"
-shadowmail=`echo $SIB_EMAIL | sed "s/......@/*****@/"`
-shadowed=`echo $SIB_EMAIL | sed "s/@.*//"`
+shadowmail=$(echo $SIB_EMAIL | sed "s/......@/*****@/")
+shadowed=$(echo $SIB_EMAIL | sed "s/@.*//")
 shadowed=${shadowed:${#shadowed}-6}
 
 while [[ $# -gt 0 ]]
@@ -86,12 +87,12 @@ do
             # As a shell, for security, instead of executing directly,
             # the email code is requested with the first connection,
             # and the code should be included in the second connection.
-            if [ -f $SIB_HOME/NoSec ] || islocal
+            if [ -f "$SIB_HOME"/NoSec ] || islocal
             then
                 exec $SIB_SHELL -c "$2"
             elif [ "$2" = "$SIB_EMAIL" ]
             then
-		        SIB_RAND=$RANDOM
+                SIB_RAND=$RANDOM
                 $msmtp --host="$SIB_MAIL_HOST" --from="$SIB_MAIL_FROM" --passwordeval="$SIB_MAIL_PASSWORDEVAL" --user="$SIB_MAIL_USERNAME" --auth=plain -t << ENDMAIL
 From: SIB Secure Shell <$SIB_MAIL_FROM>
 To: $SIB_EMAIL
@@ -99,13 +100,13 @@ Subject: Login Code
 
 Your code is :$SIB_RAND, prepend it to the cmdline.
 ENDMAIL
-                echo $SIB_RAND > $SIB_TMPDIR/sib_code
+                echo $SIB_RAND > "$SIB_TMPDIR"/sib_code
                 exit 0
-            elif [ -f $SIB_TMPDIR/sib_code ] # XXX: reentrant
+            elif [ -f "$SIB_TMPDIR"/sib_code ] # XXX: reentrant
             then
-                SIB_RAND=`cat $SIB_TMPDIR/sib_code`
-                SIB_INPUT=${2:0:${#SIB_RAND}}
-		        if [ "$SIB_RAND" = "$SIB_INPUT" ]
+                SIB_RAND="$(cat "$SIB_TMPDIR"/sib_code)"
+                SIB_INPUT="${2:0:${#SIB_RAND}}"
+                if [ "$SIB_RAND" = "$SIB_INPUT" ]
                 then
                     exec $SIB_SHELL -c "${2:${#SIB_RAND}}"
                 else
@@ -130,35 +131,36 @@ done
 # Accept second logins
 if [ "$SIB_FIRST_LOGIN" = "false" ]
 then
-	echo "WARNING: second login accepted, who output:" >> $SIB_LOG
-	$who >> $SIB_LOG
-	exec $SIB_SHELL $SIB_SHELL_ARGS
+    echo "WARNING: second login accepted, who output:" >> $SIB_LOG
+    $who >> $SIB_LOG
+    exec $SIB_SHELL $SIB_SHELL_ARGS
 fi
 
 # Log
-echo login attempt at `/bin/date` from $SIB_FROM_IP for `/usr/bin/logname` >> $SIB_LOG
+echo "login attempt at $(/bin/date) from $SIB_FROM_IP for $(/usr/bin/logname)" >> $SIB_LOG
 
 # Accept local logins
 if islocal
 then
-	echo "WARNING: local login accepted, who output:" >> $SIB_LOG
-	$who >> $SIB_LOG
-	exec $SIB_SHELL $SIB_SHELL_ARGS
+    echo "WARNING: local login accepted, who output:" >> $SIB_LOG
+    $who >> $SIB_LOG
+    exec $SIB_SHELL $SIB_SHELL_ARGS
 fi
 
 # Disable sibsecsh check
-if [ -f $SIB_HOME/NoSec ] || [ "$SIB_TRUSTED_ENV" = "true" ]
+if [ -f "$SIB_HOME"/NoSec ] || [ "$SIB_TRUSTED_ENV" = "true" ]
 then
-	exec $SIB_SHELL $SIB_SHELL_ARGS
+    exec $SIB_SHELL $SIB_SHELL_ARGS
 fi
 
 # Match Email addr
 while true
 do
-	read -p "Enter your email match \"$shadowmail\": " SIB_INPUT
-	if [ "$SIB_INPUT" = "$SIB_EMAIL" ] || [ "$SIB_INPUT" = "$shadowed" ]
+    echo -n "Enter your email match \"$shadowmail\": "
+    read -r SIB_INPUT
+    if [ "$SIB_INPUT" = "$SIB_EMAIL" ] || [ "$SIB_INPUT" = "$shadowed" ]
     then
-		SIB_RAND=$RANDOM
+        SIB_RAND=$RANDOM
         $msmtp --host="$SIB_MAIL_HOST" --from="$SIB_MAIL_FROM" --passwordeval="$SIB_MAIL_PASSWORDEVAL" --user="$SIB_MAIL_USERNAME" --auth=plain -t << ENDMAIL
 From: SIB Secure Shell <$SIB_MAIL_FROM>
 To: $SIB_EMAIL
@@ -166,20 +168,21 @@ Subject: Login Code
 
 Your code($SIB_COUNT) is $SIB_RAND.
 ENDMAIL
-		break
-	else
-		echo "Not match"
-		continue
-	fi
+        break
+    else
+        echo "Not match"
+        continue
+    fi
 done
 
 # Resend code or accept login 
 while true
 do
-	read -p 'Enter the code sent to your email address, 0 to resend:' SIB_INPUT
-	if [ "$SIB_INPUT" = "0" ]
+    echo -n 'Enter the code sent to your email address, 0 to resend:'
+    read -r SIB_INPUT
+    if [ "$SIB_INPUT" = "0" ]
     then 
-		let SIB_COUNT+=1
+        let SIB_COUNT+=1
         $msmtp --host="$SIB_MAIL_HOST" --from="$SIB_MAIL_FROM" --passwordeval="$SIB_MAIL_PASSWORDEVAL" --user="$SIB_MAIL_USERNAME" --auth=plain -t << ENDMAIL
 From: SIB Secure Shell <$SIB_MAIL_FROM>
 To: $SIB_EMAIL
@@ -187,16 +190,16 @@ Subject: Login Code
 
 Your code($SIB_COUNT) is $SIB_RAND.
 ENDMAIL
-	else
-		if [ "$SIB_RAND" = "$SIB_INPUT" ]
+    else
+        if [ "$SIB_RAND" = "$SIB_INPUT" ]
         then
-			echo "Logged in!"
-			exec $SIB_SHELL $SIB_SHELL_ARGS
+            echo "Logged in!"
+            exec $SIB_SHELL $SIB_SHELL_ARGS
 
-		else
-			echo "Not Match"
-			continue
-		fi
-	fi
+        else
+            echo "Not Match"
+            continue
+        fi
+    fi
 done
 

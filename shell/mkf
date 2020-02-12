@@ -17,9 +17,9 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-tf=`mktemp tmp-mkf.XXXX`
+tf=$(mktemp tmp-mkf.XXXX)
 
-while read line
+while read -r line
 do
     echo "$line" >> "$tf"
 done
@@ -30,6 +30,8 @@ if [ "$*" = "" ]; then
     exit 1
 fi
 
+# Whitespace for $* is intended
+# shellcheck disable=SC2048
 $* "$tf"
 rm "$tf"
 
