@@ -18,7 +18,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-"""Format the administrative division code page from website of the Ministry of Civil Affairs of the People's Republic of China into CSV files."""
+"""Format the administrative division code page from website of the Ministry
+of Civil Affairs of the People's Republic of China into CSV files."""
 
 from sys import argv
 from pathlib import Path

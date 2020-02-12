@@ -17,7 +17,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-"""One man has n children, his children have n-1 children each, they have n-2 children each, how many people are there in the family after n generations? The mother side not included. n specified in argv[1], defaults to 1
+"""One man has n children, his children have n-1 children each,
+they have n-2 children each, how many people are there in the family
+after n generations? The mother side not included.
+n specified in argv[1], defaults to 1.
 This program actually calculates OEIS:A000522"""
 
 from sys import argv

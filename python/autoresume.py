@@ -26,6 +26,7 @@ import sys
 import os
 import argparse
 import json
+from typing import List
 
 
 def pathlookup(cmd):
@@ -43,7 +44,7 @@ class AutoResume(object):
     class ARDatabase(object):
         """ A json data table for registered processes. """
         dbpath = None
-        proc_list = []
+        proc_list: List[dict] = []
 
         def __init__(self, dbpath):
             try:
@@ -82,13 +83,24 @@ class AutoResume(object):
 
     def __init__(self):
         parser = argparse.ArgumentParser(
-            description="Automatically resume a resumable program after a reboot")
-        parser.add_argument("-d", "--database", help="Specify the database file",
-                            type=str, default=Path.home()/".autoresume.json")
+            description="Automatically resume a resumable program "
+            "after a reboot")
         parser.add_argument(
-            "command", help="The subcommand to run: resume, delete, list, run, help")
+            "-d",
+            "--database",
+            help="Specify the database file",
+            type=str,
+            default=Path.home()/".autoresume.json"
+        )
         parser.add_argument(
-            "args", help="The arguments to the subcommand", nargs=argparse.REMAINDER)
+            "command",
+            help="The subcommand to run: resume, delete, list, run, help"
+        )
+        parser.add_argument(
+            "args",
+            help="The arguments to the subcommand",
+            nargs=argparse.REMAINDER
+        )
         args = parser.parse_args()
         if not hasattr(self, args.command):
             parser.print_help()
@@ -114,7 +126,12 @@ class AutoResume(object):
         args = parser.parse_args(sys.argv[2:])
         for idx, cmd in enumerate(self.database.proc_list):
             pid = self.execute_command(
-                cmd["command"], cmd["stdin"], cmd["stdout"], cmd["stderr"], cmd["cwd"])
+                cmd["command"],
+                cmd["stdin"],
+                cmd["stdout"],
+                cmd["stderr"],
+                cmd["cwd"]
+            )
             self.database.proc_list[idx]["pid"] = pid
 
     def delete(self):
@@ -165,7 +182,8 @@ class AutoResume(object):
             prog=f"{sys.argv[0]} prune", description="prune dead commands")
         args = parser.parse_args(sys.argv[2:])
         for idx in range(len(self.database.proc_list)).__reversed__():
-            # Traverse from high to low so that the one after the deleted one won't be missed
+            # Traverse from high to low so that
+            # the one after the deleted one won't be missed
             cmd = self.database.proc_list[idx]
             try:
                 os.kill(cmd["pid"], 0)

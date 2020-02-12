@@ -44,7 +44,7 @@ def loginip():
     """Get the login's remote IP."""
     cmd = sp.Popen(["/usr/bin/who", "-u", "am", "i"], stdout=sp.PIPE)
     line = cmd.stdout.read().decode("utf-8").strip()
-    match = re.search("\(.*\)", line)
+    match = re.search(r"\(.*\)", line)
     if match:
         start, end = match.span()
         return line[start+1:end-1]  # Remove brackets
@@ -95,7 +95,7 @@ class ConfigFile(object):
                     break
             else:  # No shell matches
                 raise ValueError("non-standard shell")
-        if not re.fullmatch('[^@]+@[^@]+\.[^@]+', self.conf["email"]):
+        if not re.fullmatch(r"[^@]+@[^@]+\.[^@]+", self.conf["email"]):
             raise ValueError(f"malformed email: {self.conf['email']}")
 
     def __init__(self):
@@ -108,7 +108,11 @@ class ConfigFile(object):
                 mail_from(str, required), mail_username(str, required),
                 mail_passwdcmd(str, required)
         """
-        for configfile in ["/etc/secrc", "/etc/secrc.toml", home_addr/".secrc", home_addr/".secrc.toml"]:
+        for configfile in ["/etc/secrc",
+                           "/etc/secrc.toml",
+                           home_addr/".secrc",
+                           home_addr/".secrc.toml"
+                           ]:
             try:
                 config = toml.load(configfile)
             except FileNotFoundError:
@@ -147,10 +151,13 @@ class ConfigFile(object):
         Only used when it's about to call exec.
         """
         ip = loginip()
+        whoout = sp.Popen(["/usr/bin/who"], stdout=sp.PIPE) \
+            .stdout.read().decode("utf-8")
         if os.getenv("SIB_FROM_IP"):
             # Second use of the shell e.g. screen
-            self.logfile.writelines("WARNING: second login accepted, who output:\n"
-                                    + sp.Popen(["/usr/bin/who"], stdout=sp.PIPE).stdout.read().decode("utf-8"))
+            self.logfile.writelines(
+                "WARNING: second login accepted, who output:\n" + whoout
+            )
             return True
         if (home_addr / "NoSec").exists():
             # Temporary disable sibsecsh
@@ -159,8 +166,9 @@ class ConfigFile(object):
             # Empty IP
             return False
         if self.check_ip(ip):
-            self.logfile.writelines("WARNING: local login accepted, who output:\n"
-                                    + sp.Popen(["/usr/bin/who"], stdout=sp.PIPE).stdout.read().decode("utf-8"))
+            self.logfile.writelines(
+                "WARNING: local login accepted, who output:\n" + whoout
+            )
             return True
 
     def send_email(self, code, moreinfo):
@@ -175,7 +183,11 @@ Subject: Login Code
 Your code is {code}{moreinfo}.
 """
         ctx = ssl.create_default_context()
-        with smtplib.SMTP_SSL(self.conf["mail_host"], 465, context=ctx) as server:
+        with smtplib.SMTP_SSL(
+                self.conf["mail_host"],
+                465,
+                context=ctx
+        ) as server:
             server.login(self.conf["mail_from"], self.password)
             server.sendmail(self.conf["mail_from"],
                             self.conf["email"], content)
@@ -196,7 +208,8 @@ def main():
                         cf.close()
                         execv([cf.conf["shell"], "-c"] + sys.argv[i+1].split())
                     if sys.argv[i+1] == email:
-                        code = random.SystemRandom().randint(10000, 100000)  # 5-digit
+                        # 5-digit random
+                        code = random.SystemRandom().randint(10000, 100000)
                         cf.send_email(code, ", prepend it to cmdline")
                         open(cf.conf["tmpdir"]/"sib_code",
                              "w").write(str(code))
@@ -220,7 +233,9 @@ def main():
                     sys.exit(1)
                 sys.exit(0)
         cf.logfile.writelines(
-            f"login attempt at {time.asctime()} from {loginip()} for {getpass.getuser()}\n")
+            f"login attempt at {time.asctime()} "
+            f"from {loginip()} for {getpass.getuser()}\n"
+        )
         if cf.is_accepted():
             # Accept directly
             os.environ["SIB_FROM_IP"] = loginip()
@@ -260,7 +275,9 @@ if __name__ == '__main__':
     #    main()
     # except Exception as e:
     #    print(
-    #        f"Exception {e} occured, check your configuration.", file=sys.stderr)
+    #        f"Exception {e} occured, check your configuration.",
+    #        file=sys.stderr
+    #    )
     #    # Start a restricted environment
     #    execv(["/bin/bash", "-r"])
     main()
