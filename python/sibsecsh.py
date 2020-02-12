@@ -70,8 +70,6 @@ class ConfigFile(object):
         "mail_from": "from@example.com",
         "mail_passwdcmd": "echo 123456"
     }
-    password = ""
-    logfile = None
 
     def __enter__(self):
         return self

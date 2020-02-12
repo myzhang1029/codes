@@ -43,7 +43,6 @@ class AutoResume(object):
     """ The app. """
     class ARDatabase(object):
         """ A json data table for registered processes. """
-        dbpath = None
         proc_list: List[dict] = []
 
         def __init__(self, dbpath):
