@@ -56,7 +56,7 @@
 #define FOUR_TYPES (shape == 3 || shape == 4 || shape == 7)
 
 /*This should be greater than ROW and lesser than max of int, or a negative
- * vaule*/
+ * value*/
 #define STAGE_FLOOR -1
 
 /*Level: seconds delay before dropping*/
@@ -64,7 +64,7 @@
 #define LVL 1
 
 /*
-Basic vaules for HUMAN
+Basic values for HUMAN
 
 SHAPE_S_SIZE1 3  //_00
 SHAPE_S_SIZE2 2  //00_
@@ -174,7 +174,7 @@ debug_test_pass:
 
 /*
  * refreshscr: Write scrbuf to screen with score, level and next block
- * infomation Finished but not tested Parameters: next: Next block number score:
+ * information Finished but not tested Parameters: next: Next block number score:
  * Current score level: Current level
  */
 void refreshscr(int next, int score, int level)

@@ -54,7 +54,7 @@ int main()
 #ifdef _NC
     {
         char mesg[] = "Type the amount of lines you need:",
-             mesg2[] = "Prime table generater";
+             mesg2[] = "Prime table generator";
         mvprintw(1, (col - strlen(mesg2)) / 2, "%s", mesg2);
         mvprintw(row / 2, (col - strlen(mesg)) / 2, "%s", mesg);
         refresh();

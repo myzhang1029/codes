@@ -132,7 +132,7 @@ class Corrector:
                 readline.add_history(line)
                 print("Is this correct? Please correct or leave empty. "
                       "Use space to delete this line. "
-                      "Push Up to retrive original entry.")
+                      "Push Up to retrieve original entry.")
                 # Readline enabled.
                 newline = input("> ")
                 # delete line

@@ -275,7 +275,7 @@ if __name__ == '__main__':
     #    main()
     # except Exception as e:
     #    print(
-    #        f"Exception {e} occured, check your configuration.",
+    #        f"Exception {e} occurred, check your configuration.",
     #        file=sys.stderr
     #    )
     #    # Start a restricted environment

@@ -177,7 +177,7 @@ def gendoc(data, length, numbering, outaddr, only, lyrics):
             r[offset + 0].text = "姓名"
             r[offset + 1].merge(r[offset + 3])
             # Change if needed(XXX)
-            # effectiverows = nrows - the number of classs/name lines
+            # effectiverows = nrows - the number of class/name lines
             metalines = 2
             er = 9 - metalines
             for i in range(length):
@@ -236,7 +236,7 @@ def main():
     parser.add_argument(
         "-c", "--cache", help="Read the cache into a JSON file")
     parser.add_argument(
-        "-o", "--only", help="The class number to generate, comma seperated[all]")
+        "-o", "--only", help="The class number to generate, comma separated[all]")
     parser.add_argument("-a", "--analyzeonly",
                         help="Do not generate, analyze only", action="store_true")
     parser.add_argument("-l", "--lyrics", help="Lyrics json file")

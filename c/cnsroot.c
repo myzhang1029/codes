@@ -1,4 +1,4 @@
-/* Print numbers that their nth root, n_2th root,... are all an interger
+/* Print numbers that their nth root, n_2th root,... are all an integer
  * like 4096, 262144, 729 for 2 and 3
  */
 /*

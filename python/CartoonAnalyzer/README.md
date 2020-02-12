@@ -1,6 +1,6 @@
 # CartoonAnalyzer
 [中文介绍](#火柴人动画分析)
-I made this for YUSS's 37th sports meeting. Our teacher wanted us(about 1000 students) to make some pictures on the sports field with colored fans for te grade performance.
+I made this for YUSS's 37th sports meeting. Our teacher wanted us(about 1000 students) to make some pictures on the sports field with colored fans for the grade performance.
 Originally, for every every 40 students, 2 students were in charge of converting the picture(which is a set of ~20 colored bitmaps) to the list of colors a student had to show
 (which is an ordered list of 20 colors). That process was not only boring, time-consuming, but also risky(if you got one wrong, you would be criticized by name in front of the whole grade.
 The teacher also changes this cartoon almost every day!  

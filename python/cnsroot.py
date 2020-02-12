@@ -18,7 +18,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-"""Print numbers that their nth root, n_2th root,... are all intergers
+"""Print numbers that their nth root, n_2th root,... are all integers
 like 4096, 262144, 729 for 2 and 3."""
 
 import argparse
