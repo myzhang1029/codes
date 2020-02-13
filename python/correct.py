@@ -199,7 +199,7 @@ class JiebaCorrector(Corrector):
         return ' '.join(self.jieba.cut(line))
 
 
-if __name__ == "__main__":
+def main(corr=JiebaCorrector):
     ap = argparse.ArgumentParser()
     ap.add_argument("inputfile", type=str)
     ap.add_argument("outputfile", type=str)
@@ -207,7 +207,7 @@ if __name__ == "__main__":
     ap.add_argument("-p", "--pydict", type=str, default="pydict.txt")
     ap.add_argument("-r", "--delete", type=str, nargs='*')
     ns = ap.parse_args()
-    with JiebaCorrector(
+    with corr(
         ns.inputfile,
         ns.outputfile,
         ns.dict,
@@ -216,3 +216,6 @@ if __name__ == "__main__":
         if ns.delete:
             corrector.del_words(ns.delete)
         corrector.correct()
+
+if __name__ == "__main__":
+    main()
