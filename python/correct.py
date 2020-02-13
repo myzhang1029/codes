@@ -22,6 +22,7 @@
 
 import readline
 import sys
+import os
 import argparse
 import jieba
 
@@ -186,6 +187,7 @@ class Corrector:
                     self.o.write(newline + '\n')
                 else:
                     self.o.write(line + '\n')
+        os.remove(state_name)
 
 
 class JiebaCorrector(Corrector):
