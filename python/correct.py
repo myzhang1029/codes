@@ -2,6 +2,7 @@
 
 import readline
 import sys
+import argparse
 import jieba
 
 
@@ -15,11 +16,15 @@ class pyDictionary:
     def __init__(self, filename, pyfilename):
         self.filename = filename
         self.pyfilename = pyfilename
-        self.dict = set(line.split(' ')[0].strip()
-                        for line in open(filename).readlines())
+        self.dict = set(
+            line.split(' ')[0].strip()
+            for line in open(filename).readlines()
+        )
         try:
-            self.dict |= set(line.split(' ')[0].strip()
-                             for line in open(pyfilename).readlines())
+            self.dict |= set(
+                line.split(' ')[0].strip()
+                for line in open(pyfilename).readlines()
+            )
         except FileNotFoundError:
             pass
 
@@ -34,8 +39,11 @@ class pyDictionary:
         pydict.write('\n'.join(self.dict))
         pydict.close()
 
-    def add(self, toadd):
-        self.dict |= set(toadd)
+    def add_words(self, to_add):
+        self.dict |= set(to_add)
+
+    def del_words(self, to_del):
+        self.dict -= set(to_del)
 
 
 class Corrector:
@@ -67,6 +75,14 @@ class Corrector:
         self.i.close()
         self.o.close()
         self.dict.save()
+
+    def add_words(self, words):
+        """Add words, chiled classes may overwrite this method."""
+        self.dict.add_words(words)
+
+    def del_words(self, words):
+        """Delete words, chiled classes may overwrite this method."""
+        self.dict.del_words(words)
 
     def cut(self, line):
         """Default dummy cutter, Implements a maximum forward match.
@@ -142,17 +158,19 @@ class Corrector:
                 words = set((w for w in newline.split(' ') if w))
                 print(f"Words: {words if words else '{}'}")
                 # Add these new words to dictionary
-                self.dict.add(words)
+                self.dict.add_words(words)
                 # Remove any extra whitespace
                 newline = newline.strip()
                 # Replace the line if the user has one
                 if newline:
                     self.o.write(newline + '\n')
                 else:
-                    self.o.write(l + '\n')
+                    self.o.write(line + '\n')
 
 
 class JiebaCorrector(Corrector):
+    """Correct jieba cut result."""
+
     def __init__(
             self,
             inpfilename,
@@ -170,6 +188,11 @@ class JiebaCorrector(Corrector):
         self.jieba.load_userdict(dictfilename)
         self.jieba.load_userdict(pydictfilename)
 
+    def del_words(self, words):
+        super().del_words(words)
+        for w in words:
+            self.jieba.del_word(w)
+
     def cut(self, line):
         self.dict.save()
         self.jieba.load_userdict(self.pydictfilename)
@@ -177,15 +200,19 @@ class JiebaCorrector(Corrector):
 
 
 if __name__ == "__main__":
-    a = sys.argv
-    if len(a) < 3:
-        print(f"Usage: {a[0]} inpfile outfile [dictionary [pydictionary]]")
-    if len(a) == 3:
-        with JiebaCorrector(a[1], a[2]) as corrector:
-            corrector.correct()
-    if len(a) == 4:
-        with JiebaCorrector(a[1], a[2], a[3]) as corrector:
-            corrector.correct()
-    if len(a) == 5:
-        with JiebaCorrector(a[1], a[2], a[3], a[4]) as corrector:
-            corrector.correct()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("inputfile", type=str)
+    ap.add_argument("outputfile", type=str)
+    ap.add_argument("-d", "--dict", type=str, default="dict.txt")
+    ap.add_argument("-p", "--pydict", type=str, default="pydict.txt")
+    ap.add_argument("-r", "--delete", type=str, nargs='*')
+    ns = ap.parse_args()
+    with JiebaCorrector(
+        ns.inputfile,
+        ns.outputfile,
+        ns.dict,
+        ns.pydict
+    ) as corrector:
+        if ns.delete:
+            corrector.del_words(ns.delete)
+        corrector.correct()
