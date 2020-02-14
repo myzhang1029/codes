@@ -2,7 +2,7 @@
 #
 #  admkcsv.py
 #
-#  Copyright (C) 2019 Zhang Maiyun <myzhang1029@163.com>
+#  Copyright (C) 2019-2020 Zhang Maiyun <myzhang1029@163.com>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -39,19 +39,13 @@ def gencsv(lines, name):
     open(name + ".csv", "w").writelines(nl)
 
 
-def readhtml(lines):
+def readhtml(html):
     """ Read an HTML string and format it to a list.
     lines: The HTML content.
     The content should be from mca.gov or have the same structure.
     """
     out = []
-    html = ""
     isfirstline = True
-    if isinstance(lines, list):
-        for str in lines:
-            html += str
-    else:  # string
-        html = lines
     soup = bs(html, "html.parser")
     for child in soup.body.children:  # remove extra tags
         if child.name == 'script':
@@ -60,12 +54,12 @@ def readhtml(lines):
         stripped = line.strip()
         if stripped == "":  # skip empty lines
             continue
-        if isfirstine:  # skip the first line
+        if isfirstline:  # skip the title line
             isfirstline = False
             continue
         if stripped.find("注") != -1:  # end reached
             break
-            out.append(stripped + "\n")
+        out.append(stripped + "\n")
     return out
 
 
@@ -76,6 +70,6 @@ for i in argv[1:]:
         lines = get(i).content
     else:  # a normal path
         outname = i[:-5]
-        lines = open(i).readlines()
+        lines = open(i).read()
     lines = readhtml(lines)
     gencsv(lines, outname)
