@@ -22,5 +22,10 @@
 import subprocess
 import sys
 
+ntries = 1
+
+print("Try 1")
+
 while subprocess.run(sys.argv[1:]).returncode != 0:
-    pass
+    ntries += 1
+    print(f"Try {ntries}")
