@@ -35,12 +35,21 @@ class LcmAction(argparse.Action):
 
 parser = argparse.ArgumentParser(
     description="Print numbers that their nth roots are all integers")
-parser.add_argument("-b", "--base-max",
-                    help="maximum of the base[3]", type=int, default=3)
-parser.add_argument("-p", "--power-max",
-                    help="maximum of the power[3]", type=int, default=3)
-parser.add_argument("-m", "--add-multiple", help="add a multiple",
-                    type=int, action=LcmAction, default=1)
+parser.add_argument(
+    "-b", "--base-max",
+    help="maximum of the base[3]",
+    type=int, default=3
+)
+parser.add_argument(
+    "-p", "--power-max",
+    help="maximum of the power[3]",
+    type=int, default=3
+)
+parser.add_argument(
+    "-m", "--add-multiple",
+    help="add a multiple",
+    type=int, action=LcmAction, default=1
+)
 args = parser.parse_args()
 
 for base in range(0, args.base_max + 1):
