@@ -174,8 +174,8 @@ debug_test_pass:
 
 /*
  * refreshscr: Write scrbuf to screen with score, level and next block
- * information Finished but not tested Parameters: next: Next block number score:
- * Current score level: Current level
+ * information Finished but not tested Parameters: next: Next block number
+ * score: Current score level: Current level
  */
 void refreshscr(int next, int score, int level)
 {
