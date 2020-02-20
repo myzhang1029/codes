@@ -204,7 +204,7 @@ def main():
                     if cf.is_accepted():
                         os.environ["SIB_FROM_IP"] = loginip()
                         cf.close()
-                        execv([cf.conf["shell"], "-c"] + sys.argv[i+1].split())
+                        execv([cf.conf["shell"], "-c"] + [sys.argv[i+1]])
                     if sys.argv[i+1] == email:
                         # 5-digit random
                         code = random.SystemRandom().randint(10000, 100000)
@@ -219,7 +219,7 @@ def main():
                             os.environ["SIB_FROM_IP"] = loginip()
                             cf.close()
                             execv([cf.conf["shell"], "-c"] +
-                                  sys.argv[i+1][len(code):].split())
+                                  [sys.argv[i+1][len(code):]])
                         else:
                             print("ERROR: Wrong or missing code",
                                   file=sys.stderr)
