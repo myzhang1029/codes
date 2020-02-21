@@ -2,7 +2,7 @@
  * algorithm */
 /*
  * prime3.c
- * Copyright (C) 2018 Zhang Maiyun <myzhang1029@163.com>
+ * Copyright (C) 2018,2020 Zhang Maiyun <myzhang1029@163.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -27,14 +27,14 @@
 
 int main(void)
 {
-    unsigned long i, j;
+    unsigned long i, j, sq = sqrt(MAXPRIME);
     /* Reversed bool, true is false, false is true */
     bool *primes = calloc(MAXPRIME, sizeof(bool));
     if (!primes)
         return fprintf(stderr, "malloc failed\n"); /* 15 */
 
 #pragma omp for
-    for (i = 2; i < sqrt(MAXPRIME); ++i)
+    for (i = 2; i < sq; ++i)
         for (j = i * i; j < MAXPRIME; j += i)
             primes[j] = true;
 

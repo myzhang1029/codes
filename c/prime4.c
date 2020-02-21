@@ -25,13 +25,13 @@
 #include <stdlib.h>
 
 /* Inclusive */
-#define MINPRIME 10000000000UL
+#define MINPRIME 10000000000ULL
 /* Exclusive */
-#define MAXPRIME 10000010000UL
+#define MAXPRIME 10000100000ULL
 
 int main(void)
 {
-    unsigned long i, j;
+    unsigned long long i, j, sq = (unsigned long long) sqrt(MAXPRIME);
     /* Reversed bool, true is false, false is true */
     bool *primes = calloc(MAXPRIME - MINPRIME, sizeof(bool));
     if (!primes)
@@ -40,7 +40,7 @@ int main(void)
         return 0;
 
 #pragma omp for
-    for (i = 2; i < sqrt(MAXPRIME); ++i)
+    for (i = 2; i < sq; ++i)
     {
         for (j = i * i; j < MAXPRIME; j += i)
         {
@@ -52,7 +52,7 @@ int main(void)
 
     for (i = 0; i < MAXPRIME - MINPRIME; ++i)
         if (primes[i] == false) /* is prime */
-            printf("%lu\n", i + MINPRIME);
+            printf("%llu\n", i + MINPRIME);
 
     free(primes);
     return 0;
