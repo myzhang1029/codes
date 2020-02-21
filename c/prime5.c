@@ -82,6 +82,7 @@ int main(void)
         if (primes[i] == false) /* is prime */
             printf("%llu\n", i + MINPRIME);
 
+    free(line);
     free(primes);
     return 0;
 }
