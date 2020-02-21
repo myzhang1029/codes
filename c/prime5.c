@@ -27,9 +27,9 @@
 /* Inclusive */
 #define MINPRIME 0ULL
 /* Exclusive */
-#define MAXPRIME 100ULL
+#define MAXPRIME 1000ULL
 /* base-10 length of MAXPRIME */
-#define LENGTH 3
+#define LENGTH 4
 int main(void)
 {
     unsigned long long
@@ -64,8 +64,6 @@ int main(void)
             return 1;
         }
         i = atoll(line);
-        if (i >= sq)
-            break;
         /* Print to stderr */
         fprintf(stderr, "%llu\n", i);
 #pragma omp for
@@ -75,6 +73,9 @@ int main(void)
                 continue;
             primes[j - MINPRIME] = true;
         }
+	/* Put this code here so that no extra line is read */
+        if (i >= sq)
+            break;
     }
 
     for (i = 0; i < MAXPRIME - MINPRIME; ++i)
