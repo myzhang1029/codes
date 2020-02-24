@@ -45,11 +45,11 @@ def loginip():
     cmd = sp.Popen(["/usr/bin/who", "-u", "am", "i"], stdout=sp.PIPE)
     line = cmd.stdout.read().decode("utf-8").strip()
     match = re.search(r"\(.*\)", line)
-    if match:
+    if os.getenv("SSH_CONNECTION"):
+        return os.getenv("SSH_CONNECTION").split()[0]
+    elif match:
         start, end = match.span()
         return line[start+1:end-1]  # Remove brackets
-    elif os.getenv("SSH_CONNECTION"):
-        return os.getenv("SSH_CONNECTION").split()[0]
     else:
         # Reverse shell login
         return ""
