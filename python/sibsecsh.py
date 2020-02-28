@@ -42,8 +42,8 @@ def execv(cmdline):
 
 def loginip():
     """Get the login's remote IP."""
-    cmd = sp.Popen(["/usr/bin/who", "-u", "am", "i"], stdout=sp.PIPE)
-    line = cmd.stdout.read().decode("utf-8").strip()
+    with sp.Popen(["/usr/bin/who", "-u", "am", "i"], stdout=sp.PIPE) as cmd:
+        line = cmd.stdout.read().decode("utf-8").strip()
     match = re.search(r"\(.*\)", line)
     if os.getenv("SSH_CONNECTION"):
         return os.getenv("SSH_CONNECTION").split()[0]
