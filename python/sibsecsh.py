@@ -42,8 +42,8 @@ def execv(cmdline):
 
 def loginip():
     """Get the login's remote IP."""
-    with sp.Popen(["/usr/bin/who", "-u", "am", "i"], stdout=sp.PIPE) as cmd:
-        line = cmd.stdout.read().decode("utf-8").strip()
+    cmd = sp.Popen(["/usr/bin/who", "-u", "am", "i"], stdout=sp.PIPE)
+    line = cmd.communicate()[0].decode().strip()
     match = re.search(r"\(.*\)", line)
     if os.getenv("SSH_CONNECTION"):
         return os.getenv("SSH_CONNECTION").split()[0]
@@ -128,7 +128,7 @@ class ConfigFile(object):
             net, False) for net in self.conf["accepted_ips"]]
         # Extract the password
         cmd = sp.Popen(self.conf["mail_passwdcmd"].split(), stdout=sp.PIPE)
-        self.password = cmd.stdout.read().decode("utf-8").strip()
+        self.password = cmd.communicate()[0].decode().strip()
         # Open the log file
         self.logfile = self.conf["log_file"].open("a")
 
@@ -140,8 +140,14 @@ class ConfigFile(object):
             Args: ip: the ip to check(str)
         """
         for accepted in self.conf["accepted_ips"]:
-            if ia.ip_address(ip) in accepted:
-                return True
+            try:
+                if ia.ip_address(ip) in accepted:
+                    return True
+            except ValueError:
+                # Rare case: invocation inside screen/tmux while the parent isn't sibsecsh
+                # Then the ip here is something like ":pts/0"
+                # Reject this as it could be authored by a reverse shell
+                return False
         return False
 
     def is_accepted(self):
@@ -149,8 +155,8 @@ class ConfigFile(object):
         Only used when it's about to call exec.
         """
         ip = loginip()
-        whoout = sp.Popen(["/usr/bin/who"], stdout=sp.PIPE) \
-            .stdout.read().decode("utf-8")
+        whoout = sp.Popen(["/usr/bin/who"], stdout=sp.PIPE).communicate()[0] \
+            .decode()
         if os.getenv("SIB_FROM_IP"):
             # Second use of the shell e.g. screen
             self.logfile.writelines(
@@ -269,13 +275,19 @@ def main():
 
 
 if __name__ == '__main__':
-    # try:
-    #    main()
-    # except Exception as e:
-    #    print(
-    #        f"Exception {e} occurred, check your configuration.",
-    #        file=sys.stderr
-    #    )
-    #    # Start a restricted environment
-    #    execv(["/bin/bash", "-r"])
+    # These are debug code, used for validating configuration.
+    # Change False to True when you experience problems.
+    # Make sure you run the program with these lines enabled
+    # BEFORE actually chsh-ing to sibsecsh, or you might lose control
+    # to your system.
+    if False:
+        try:
+            main()
+        except Exception as e:
+            print(
+                f"Exception {e} occurred, check your configuration.",
+                file=sys.stderr
+            )
+            # Start a restricted environment
+            execv(["/bin/bash", "-r"])
     main()
