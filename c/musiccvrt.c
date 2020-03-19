@@ -2,7 +2,7 @@
  * to read it(not completed)*/
 /*
  *  musiccvrt.c
- *  Copyright (C) 2017 Zhang Maiyun <myzhang1029@163.com>
+ *  Copyright (C) 2017 Zhang Maiyun <myzhang1029@hotmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

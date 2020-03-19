@@ -1,7 +1,7 @@
 /* Solve a quadratic equation */
 /*
  *  autoip.c
- *  Copyright (C) 2017, 2018 Zhang Maiyun <myzhang1029@163.com>
+ *  Copyright (C) 2017, 2018 Zhang Maiyun <myzhang1029@hotmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
