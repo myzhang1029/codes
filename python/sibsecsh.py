@@ -55,6 +55,10 @@ def loginip():
         return ""
 
 
+def eprint(*args, **kwargs):
+    print(*args, file=stderr, **kwargs)
+
+
 class ConfigFile(object):
     # All of these could be overridden in ~/.secrc
     conf = {
@@ -144,7 +148,8 @@ class ConfigFile(object):
                 if ia.ip_address(ip) in accepted:
                     return True
             except ValueError:
-                # Rare case: invocation inside screen/tmux while the parent isn't sibsecsh
+                # Rare case: invocation inside screen/tmux while the parent
+                # isn't sibsecsh
                 # Then the ip here is something like ":pts/0"
                 # Reject this as it could be authored by a reverse shell
                 return False
@@ -197,6 +202,52 @@ Your code is {code}{moreinfo}.
                             self.conf["email"], content)
 
 
+def authenticate(email, send_email):
+    """Ask for code, giving 3 tries."""
+    # Make a shadowed email
+    namelen = email.rfind('@')
+    shadowed = email[namelen//2:namelen]
+    shadowemail = email[:namelen//2] + '*' * \
+        (namelen-namelen//2) + email[namelen:]
+    tries = 0
+    while tries < 3:
+        tries += 1
+        inp = input(f"Enter your email matching {shadowemail}: ")
+        if inp == shadowed or inp == email:
+            tries = 0
+            break
+        eprint("Not match")
+    if tries != 0:
+        # Maximum number of tries exceeded
+        return False
+    code = str(random.SystemRandom().randint(10000, 100000))  # 5-digit
+    send_email(code, "")
+    while tries < 3:
+        tries += 1
+        inp = input(
+            "Enter the code sent to your email address, 0 to resend: ")
+        if inp == "0":
+            # Not counting this one
+            tries -= 1
+            send_email(code, "")
+        elif code == inp:
+            print("Logged in!")
+            tries = 0
+            return True
+        else:
+            # Not 0 nor matched
+            eprint("Not match")
+
+    # Maximum number of tries exceeded
+    return False
+
+
+def set_env_exec(cmd):
+    """Execute the command after setting controlling environment."""
+    os.environ["SIB_FROM_IP"] = loginip()
+    execv(cmd)
+
+
 def main():
     with ConfigFile() as cf:
         email = cf.conf["email"]
@@ -208,9 +259,9 @@ def main():
                 # and the code should be included in the second connection.
                 try:
                     if cf.is_accepted():
-                        os.environ["SIB_FROM_IP"] = loginip()
                         cf.close()
-                        execv([cf.conf["shell"], "-c"] + [sys.argv[i+1]])
+                        set_env_exec([cf.conf["shell"], "-c"] +
+                                     [sys.argv[i+1]])
                     if sys.argv[i+1] == email:
                         # 5-digit random
                         code = random.SystemRandom().randint(10000, 100000)
@@ -222,56 +273,29 @@ def main():
                                     "sib_code").read().strip()
                         inp = sys.argv[i+1][:len(code)]
                         if code == inp:
-                            os.environ["SIB_FROM_IP"] = loginip()
                             cf.close()
-                            execv([cf.conf["shell"], "-c"] +
-                                  [sys.argv[i+1][len(code):]])
+                            set_env_exec([cf.conf["shell"], "-c"] +
+                                         [sys.argv[i+1][len(code):]])
                         else:
-                            print("ERROR: Wrong or missing code",
-                                  file=sys.stderr)
+                            eprint("ERROR: Wrong or missing code")
+                            (cf.conf["tmpdir"]/"sib_code").unlink()
                     else:
-                        print("ERROR: Request an email code first",
-                              file=sys.stderr)
+                        eprint("ERROR: Request an email code first")
                 except Exception as e:
-                    print(e, file=sys.stderr)
+                    eprint(e)
                     sys.exit(1)
                 sys.exit(0)
         cf.logfile.writelines(
             f"login attempt at {time.asctime()} "
             f"from {loginip()} for {getpass.getuser()}\n"
         )
-        if cf.is_accepted():
-            # Accept directly
-            os.environ["SIB_FROM_IP"] = loginip()
-            cmd = cf.conf["shell"] + " " + cf.conf["shell_args"]
-            cf.close()
-            execv(cmd.split())
-        # The main functions
-        namelen = email.rfind('@')
-        shadowed = email[namelen//2:namelen]
-        shadowemail = email[:namelen//2] + '*' * \
-            (namelen-namelen//2) + email[namelen:]
-        while True:
-            inp = input(f"Enter your email matching {shadowemail}: ")
-            if not inp == shadowed and not inp == email:
-                print("Not match")
-                continue
-            break
-        code = str(random.SystemRandom().randint(10000, 100000))  # 5-digit
-        cf.send_email(code, "")
-        while True:
-            inp = input(
-                "Enter the code sent to your email address, 0 to resend: ")
-            if inp == "0":
-                cf.send_email(code, "")
-                continue
-            if code == inp:
-                print("Logged in!")
-                break
-        os.environ["SIB_FROM_IP"] = loginip()
         cmd = cf.conf["shell"] + " " + cf.conf["shell_args"]
-        cf.close()
-        execv(cmd.split())
+        if cf.is_accepted() or authenticate(email, cf.send_email):
+            cf.close()
+            set_env_exec(cmd.split())
+        else:
+            eprint("Retries exceeded")
+            sys.exit(1)
 
 
 if __name__ == '__main__':
