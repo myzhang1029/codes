@@ -56,7 +56,7 @@ def loginip():
 
 
 def eprint(*args, **kwargs):
-    print(*args, file=stderr, **kwargs)
+    print(*args, file=sys.stderr, **kwargs)
 
 
 class ConfigFile(object):
