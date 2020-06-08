@@ -21,13 +21,13 @@
 """Python NLP segmentation manual corrector."""
 
 import readline
-import sys
 import os
 import argparse
+from pathlib import Path
 import jieba
 
 
-class pyDictionary:
+class PyDictionary:
     """NLP dictionary for use only in this program.
     There are two dictionaries:
     user dictionary: Read only, provided by the user.
@@ -35,19 +35,18 @@ class pyDictionary:
     """
 
     def __init__(self, filename, pyfilename):
-        self.filename = filename
-        self.pyfilename = pyfilename
+        self.filename = Path(filename)
+        self.pyfilename = Path(pyfilename)
+        self.filename.touch()
+        self.pyfilename.touch()
         self.dict = set(
             line.split(' ')[0].strip()
-            for line in open(filename).readlines()
+            for line in self.filename.open().readlines()
         )
-        try:
-            self.dict |= set(
-                line.split(' ')[0].strip()
-                for line in open(pyfilename).readlines()
-            )
-        except FileNotFoundError:
-            pass
+        self.dict |= set(
+            line.split(' ')[0].strip()
+            for line in self.pyfilename.open().readlines()
+        )
 
     def __enter__(self):
         return self
@@ -56,14 +55,20 @@ class pyDictionary:
         self.save()
 
     def save(self):
-        pydict = open(self.pyfilename, "w")
+        """Save the current state of the dictionary.
+
+        Fine to be called multiple times.
+        """
+        pydict = self.pyfilename.open("w")
         pydict.write('\n'.join(self.dict))
         pydict.close()
 
     def add_words(self, to_add):
+        """Add words to the dictionary."""
         self.dict |= set(to_add)
 
     def del_words(self, to_del):
+        """Delete words from the dictionary."""
         self.dict -= set(to_del)
 
 
@@ -79,11 +84,11 @@ class Corrector:
     ):
         self.inpfilename = inpfilename
         self.outfilename = outfilename
-        self.i = open(inpfilename, "r")
-        self.o = open(outfilename, "a")
+        self.input = open(inpfilename, "r")
+        self.output = open(outfilename, "a")
         self.dictfilename = dictfilename
         self.pydictfilename = pydictfilename
-        self.dict = pyDictionary(dictfilename, pydictfilename)
+        self.dict = PyDictionary(dictfilename, pydictfilename)
 
     def __enter__(self):
         return self
@@ -93,8 +98,8 @@ class Corrector:
 
     def close(self):
         """Close all open files and save the dictionary."""
-        self.i.close()
-        self.o.close()
+        self.input.close()
+        self.output.close()
         self.dict.save()
 
     def add_words(self, words):
@@ -111,24 +116,24 @@ class Corrector:
         result = ''
         # character before nmf are skipped
         nextmeaningful = 0
-        # n: current char
-        for n, c in enumerate(line):
+        # count: current char
+        for count, char in enumerate(line):
             word = ''
-            if n < nextmeaningful:
+            if count < nextmeaningful:
                 continue
-            # l: length of current word trying
-            for l in range(1, len(line) - n + 1):
+            # lenght: length of current word trying
+            for length in range(1, len(line) - count + 1):
                 # Current characters
-                maybe_word = line[n:l+n]
+                maybe_word = line[count:length+count]
                 # Test if this combination is a word
                 if maybe_word in self.dict.dict:
                     # Overwrite each time it finds a longer word
                     word = maybe_word
-                    nextmeaningful = n + l
+                    nextmeaningful = count + length
             if word:
                 result += word + ' '
             else:
-                result += c + ' '
+                result += char + ' '
                 nextmeaningful += 1
         return result[:-1]  # remove trailing ws
 
@@ -137,7 +142,7 @@ class Corrector:
         # Using a generator instead of a AIO read
         # to save memory in case the data is huge
         while True:
-            line = self.i.readline()
+            line = self.input.readline()
             if line:
                 yield line.strip()
             else:
@@ -184,9 +189,9 @@ class Corrector:
                 newline = newline.strip()
                 # Replace the line if the user has one
                 if newline:
-                    self.o.write(newline + '\n')
+                    self.output.write(newline + '\n')
                 else:
-                    self.o.write(line + '\n')
+                    self.output.write(line + '\n')
         os.remove(state_name)
 
 
@@ -222,21 +227,22 @@ class JiebaCorrector(Corrector):
 
 
 def main(corr=JiebaCorrector):
-    ap = argparse.ArgumentParser()
-    ap.add_argument("inputfile", type=str)
-    ap.add_argument("outputfile", type=str)
-    ap.add_argument("-d", "--dict", type=str, default="dict.txt")
-    ap.add_argument("-p", "--pydict", type=str, default="pydict.txt")
-    ap.add_argument("-r", "--delete", type=str, nargs='*')
-    ns = ap.parse_args()
+    """Entrypoint."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("inputfile", type=str)
+    parser.add_argument("outputfile", type=str)
+    parser.add_argument("-d", "--dict", type=str, default="dict.txt")
+    parser.add_argument("-p", "--pydict", type=str, default="pydict.txt")
+    parser.add_argument("-r", "--delete", type=str, nargs='*')
+    namespace = parser.parse_args()
     with corr(
-        ns.inputfile,
-        ns.outputfile,
-        ns.dict,
-        ns.pydict
+            namespace.inputfile,
+            namespace.outputfile,
+            namespace.dict,
+            namespace.pydict
     ) as corrector:
-        if ns.delete:
-            corrector.del_words(ns.delete)
+        if namespace.delete:
+            corrector.del_words(namespace.delete)
         corrector.correct()
 
 
