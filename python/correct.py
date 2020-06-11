@@ -20,10 +20,11 @@
 
 """Python NLP segmentation manual corrector."""
 
-import readline
-import os
 import argparse
+import os
+import readline
 from pathlib import Path
+
 import jieba
 
 

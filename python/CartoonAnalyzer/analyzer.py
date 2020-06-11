@@ -19,14 +19,15 @@
 
 """Analyze YUSS 2020 cartoon specs and make instruction tables."""
 
-import pptx
-import docx
-from docx.shared import Cm
-from docx.oxml.ns import nsdecls
-from docx.oxml import parse_xml
-import sys
-import json
 import argparse
+import json
+import sys
+
+import docx
+import pptx
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
+from docx.shared import Cm
 
 
 def rgbFromStr(s):

@@ -21,9 +21,10 @@
 """Format the administrative division code page from website of the Ministry
 of Civil Affairs of the People's Republic of China into CSV files."""
 
-from sys import argv
 from pathlib import Path
+from sys import argv
 from urllib.parse import urlparse
+
 from bs4 import BeautifulSoup as bs
 from requests import get
 
@@ -62,14 +63,16 @@ def readhtml(html):
         out.append(stripped + "\n")
     return out
 
+def start():
+    for i in argv[1:]:
+        o = urlparse(i)
+        if o.scheme:  # a URL entered
+            outname = Path(o.path).stem
+            lines = get(i).content.decode()
+        else:  # a normal path
+            outname = i[:-5]
+            lines = open(i).read()
+        lines = readhtml(lines)
+        gencsv(lines, outname)
 
-for i in argv[1:]:
-    o = urlparse(i)
-    if o.scheme:  # a URL entered
-        outname = Path(o.path).stem
-        lines = get(i).content
-    else:  # a normal path
-        outname = i[:-5]
-        lines = open(i).read()
-    lines = readhtml(lines)
-    gencsv(lines, outname)
+start()

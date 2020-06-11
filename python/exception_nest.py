@@ -18,7 +18,7 @@ depth = 15
 
 # Generate code to demonstrate the issue
 for i in range(depth):
-    print(f"{' '*4*i}try:") # from {'e' if i else 'Exception()'}
+    print(f"{' '*4*i}try:")  # from {'e' if i else 'Exception()'}
     print(f"{' '*4*(i+1)}raise Exception")
     print(f"{' '*4*i}except Exception as e:")
     if i+1 == depth:

@@ -19,18 +19,19 @@
 
 """Python 2FA shell."""
 
-import toml  # Non-stdlib
-import sys
-import ssl
-import smtplib
-import re
-import os
-import time
-import random
 import getpass
-import subprocess as sp
 import ipaddress as ia
+import os
+import random
+import re
+import smtplib
+import ssl
+import subprocess as sp
+import sys
+import time
 from pathlib import Path
+
+import toml  # Non-stdlib
 
 home_addr = Path.home()
 
@@ -47,19 +48,18 @@ def loginip():
     match = re.search(r"\(.*\)", line)
     if os.getenv("SSH_CONNECTION"):
         return os.getenv("SSH_CONNECTION").split()[0]
-    elif match:
+    if match:
         start, end = match.span()
         return line[start+1:end-1]  # Remove brackets
-    else:
-        # Reverse shell login
-        return ""
+    # Reverse shell login
+    return ""
 
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-class ConfigFile(object):
+class ConfigFile:
     # All of these could be overridden in ~/.secrc
     conf = {
         "accepted_ips": [
@@ -78,7 +78,7 @@ class ConfigFile(object):
     def __enter__(self):
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, *args):
         self.close()
 
     def validate(self):
@@ -179,6 +179,7 @@ class ConfigFile(object):
                 "WARNING: local login accepted, who output:\n" + whoout
             )
             return True
+        return False
 
     def send_email(self, code, moreinfo):
         """Use smtplib to send emails.

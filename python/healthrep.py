@@ -20,10 +20,12 @@
 
 """Generate health report based on wjx.com report spreadsheet."""
 
-import xlrd
-import tempfile
-import requests
 import sys
+import tempfile
+
+import requests
+
+import xlrd
 
 
 def geturl(url):
@@ -63,6 +65,7 @@ def kickrep(healthlist):
         rep = healthlist[idx]
         thisnum = rep[0:2]
         thisline = rep
+        oldline = ''
         if thisnum == oldnum:
             # Skip verification for identical lines
             if thisline == oldline:

@@ -18,17 +18,16 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import subprocess as sp
-import random
-import sys
-import time
-
 """Generate junk and send through AppleScript.
 Make sure to select the appropriate persion."""
 
+import random
+import subprocess as sp
+import time
+
 tk = """
 tell application "WeChat"
-	activate
+\tactivate
 end tell
 set the clipboard to "{}"
 tell application "System Events" to keystroke "v" using command down
@@ -111,7 +110,7 @@ def small2words(num: int) -> str:
     if num > 0:
         if addand:
             string += " and"
-        if num > 0 and num <= 20:
+        if 0 < num <= 20:
             string += " " + mp[num]
         else:
             tens = num//10
@@ -127,5 +126,5 @@ if __name__ == "__main__":
         s = number2words(random.randint(0, 1000000000000000))
         print(s)
         cmd = tk.format(s)
-        #sp.Popen(["osascript"], stdin=sp.PIPE).communicate(cmd.encode())
+        sp.Popen(["osascript"], stdin=sp.PIPE).communicate(cmd.encode())
         time.sleep(5)

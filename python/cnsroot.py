@@ -22,7 +22,7 @@
 like 4096, 262144, 729 for 2 and 3."""
 
 import argparse
-from sys import exit
+
 from sbl import lcm
 
 

@@ -22,8 +22,10 @@
 
 from math import ceil, log
 
+
 def key2num(key):
     return int.from_bytes(key.encode(), "big")
+
 
 def encode1(s, key):
     p = key2num(key)
