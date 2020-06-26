@@ -21,9 +21,11 @@ tf=$(mktemp tmp-mkf.XXXX)
 
 while read -r line
 do
+    echo "$line"
     echo "$line" >> "$tf"
 done
 
+echo read done
 if [ "$*" = "" ]; then
     cat "$tf"
     rm "$tf"
