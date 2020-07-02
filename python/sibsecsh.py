@@ -33,7 +33,7 @@ from pathlib import Path
 
 import toml  # Non-stdlib
 
-home_addr = Path.home()
+HOME_ADDR = Path.home()
 
 
 def execv(cmdline):
@@ -56,11 +56,15 @@ def loginip():
 
 
 def eprint(*args, **kwargs):
+    """Print to stderr."""
     print(*args, file=sys.stderr, **kwargs)
 
 
 class ConfigFile:
-    # All of these could be overridden in ~/.secrc
+    """Configuration for sibsecsh.
+
+    Config file location: See pydoc ConfigFile.__init__
+    """
     conf = {
         "accepted_ips": [
             "192.168.1.0/24",
@@ -69,7 +73,7 @@ class ConfigFile:
         "shell": "/bin/zsh",
         "shell_args": "--login",
         "log_file": Path("/var/log/sibsecsh.log"),
-        "tmpdir": home_addr / ".cache/sibsecsh",
+        "tmpdir": HOME_ADDR / ".cache/sibsecsh",
         "mail_host": "smtp.example.com",
         "mail_port": 587,
         "mail_from": "from@example.com",
@@ -81,25 +85,6 @@ class ConfigFile:
 
     def __exit__(self, *args):
         self.close()
-
-    def validate(self):
-        """Validate config."""
-        # see if this shell is accepted system shell
-        shellfile = Path("/etc/shells")
-        if shellfile.exists():
-            shells = shellfile.open().readlines()
-            commentphr = re.compile(r"#")
-            # remove comments and search for conf["shell"]
-            for sh in shells:
-                match = commentphr.search(sh)
-                if match:
-                    sh = sh[0:match.pos]
-                if self.conf["shell"] == sh.strip():
-                    break
-            else:  # No shell matches
-                raise ValueError("non-standard shell")
-        if not re.fullmatch(r"[^@]+@[^@]+\.[^@]+", self.conf["email"]):
-            raise ValueError(f"malformed email: {self.conf['email']}")
 
     def __init__(self):
         """Load system and user configuration file.
@@ -113,8 +98,8 @@ class ConfigFile:
         """
         for configfile in ["/etc/secrc",
                            "/etc/secrc.toml",
-                           home_addr/".secrc",
-                           home_addr/".secrc.toml"
+                           HOME_ADDR/".secrc",
+                           HOME_ADDR/".secrc.toml"
                            ]:
             try:
                 config = toml.load(configfile)
@@ -138,7 +123,38 @@ class ConfigFile:
         self.logfile = self.conf["log_file"].open("a")
 
     def close(self):
+        """Close log file."""
         self.logfile.close()
+
+    @staticmethod
+    def search_shells(shell_name):
+        """Tell whether SHELL_NAME is in /etc/shells."""
+        shellfile = Path("/etc/shells")
+        if shellfile.exists():
+            # remove comments and search for shell_name
+            shells = shellfile.open().readlines()
+            commentphr = re.compile(r"#")
+            # Go over all lines in /etc/shells
+            for shell in shells:
+                # Get the string index of '#'
+                match = commentphr.search(shell)
+                if match:
+                    # Strip the comment part from the line
+                    shell = shell[0:match.pos]
+                # This line matches
+                if shell_name == shell.strip():
+                    return True
+            return False
+        # Skip the check now
+        return True
+
+    def validate(self):
+        """Validate config."""
+        # see if this shell is accepted system shell
+        if not self.search_shells(self.conf["shell"]):
+            raise ValueError("non-standard shell")
+        if not re.fullmatch(r"[^@]+@[^@]+\.[^@]+", self.conf["email"]):
+            raise ValueError(f"malformed email: {self.conf['email']}")
 
     def check_ip(self, ip):
         """Check ip to see if it is accepted.
@@ -169,7 +185,7 @@ class ConfigFile:
                 "WARNING: second login accepted, who output:\n" + whoout
             )
             return True
-        if (home_addr / "NoSec").exists():
+        if (HOME_ADDR / "NoSec").exists():
             # Temporary disable sibsecsh
             return True
         if not ip:
@@ -215,7 +231,7 @@ def authenticate(email, send_email):
     while tries < 3:
         tries += 1
         inp = input(f"Enter your email matching {shadowemail}: ")
-        if inp == shadowed or inp == email:
+        if inp in (shadowed, email):
             tries = 0
             break
         eprint("Not match")
@@ -251,6 +267,7 @@ def set_env_exec(cmd):
 
 
 def main():
+    """Entrypoint."""
     with ConfigFile() as cf:
         email = cf.conf["email"]
         cf.conf["tmpdir"].mkdir(parents=True, exist_ok=True)
