@@ -71,6 +71,7 @@ class ConfigFile:
         "log_file": Path("/var/log/sibsecsh.log"),
         "tmpdir": home_addr / ".cache/sibsecsh",
         "mail_host": "smtp.example.com",
+        "mail_port": 587,
         "mail_from": "from@example.com",
         "mail_passwdcmd": "echo 123456"
     }
@@ -195,7 +196,7 @@ Your code is {code}{moreinfo}.
         ctx = ssl.create_default_context()
         with smtplib.SMTP_SSL(
                 self.conf["mail_host"],
-                465,
+                self.conf["mail_port"],
                 context=ctx
         ) as server:
             server.login(self.conf["mail_from"], self.password)
