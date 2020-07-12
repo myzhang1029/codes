@@ -130,9 +130,11 @@ class SibSecureShell:
         self.password = cmd.communicate()[0].decode().strip()
         # Get a logger
         self.logger = logging.getLogger('sibsecsh.py')
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.INFO)
         handler = logging.FileHandler(self.conf["log_file"])
-        handler.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            "[%(asctime)s] %(name)s %(levelname)s: %(message)s")
+        handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
     @staticmethod
@@ -225,7 +227,7 @@ Subject: Login Code
 
 Your code is {code}{moreinfo}.
 """
-        self.logger.info("Sending email to %r.", self.conf['email'])
+        self.logger.info("Sending email to %r", self.conf['email'])
         ctx = ssl.create_default_context()
         with smtplib.SMTP(
                 self.conf["mail_host"],
@@ -328,7 +330,7 @@ def main():
     email = app.conf["email"]
     app.conf["tmpdir"].mkdir(parents=True, exist_ok=True)
     app.parse_args()
-    app.logger.info("Login attempt from %r for %r.", loginip(), getuser())
+    app.logger.info("Login attempt from %r for %r", loginip(), getuser())
     cmd = app.conf["shell"] + " " + app.conf["shell_args"]
     if app.is_accepted() or app.authenticate(email):
         set_env_exec(cmd.split())
