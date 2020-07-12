@@ -19,8 +19,8 @@
 
 """Python 2FA shell."""
 
-import getpass
 import ipaddress as ia
+import logging
 import os
 import random
 import re
@@ -28,26 +28,34 @@ import smtplib
 import ssl
 import subprocess as sp
 import sys
-import time
+from getpass import getuser
 from pathlib import Path
+from typing import Any, Dict, List, NoReturn
 
 import toml  # Non-stdlib
 
 HOME_ADDR = Path.home()
 
 
-def execv(cmdline):
+def execv(cmdline: List[str]) -> NoReturn:
     """Execute and replace process."""
     os.execv(cmdline[0], cmdline)
 
 
-def loginip():
+def set_env_exec(cmd: List[str]) -> NoReturn:
+    """Execute the command after setting controlling environment."""
+    os.environ["SIB_FROM_IP"] = loginip()
+    execv(cmd)
+
+
+def loginip() -> str:
     """Get the login's remote IP."""
     cmd = sp.Popen(["/usr/bin/who", "-u", "am", "i"], stdout=sp.PIPE)
     line = cmd.communicate()[0].decode().strip()
     match = re.search(r"\(.*\)", line)
-    if os.getenv("SSH_CONNECTION"):
-        return os.getenv("SSH_CONNECTION").split()[0]
+    ssh_connection = os.getenv("SSH_CONNECTION")
+    if ssh_connection:
+        return ssh_connection.split()[0]
     if match:
         start, end = match.span()
         return line[start+1:end-1]  # Remove brackets
@@ -60,12 +68,18 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-class ConfigFile:
-    """Configuration for sibsecsh.
+class SibSecureShell:
+    """sibsecsh App class.
 
-    Config file location: See pydoc ConfigFile.__init__
+    Includes:
+    - configuration:
+        Config file location: See pydoc ConfigFile.__init__
+    - application:
+        - Logging
+        - Things about authorization
+        - Things about behaving like a shell
     """
-    conf = {
+    conf: Dict[str, Any] = {
         "accepted_ips": [
             "192.168.1.0/24",
         ],
@@ -80,12 +94,9 @@ class ConfigFile:
         "mail_passwdcmd": "echo 123456"
     }
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        self.close()
-
+    ###
+    # Config only methods:
+    ###
     def __init__(self):
         """Load system and user configuration file.
             TOML File /etc/secrc, /etc/secrc.toml, ~/.secrc, ~/.secrc.toml
@@ -96,17 +107,15 @@ class ConfigFile:
                 mail_from(str, required), mail_username(str, required),
                 mail_passwdcmd(str, required)
         """
-        for configfile in ["/etc/secrc",
-                           "/etc/secrc.toml",
-                           HOME_ADDR/".secrc",
-                           HOME_ADDR/".secrc.toml"
-                           ]:
-            try:
+        possible_locations = [Path("/etc/secrc"),
+                              Path("/etc/secrc.toml"),
+                              HOME_ADDR/".secrc",
+                              HOME_ADDR/".secrc.toml"
+                              ]
+        for configfile in possible_locations:
+            if configfile.exists():
                 config = toml.load(configfile)
-            except FileNotFoundError:
-                continue
-            for key, val in config.items():
-                self.conf[key] = val
+                self.conf.update(config)
         self.validate()
         # Post-read modifications
         # Path objects are easier to operate
@@ -119,15 +128,15 @@ class ConfigFile:
         # Extract the password
         cmd = sp.Popen(self.conf["mail_passwdcmd"].split(), stdout=sp.PIPE)
         self.password = cmd.communicate()[0].decode().strip()
-        # Open the log file
-        self.logfile = self.conf["log_file"].open("a")
-
-    def close(self):
-        """Close log file."""
-        self.logfile.close()
+        # Get a logger
+        self.logger = logging.getLogger('sibsecsh.py')
+        self.logger.setLevel(logging.DEBUG)
+        handler = logging.FileHandler(self.conf["log_file"])
+        handler.setLevel(logging.INFO)
+        self.logger.addHandler(handler)
 
     @staticmethod
-    def search_shells(shell_name):
+    def search_shells(shell_name: str) -> bool:
         """Tell whether SHELL_NAME is in /etc/shells."""
         shellfile = Path("/etc/shells")
         if shellfile.exists():
@@ -156,9 +165,18 @@ class ConfigFile:
         if not re.fullmatch(r"[^@]+@[^@]+\.[^@]+", self.conf["email"]):
             raise ValueError(f"malformed email: {self.conf['email']}")
 
-    def check_ip(self, ip):
+    ###
+    # App related methods:
+    ###
+
+    @staticmethod
+    def gen_code() -> str:
+        """Wrapper for generating login code."""
+        return str(random.SystemRandom().randint(10000, 100000))
+
+    def check_ip(self, ip: str) -> bool:
         """Check ip to see if it is accepted.
-            Args: ip: the ip to check(str)
+            Args: ip: the ip to check
         """
         for accepted in self.conf["accepted_ips"]:
             try:
@@ -172,33 +190,31 @@ class ConfigFile:
                 return False
         return False
 
-    def is_accepted(self):
+    def is_accepted(self) -> bool:
         """Check if this login should be accepted without authentication.
-        Only used when it's about to call exec.
+
+        Only used when it's about to call exec
         """
         ip = loginip()
         whoout = sp.Popen(["/usr/bin/who"], stdout=sp.PIPE).communicate()[0] \
             .decode()
         if os.getenv("SIB_FROM_IP"):
-            # Second use of the shell e.g. screen
-            self.logfile.writelines(
-                "WARNING: second login accepted, who output:\n" + whoout
-            )
+            # Non-first use of the shell e.g. screen
+            self.logger.warning("Nested login accepted\n%r", whoout)
             return True
         if (HOME_ADDR / "NoSec").exists():
-            # Temporary disable sibsecsh
+            # sibsecsh temporary disabled
+            self.logger.warning("Sibsecsh.py diabled\n%r", whoout)
             return True
         if not ip:
             # Empty IP
             return False
         if self.check_ip(ip):
-            self.logfile.writelines(
-                "WARNING: local login accepted, who output:\n" + whoout
-            )
+            self.logger.warning("Local login accepted\n%r", whoout)
             return True
         return False
 
-    def send_email(self, code, moreinfo):
+    def send_email(self, code: str, moreinfo: str):
         """Use smtplib to send emails.
             Args: code: the email code(any)
                   moreinfo: more info to add(str)
@@ -209,128 +225,124 @@ Subject: Login Code
 
 Your code is {code}{moreinfo}.
 """
+        self.logger.info("Sending email to %r.", self.conf['email'])
         ctx = ssl.create_default_context()
-        with smtplib.SMTP_SSL(
+        with smtplib.SMTP(
                 self.conf["mail_host"],
-                self.conf["mail_port"],
-                context=ctx
+                self.conf["mail_port"]
         ) as server:
+            server.starttls(context=ctx)
             server.login(self.conf["mail_from"], self.password)
             server.sendmail(self.conf["mail_from"],
                             self.conf["email"], content)
 
-
-def authenticate(email, send_email):
-    """Ask for code, giving 3 tries."""
-    # Make a shadowed email
-    namelen = email.rfind('@')
-    shadowed = email[namelen//2:namelen]
-    shadowemail = email[:namelen//2] + '*' * \
-        (namelen-namelen//2) + email[namelen:]
-    tries = 0
-    while tries < 3:
-        tries += 1
-        inp = input(f"Enter your email matching {shadowemail}: ")
-        if inp in (shadowed, email):
-            tries = 0
-            break
-        eprint("Not match")
-    if tries != 0:
-        # Maximum number of tries exceeded
-        return False
-    code = str(random.SystemRandom().randint(10000, 100000))  # 5-digit
-    send_email(code, "")
-    while tries < 3:
-        tries += 1
-        inp = input(
-            "Enter the code sent to your email address, 0 to resend: ")
-        if inp == "0":
-            # Not counting this one
-            tries -= 1
-            send_email(code, "")
-        elif code == inp:
-            print("Logged in!")
-            tries = 0
-            return True
-        else:
-            # Not 0 nor matched
+    def authenticate(self, email: str) -> bool:
+        """Ask for code, giving 3 tries."""
+        # Make a shadowed email
+        namelen = email.rfind('@')
+        shadowed = email[namelen//2:namelen]
+        shadowemail = email[:namelen//2] + '*' * \
+            (namelen-namelen//2) + email[namelen:]
+        tries = 0
+        # First ask the user for email
+        while tries < 3:
+            tries += 1
+            inp = input(f"Enter your email matching {shadowemail}: ")
+            if inp in (shadowed, email):
+                tries = 0
+                break
+            self.logger.info("Got wrong email %r", inp)
             eprint("Not match")
+        else:
+            # Maximum number of tries exceeded
+            self.logger.warning("Maximum number of retries exceeded")
+            eprint("Maximum number of retries exceeded")
+            return False
+        code = self.gen_code()
+        self.send_email(code, "")
+        while tries < 3:
+            tries += 1
+            inp = input(
+                "Enter the code sent to your email address, 0 to resend: ")
+            if inp == "0":
+                # Not counting this one
+                tries -= 1
+                self.send_email(code, "")
+            elif code == inp:
+                print("Logged in!")
+                tries = 0
+                return True
+            else:
+                # Not 0 nor matched
+                self.logger.info("Got wrong login code %r", inp)
+                eprint("Not match")
 
-    # Maximum number of tries exceeded
-    return False
+        # Maximum number of tries exceeded
+        self.logger.warning("Maximum number of retries exceeded")
+        eprint("Maximum number of retries exceeded")
+        return False
 
+    def parse_args(self):
+        """Parse shell args.
 
-def set_env_exec(cmd):
-    """Execute the command after setting controlling environment."""
-    os.environ["SIB_FROM_IP"] = loginip()
-    execv(cmd)
-
-
-def main():
-    """Entrypoint."""
-    with ConfigFile() as cf:
-        email = cf.conf["email"]
-        cf.conf["tmpdir"].mkdir(parents=True, exist_ok=True)
+        Currently supported: -c
+        """
         for i, arg in enumerate(sys.argv):
             if arg == "-c":
                 # For security, instead of executing directly,
                 # the email code is requested with the first connection,
                 # and the code should be included in the second connection.
-                try:
-                    if cf.is_accepted():
-                        cf.close()
-                        set_env_exec([cf.conf["shell"], "-c"] +
-                                     [sys.argv[i+1]])
-                    if sys.argv[i+1] == email:
-                        # 5-digit random
-                        code = random.SystemRandom().randint(10000, 100000)
-                        cf.send_email(code, ", prepend it to cmdline")
-                        open(cf.conf["tmpdir"]/"sib_code",
-                             "w").write(str(code))
-                    elif (cf.conf["tmpdir"]/"sib_code").exists():
-                        code = open(cf.conf["tmpdir"] /
-                                    "sib_code").read().strip()
-                        inp = sys.argv[i+1][:len(code)]
-                        if code == inp:
-                            cf.close()
-                            set_env_exec([cf.conf["shell"], "-c"] +
-                                         [sys.argv[i+1][len(code):]])
-                        else:
-                            eprint("ERROR: Wrong or missing code")
-                            (cf.conf["tmpdir"]/"sib_code").unlink()
+                if self.is_accepted():
+                    set_env_exec([self.conf["shell"], "-c"] +
+                                 [sys.argv[i+1]])
+                    # Ending: This process is replaced
+                if sys.argv[i+1] == self.conf["email"]:
+                    code = self.gen_code()
+                    self.send_email(code, ", prepend it to cmdline")
+                    open(self.conf["tmpdir"]/"sib_code",
+                         "w").write(str(code))
+                    # Ending: Function ends, status = 0
+                elif (self.conf["tmpdir"]/"sib_code").exists():
+                    code = open(self.conf["tmpdir"] /
+                                "sib_code").read().strip()
+                    inp = sys.argv[i+1][:len(code)]
+                    if code == inp:
+                        set_env_exec([self.conf["shell"], "-c"] +
+                                     [sys.argv[i+1][len(code):]])
+                        # Ending: This process is replaced
                     else:
-                        eprint("ERROR: Request an email code first")
-                except Exception as e:
-                    eprint(e)
+                        self.logger.info("Got wrong execution code %r", inp)
+                        eprint("ERROR: Wrong or missing code")
+                        (self.conf["tmpdir"]/"sib_code").unlink()
+                        sys.exit(1)
+                else:
+                    self.logger.info(
+                        "Unauthorized execution access from %r", loginip())
+                    eprint("ERROR: Request an email code first")
                     sys.exit(1)
-                sys.exit(0)
-        cf.logfile.writelines(
-            f"login attempt at {time.asctime()} "
-            f"from {loginip()} for {getpass.getuser()}\n"
-        )
-        cmd = cf.conf["shell"] + " " + cf.conf["shell_args"]
-        if cf.is_accepted() or authenticate(email, cf.send_email):
-            cf.close()
-            set_env_exec(cmd.split())
-        else:
-            eprint("Retries exceeded")
-            sys.exit(1)
+
+
+def main():
+    """Entrypoint."""
+    app = SibSecureShell()
+    email = app.conf["email"]
+    app.conf["tmpdir"].mkdir(parents=True, exist_ok=True)
+    app.parse_args()
+    app.logger.info("Login attempt from %r for %r.", loginip(), getuser())
+    cmd = app.conf["shell"] + " " + app.conf["shell_args"]
+    if app.is_accepted() or app.authenticate(email):
+        set_env_exec(cmd.split())
+    else:
+        sys.exit(1)
 
 
 if __name__ == '__main__':
-    # These are debug code, used for validating configuration.
-    # Change False to True when you experience problems.
-    # Make sure you run the program with these lines enabled
-    # BEFORE actually chsh-ing to sibsecsh, or you might lose control
-    # to your system.
-    if False:
-        try:
-            main()
-        except Exception as e:
-            print(
-                f"Exception {e} occurred, check your configuration.",
-                file=sys.stderr
-            )
-            # Start a restricted environment
-            execv(["/bin/bash", "-r"])
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(
+            f"Exception {e} occurred, check your configuration.",
+            file=sys.stderr
+        )
+        input()
+        sys.exit(1)
