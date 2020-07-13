@@ -50,12 +50,12 @@ def set_env_exec(cmd: List[str]) -> NoReturn:
 
 def loginip() -> str:
     """Get the login's remote IP."""
-    cmd = sp.Popen(["/usr/bin/who", "-u", "am", "i"], stdout=sp.PIPE)
-    line = cmd.communicate()[0].decode().strip()
-    match = re.search(r"\(.*\)", line)
     ssh_connection = os.getenv("SSH_CONNECTION")
     if ssh_connection:
         return ssh_connection.split()[0]
+    cmd = sp.Popen(["/usr/bin/who", "-u", "am", "i"], stdout=sp.PIPE)
+    line = cmd.communicate()[0].decode().strip()
+    match = re.search(r"\(.*\)", line)
     if match:
         start, end = match.span()
         return line[start+1:end-1]  # Remove brackets
@@ -198,21 +198,19 @@ class SibSecureShell:
         Only used when it's about to call exec
         """
         ip = loginip()
-        whoout = sp.Popen(["/usr/bin/who"], stdout=sp.PIPE).communicate()[0] \
-            .decode()
         if os.getenv("SIB_FROM_IP"):
             # Non-first use of the shell e.g. screen
-            self.logger.warning("Nested login accepted\n%r", whoout)
+            self.logger.warning("Nested login accepted")
             return True
         if (HOME_ADDR / "NoSec").exists():
             # sibsecsh temporary disabled
-            self.logger.warning("Sibsecsh.py diabled\n%r", whoout)
+            self.logger.warning("Sibsecsh.py diabled")
             return True
         if not ip:
             # Empty IP
             return False
         if self.check_ip(ip):
-            self.logger.warning("Local login accepted\n%r", whoout)
+            self.logger.warning("Local login accepted")
             return True
         return False
 
@@ -290,7 +288,9 @@ Your code is {code}{moreinfo}.
         Currently supported: -c
         """
         for i, arg in enumerate(sys.argv):
+            self.logger.debug("Arg [%d]: %r", i, arg)
             if arg == "-c":
+                self.logger.debug("Got -c")
                 # For security, instead of executing directly,
                 # the email code is requested with the first connection,
                 # and the code should be included in the second connection.
@@ -327,10 +327,14 @@ Your code is {code}{moreinfo}.
 def main():
     """Entrypoint."""
     app = SibSecureShell()
+    app.logger.debug("%r", sys.argv)
     email = app.conf["email"]
+    whoout = sp.Popen(["/usr/bin/who"],
+                      stdout=sp.PIPE).communicate()[0].decode().strip()
     app.conf["tmpdir"].mkdir(parents=True, exist_ok=True)
     app.parse_args()
     app.logger.info("Login attempt from %r for %r", loginip(), getuser())
+    app.logger.info("Who output:\n%s", whoout)
     cmd = app.conf["shell"] + " " + app.conf["shell_args"]
     if app.is_accepted() or app.authenticate(email):
         set_env_exec(cmd.split())
