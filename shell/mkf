@@ -17,15 +17,12 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-tf=$(mktemp tmp-mkf.XXXX)
+tf="$(mktemp tmp-mkf.XXXX)"
 
-while read -r line
-do
-    echo "$line"
-    echo "$line" >> "$tf"
-done
+cat > "$tf"
 
 echo read done
+
 if [ "$*" = "" ]; then
     cat "$tf"
     rm "$tf"
@@ -35,5 +32,7 @@ fi
 # Whitespace for $* is intended
 # shellcheck disable=SC2048
 $* "$tf"
-rm "$tf"
+ret="$?"
 
+rm "$tf"
+exit ret
