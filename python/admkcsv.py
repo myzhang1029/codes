@@ -63,6 +63,7 @@ def readhtml(html):
         out.append(stripped + "\n")
     return out
 
+
 def start():
     for i in argv[1:]:
         o = urlparse(i)
@@ -74,5 +75,6 @@ def start():
             lines = open(i).read()
         lines = readhtml(lines)
         gencsv(lines, outname)
+
 
 start()
