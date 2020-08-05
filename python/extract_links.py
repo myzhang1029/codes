@@ -38,7 +38,7 @@ def get_play_links(detail_page: str) -> List[str]:
     # Get the last button
     expand_button = elem.find_elements_by_tag_name("a")[-1]
     target_div = "/html/body/div[2]/div[2]/div[1]/div/div[1]/div[1]/span/div/div/div"
-    if expand_button.get_property("data_range"):
+    if expand_button.get_property("href") == "javascript:;":
         # The last button is an expand button
         expand_button.click()
         target_div = "/html/body/div[2]/div[2]/div[1]/div/div[1]/div[1]/span/div/div/div[2]"
