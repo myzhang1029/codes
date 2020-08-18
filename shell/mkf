@@ -35,4 +35,4 @@ $* "$tf"
 ret="$?"
 
 rm "$tf"
-exit ret
+exit "$ret"
