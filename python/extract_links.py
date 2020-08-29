@@ -22,12 +22,28 @@
 
 import sys
 from typing import List
-from selenium.webdriver import Edge
+import selenium.webdriver as wds
+from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+
+def get_webdriver() -> wds.remote.webdriver.WebDriver:
+    """Get a working webdriver."""
+    possible = (wds.Edge, wds.Firefox, wds.Chrome, wds.Safari, wds.Opera)
+    for driver in possible:
+        try:
+            driver()
+            return driver
+        except WebDriverException:
+            continue
+    raise WebDriverException("No available webdriver.")
 
 
 def get_play_links(detail_page: str) -> List[str]:
     """Get play links on a detail page."""
-    drv = Edge()
+    driver = get_webdriver()
+    drv = driver()
     # drv.get("https://v.qq.com/detail/d/dxd1v76tmu0wjuj.html")
     # drv.get("https://v.qq.com/detail/s/sx5xljydk45g1pp.html")
     drv.get(detail_page)
