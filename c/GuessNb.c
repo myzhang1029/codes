@@ -7,7 +7,7 @@ int main(void)
         rnds = 0;
     while (++rnds)
     {
-        printf("Input your guess between 1 and 100: ");
+        printf("Input your guess between 0 and 100: ");
         fflush(stdin);
         scanf("%d", &gs);
         if (gs == rd)
