@@ -1,17 +1,19 @@
 /* Corvid code written for THINKERS Zhixing of UWC CSC.
- * Toggle a list of text.
+ * 1. Toggle a list of text.
+ * 2. Mimic three count ups.
  *
  * Copyright (C) 2020 Zhang Maiyun <myzhang1029@hotmail.com>, <myzhang20@uwcchina.org>.
  * All rights reserved.
  */
-// The code in this file will load on every page of your site
+// API Reference: https://www.wix.com/corvid/reference
+// “Hello, World!” Example: https://www.wix.com/corvid/hello-world
 
 // The mapping between the id of the "add" button and the ids of the "add" button,
 // the multiply button, the text area, the corresponding image, and the visibility of the respective tabs.
 let numberMappingTable = {
-    21: [21, 20, 66, 22, true],
-    15: [15, 18, 59, 23, false],
-    16: [16, 19, 63, 24, false]
+    21: [21, 20, 66, 28, true],
+    15: [15, 18, 59, 29, false],
+    16: [16, 19, 63, 30, false]
 };
 
 // Change the visibility of the buttons, textareas, and the images
@@ -39,7 +41,7 @@ function toggleTab(addNumber) {
         // Collapsing others and opening this one
         for (const id in numberMappingTable) {
             if (id - addNumber !== 0) {
-                console.log(id, addNumber);
+   console.log(id,addNumber);
                 numberMappingTable[id][4] = false;
             }
         }
@@ -48,8 +50,22 @@ function toggleTab(addNumber) {
 }
 
 $w.onReady(function () {
-    // Write your code here
-    changeVisibilityAccordingToMap();
+
+    // Write your JavaScript here
+
+    // To select an element by ID use: $w("#elementID")
+
+    // Click "Preview" to run your code
+
+    var influenced = 0;
+    setInterval(function () {
+        if (influenced < 400) {
+            $w('#text10').text = (++influenced) + "+";
+            $w('#text9').text = (~~(influenced/80)) + "+";
+            $w('#text8').text = (~~(influenced/40)) + "+";
+        }
+    }, 2);
+ changeVisibilityAccordingToMap();
     $w("#image21").onClick(function () {
         toggleTab(21);
     });
