@@ -1,7 +1,7 @@
 /* Solve a quadratic equation */
 /*
- *  autoip.c
- *  Copyright (C) 2017, 2018 Zhang Maiyun <myzhang1029@hotmail.com>
+ *  qm.c
+ *  Copyright (C) 2017-2020 Zhang Maiyun <myzhang1029@hotmail.com>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,8 @@ int main()
 {
     double a, b, c, delta, x1, x2, real, imag;
 
-    printf("输入三个系数 a, b, c: ");
+    printf("Input three coefficients a, b, c: ");
+    fflush(stdout);
     scanf("%lf %lf %lf", &a, &b, &c);
 
     delta = b * b - 4 * a * c;
@@ -50,5 +51,6 @@ int main()
         printf("x1 = %.10lf+%.10lfi, x2 = %.10f-%.10fi\n", real, imag, real,
                imag);
     }
+    getchar();
     return 0;
 }
