@@ -3,8 +3,8 @@
 #include <time.h>
 int main(void)
 {
-    int rd = (srand(time(NULL)), rand() % 101), gs = 0, nt = time(NULL),
-        rnds = 0;
+    int rd = (srand(time(NULL)), rand() % 101), gs = 0, rnds = 0;
+    time_t nt = time(NULL);
     char input[10];
 
     while (++rnds)
