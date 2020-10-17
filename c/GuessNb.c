@@ -5,14 +5,17 @@ int main(void)
 {
     int rd = (srand(time(NULL)), rand() % 101), gs = 0, nt = time(NULL),
         rnds = 0;
+    char input[10];
+
     while (++rnds)
     {
         printf("Input your guess between 0 and 100: ");
-        fflush(stdin);
-        scanf("%d", &gs);
+        fflush(stdout);
+        fgets(input, 10, stdin);
+        gs = atoi(input);
         if (gs == rd)
         {
-            printf("\nYou won the game in %d seconds or %d rounds\n",
+            printf("\nYou won the game in %ld seconds or %d rounds\n",
                    time(NULL) - nt, rnds);
             break;
         }
