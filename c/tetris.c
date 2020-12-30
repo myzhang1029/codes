@@ -21,11 +21,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <slib.h>
+#include <slib/fileopt.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <slib.h>
-#if PLAT
+#ifdef _WIN32
 #include <conio.h>
 #include <windows.h>
 #else
@@ -39,7 +41,7 @@
 #define COL 10
 
 /* Screen roller */
-#if PLAT
+#ifdef _WIN32
 #define clscr() system("cls")
 #else
 #define clscr() system("clear")
@@ -107,13 +109,12 @@ int scrbuf[ROW][COL] = {{0}};
 
 int main()
 {
-    int n = 0, type = (int)randomnum(time(NULL), 1, 7), pos, stage, pnt, next,
-        score = 0, level = LVL;
+    int n = 0, type, pos, stage, pnt, next, score = 0, level = LVL;
 #if PLAT
     COORD sz = GetLargestConsoleWindowSize(GetStdHandle(STD_OUTPUT_HANDLE));
     if (sz.X < 15 || sz.Y < 27)
     {
-        fprintf(stderr, "Window needs at least 27 rows and 15 columns");
+        fprintf(stderr, "Window needs at least 27 rows and 15 columns\n");
         exit(1);
     }
 #else
@@ -121,15 +122,14 @@ int main()
     ioctl(STDIN_FILENO, TIOCGWINSZ, &sz);
     if (sz.ws_col < 15 || sz.ws_row < 27)
     {
-        goto debug_test_pass;
-        fprintf(stderr, "Window needs at least 27 rows and 15 columns");
+        fprintf(stderr, "Window needs at least 27 rows and 15 columns\n");
         exit(1);
     }
 #endif
-debug_test_pass:
+    srand(time(NULL));
+    type = 1 + rand() % 7;
     while (1)
     {
-        srand(time(NULL));
         next = 1 + rand() % 7;
         pos = COL / 2;
         stage = 1;
