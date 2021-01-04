@@ -1,5 +1,5 @@
-# Public domain
 #!/usr/bin/env python3
+# Public domain
 
 """Automated download of edX course videos."""
 
