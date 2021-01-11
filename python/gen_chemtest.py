@@ -3,6 +3,7 @@
 
 """Generate Examcoo chemistry elements paper."""
 import argparse
+from typing import List
 
 DATA = [['H', 'hydrogen', '氢'],
         ['He', 'helium', '氦'],
@@ -126,7 +127,7 @@ DATA = [['H', 'hydrogen', '氢'],
 
 def number2chinese(number: int):
     """Naive approach to convert number to chinese. Incorrect for numbers with zeroes in between."""
-    res = []
+    res: List[str] = []
     tbln = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"]
     tble = ["", "十", "百", "千", "万"]
     count = 0
