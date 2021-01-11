@@ -24,10 +24,10 @@ Dataset:
     ftp://ftp.cuhk.hk/pub/chinese/ifcss/software/data/Uni2Pinyin.gz
 """
 
-import os
+import os.path as op
 import sys
 
-dbfile = os.path.abspath(__file__) + "/Uni2Pinyin"
+dbfile = op.dirname(op.abspath(__file__)) + "/Uni2Pinyin"
 db = open(dbfile)
 entries = {}
 for line in db.readlines():
