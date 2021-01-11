@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 #  mkf - make a file from the pipe and execute command
 #  Copyright (C) 2019 Zhang Maiyun <myzhang1029@hotmail.com>
@@ -20,8 +20,6 @@
 tf="$(mktemp tmp-mkf.XXXX)"
 
 cat > "$tf"
-
-echo read done
 
 if [ "$*" = "" ]; then
     cat "$tf"
