@@ -175,13 +175,13 @@ ENDMAIL
     fi
 done
 
-# Resend code or accept login 
+# Resend code or accept login
 while true
 do
     echo -n 'Enter the code sent to your email address, 0 to resend:'
     read -r SIB_INPUT
     if [ "$SIB_INPUT" = "0" ]
-    then 
+    then
         let SIB_COUNT+=1
         $msmtp --host="$SIB_MAIL_HOST" --from="$SIB_MAIL_FROM" --passwordeval="$SIB_MAIL_PASSWORDEVAL" --user="$SIB_MAIL_USERNAME" --auth=plain -t << ENDMAIL
 From: SIB Secure Shell <$SIB_MAIL_FROM>
@@ -202,4 +202,3 @@ ENDMAIL
         fi
     fi
 done
-
