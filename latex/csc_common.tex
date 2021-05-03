@@ -1,11 +1,19 @@
+% Common premable commands for Zhang Maiyun's UWC CSC documents
+% Based on MikTeX article template
+% License: CC BY-SA 4.0
+
 % !TEX TS-program = xelatex
 % !BIB TS-program = biber
 % !TEX encoding = UTF-8 Unicode
 %TC: macro \usetikzlibrary [ignore]
 %TC: macro \usepgfplotslibrary [ignore]
 %TC: macro \pgfplotsset [ignore]
-% Common premable commands for Zhang Maiyun's UWC CSC documents
-% Based on MikTeX article template
+%TC: macro \labauthor [ignore]
+%TC: macro \labpartners [ignore]
+%TC: macro \labdate [ignore]
+
+%%% Engine selection
+\usepackage{iftex}
 
 %%% SECTION TITLE APPEARANCE
 \usepackage{sectsty}
@@ -29,15 +37,26 @@
 \usepackage{textcomp} % some other symbols
 \usepackage{xcolor} % color names
 \usepackage{csquotes}
-\usepackage[american]{babel}
+\ifxetex
+  \usepackage{fontspec} % about Chinese fonts
+  \usepackage[slantfont, boldfont]{xeCJK}
+  \usepackage{polyglossia}
+  \setdefaultlanguage[variant=american]{english}
+\else
+  \usepackage[american]{babel}
+  \ifluatex
+    \usepackage{fontspec} % about Chinese fonts
+    \usepackage{luatexja-fontspec}
+  \else
+    \usepackage[utf8]{inputenc}
+  \fi
+\fi
 \usepackage[style=mla-new, backend=biber]{biblatex} % MLA8 format citation as required
 \usepackage{tikz} % drawing support
 \usetikzlibrary{calc} % tikz point calculations
 \usepackage{pgfplots} % plotting in tikz
 \pgfplotsset{compat=1.17, compat/show suggested version=false}
 \usepgfplotslibrary{units}
-\usepackage{fontspec} % about Chinese fonts
-\usepackage[slantfont, boldfont]{xeCJK}
 
 %%% ToC (table of contents) APPEARANCE
 \usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
@@ -61,26 +80,29 @@
 
 %%% Nian Liu's FP Chemistry E4 title requirements
 \newcommand{\makeefourtitle}{
-\begin{titlepage}
-\begin{center}
-\vspace*{9em}
-\begin{huge}\textbf{\vlabtitle}\end{huge}\\
-\vspace{1.5em}
-\large
-FP Chemistry E4
-\vfill
-\def\oldarraystretch{\arraystretch}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{rl}
-Written by& \vlabauthor\\
-Partners:& \vlabpartners\\
-Supervisor:& Peter Muya\\
-Date:& \vlabdate
-\vspace{13em}
-\end{tabular}
-\renewcommand{\arraystretch}{\oldarraystretch}
-\end{center}
-\end{titlepage}}
+    \begin{titlepage}
+        \begin{center}
+            \vspace*{9em}
+            \begin{huge}
+            \textbf{\vlabtitle}
+            \end{huge}\\
+            \vspace{1.5em}
+            \large
+            FP Chemistry E4
+            \vfill
+            \def\oldarraystretch{\arraystretch}
+            \renewcommand{\arraystretch}{1.2}
+            \begin{tabular}{rl}
+                Written by& \vlabauthor\\
+                Partners:& \vlabpartners\\
+                Supervisor:& Peter Muya\\
+                Date:& \vlabdate
+                \vspace{13em}
+            \end{tabular}
+            \renewcommand{\arraystretch}{\oldarraystretch}
+        \end{center}
+    \end{titlepage}
+}
 % specify the information of this lab report
 \newcommand{\labtitle}[1]{\def\vlabtitle{#1}}
 \newcommand{\labauthor}[1]{\def\vlabauthor{#1}}
@@ -96,6 +118,12 @@ Date:& \vlabdate
 % Run this in documents requiring CJK fonts
 \newcommand{\zmyCJKenable}[1]{
     % From ctex/fontset/ctex-fontset-*.def
+    \ifluatex
+      \let\setCJKmainfont\setmainjfont
+      \let\setCJKsansfont\setsansjfont
+      \let\setCJKmonofont\setmonojfont
+    \else\RequireXeTeX
+    \fi
     % Fonts for macOS
     \ifx#1\zmyCJKmacnew
         % >= EL Capitan
@@ -126,6 +154,24 @@ Date:& \vlabdate
     \else
         \errmessage{Cannot find specified platform to select CJK fonts}
     \fi\fi\fi\fi\fi
+}
+
+% Convenient centered three part table
+\newenvironment{ctpt}{\center\threeparttable}{\endthreeparttable\endcenter}
+
+% Centered title from https://stackoverflow.com/a/3142372
+\newcommand{\mkctitle}{
+    \begin{titlepage}
+        \null  % Empty line
+        \nointerlineskip  % No skip for prev line
+        \vfill
+        \let\snewpage \newpage
+        \let\newpage \relax
+        \maketitle
+        \let \newpage \snewpage
+        \vfill
+        \break % page break
+    \end{titlepage}
 }
 
 \author{Maiyun Zhang}
