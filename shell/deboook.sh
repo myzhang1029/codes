@@ -47,7 +47,7 @@ usage()
 # $3: cropbox
 output_page()
 {
-    "$logger" "Page $1"
+    "$logger" "Page $1. Original WxH is ${width}x$height."
     gs \
         -dNOPAUSE \
         -dBATCH \
@@ -59,6 +59,21 @@ output_page()
         -c "[/CropBox [$3]" \
         -c " /PAGES pdfmark" \
         -f "$input"
+}
+
+# Get page dimensions
+get_dim()
+{
+    size="$(pdfinfo -f "$idx" -l "$idx" "$input" | grep "$idx size")"
+    rot="$(pdfinfo -f "$idx" -l "$idx" "$input" | grep "$idx rot" | awk '{print $4}')"
+    if [ "$((rot % 180))" -eq 90 ]
+    then
+        height="$(echo "$size" | awk '{print $4}')"
+        width="$(echo "$size" | awk '{print $6}')"
+    else
+        height="$(echo "$size" | awk '{print $6}')"
+        width="$(echo "$size" | awk '{print $4}')"
+    fi
 }
 
 # No options given
@@ -141,9 +156,7 @@ do
         hipage="$((2 * npages - idx + 1))"
     fi
     # Get page geometry
-    geometry="$(pdfinfo -f "$idx" -l "$idx" "$input" | grep "$idx size")"
-    height="$(echo "$geometry" | awk '{print $4}')"
-    width="$(echo "$geometry" | awk '{print $6}')"
+    get_dim
     # If this page is odd-numbered (from the first page),
     # then the larger-numbered page is on the left
     # else, it is on the right
