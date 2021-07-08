@@ -1,6 +1,6 @@
 [package]
 name = "mkf"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Zhang Maiyun <myzhang1029@hotmail.com>"]
 edition = "2018"
 
@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 clap = "2.33.3"
+rand = "0.8.4"
+tempfile = "3.2.0"
