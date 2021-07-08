@@ -24,7 +24,7 @@ use rand::{distributions::Alphanumeric, Rng};
 use std::fs::{File, OpenOptions};
 use std::io;
 use std::io::Write;
-use std::process::Command;
+use std::process::{exit, Command};
 use tempfile::TempDir;
 
 const PROGRAM_NAME: &str = "mkf";
@@ -112,7 +112,7 @@ fn mktmp(tmp_dir: &TempDir, suffix: Option<&str>) -> std::path::PathBuf {
     })
 }
 
-fn main() {
+fn real_main() -> i32 {
     // First parse the arguments
     let matches = parse_args();
 
@@ -147,15 +147,26 @@ fn main() {
         .collect();
 
     // If no explicit replstr specified, append it to the end
-    if matches.values_of("replstr").is_none() {
+    if !matches.is_present("replstr") {
         args.push(file_path.to_str().unwrap().to_string());
     }
 
-    Command::new(matches.value_of("utility").unwrap())
-        .args(args)
+    // Run the command
+    let utility = matches.value_of("utility").unwrap();
+    let mut cmd = Command::new(utility);
+    cmd.args(args);
+    if matches.is_present("reopen") {
+        cmd.stdin(File::open("/dev/tty").unwrap());
+    }
+    let exit_status = cmd
         .spawn()
         .unwrap()
         // We must wait, or tmp_dir will be removed before cmd terminates
         .wait()
         .unwrap();
+    exit_status.code().unwrap_or_default()
+}
+
+fn main() {
+    exit(real_main());
 }
