@@ -126,6 +126,34 @@ fn mktmp(tmp_dir: &TempDir, suffix: Option<&str>) -> std::path::PathBuf {
     })
 }
 
+/// Create and fill a temporary file
+fn prepare_tmp_file<P: AsRef<std::path::Path>>(
+    file_path: P,
+    arg_eofstr: Option<&str>,
+) -> io::Result<()> {
+    // Create and truncate that so-named file
+    let mut tmp_file = OpenOptions::new()
+        .create(true)
+        .truncate(true)
+        .write(true)
+        .open(file_path)?;
+
+    // Fill the file with stdin
+    match arg_eofstr {
+        Some(eofstr) => read_fill_text(&mut tmp_file, eofstr),
+        None => read_fill_bin(&mut tmp_file),
+    }?;
+    // Make sure the file is written to before we invoke the command
+    tmp_file.sync_all()?;
+    Ok(())
+}
+
+/// Fail the execution with an error message and return a status
+fn fail<E: std::fmt::Display>(reason: E, msg: &str, code: i32) -> ! {
+    eprintln!("{}: {}", msg, reason);
+    std::process::exit(code)
+}
+
 fn real_main() -> i32 {
     // First parse the arguments
     let matches = parse_args();
@@ -134,53 +162,48 @@ fn real_main() -> i32 {
     // TempDir will delete it for us, but we must keep it in main's scope
     // Control its location with `std::env::temp_dir()`
     // Just die if this fails
-    let tmp_dir = TempDir::new().unwrap();
+    let tmp_dir =
+        TempDir::new().unwrap_or_else(|msg| fail(msg, "Cannot create temporary directory", 2));
+
     // Create temporary path
     let file_path = mktmp(&tmp_dir, matches.value_of("suffix"));
-    {
-        let mut tmp_file = OpenOptions::new()
-            .create(true)
-            .truncate(true)
-            .write(true)
-            .open(&file_path)
-            .unwrap();
-
-        // Fill the file
-        match matches.value_of("eofstr") {
-            Some(eofstr) => read_fill_text(&mut tmp_file, eofstr),
-            None => read_fill_bin(&mut tmp_file),
-        }
-        .unwrap();
-        // Make sure the file is written to before we invoke the command
-        tmp_file.sync_all().unwrap();
-    }
+    let path_as_str = file_path
+        .to_str()
+        .unwrap_or_else(|| fail(file_path.display(), "Cannot process this path", 1));
+    // Create temporary file
+    prepare_tmp_file(&file_path, matches.value_of("eofstr"))
+        .unwrap_or_else(|msg| fail(msg, "Cannot capture stdin", 2));
 
     let args_raw = matches.values_of("arguments").unwrap_or_default();
     // Transform arguments by (replstr => path)
     let mut args: Vec<String> = args_raw
         .map(|itm| match matches.value_of("replstr") {
-            Some(replstr) => itm.replace(replstr, file_path.to_str().unwrap()),
+            Some(replstr) => itm.replace(replstr, path_as_str),
             None => itm.to_string(),
         })
         .collect();
 
     // If no explicit replstr specified, append it to the end
     if !matches.is_present("replstr") {
-        args.push(file_path.to_str().unwrap().to_string());
+        args.push(path_as_str.to_string());
     }
 
     // Run the command
+    // utility has default value so this shouldn't fail
     let utility = matches.value_of("utility").unwrap();
     let mut cmd = Command::new(utility);
     cmd.args(args);
     if matches.is_present("reopen") {
-        cmd.stdin(File::open("/dev/tty").unwrap());
+        cmd.stdin(
+            File::open("/dev/tty").unwrap_or_else(|msg| fail(msg, "Cannot open /dev/tty", 2)),
+        );
     }
     let exit_status = cmd
         .spawn()
-        .unwrap()
+        .unwrap_or_else(|msg| fail(msg, "Cannot execute", 3))
         // We must wait, or tmp_dir will be removed before cmd terminates
         .wait()
+        // So wait() shouldn't fail normally
         .unwrap();
     exit_status.code().unwrap_or_default()
 }
