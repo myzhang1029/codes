@@ -23,7 +23,7 @@ use clap::{crate_version, App, Arg, ArgMatches};
 use rand::{distributions::Alphanumeric, Rng};
 use std::fs::{File, OpenOptions};
 use std::io;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::process::{exit, Command};
 use tempfile::TempDir;
 
@@ -58,7 +58,7 @@ fn parse_args<'a>() -> ArgMatches<'a> {
             Arg::with_name("eofstr")
                 .short("E")
                 .takes_value(true)
-                .help("Use eofstr as a logical EOF marker."),
+                .help("Use eofstr as a logical EOF marker. If specified, stdin will be read as text (instead of binary)."),
         )
         .arg(
             Arg::with_name("replstr")
@@ -74,8 +74,8 @@ fn parse_args<'a>() -> ArgMatches<'a> {
         .get_matches()
 }
 
-/// Read from stdin and fill the temporary file
-fn read_fill(tmp_file: &mut File, eofstr: Option<&str>) {
+/// Read from stdin and fill the temporary file (Text mode)
+fn read_fill_text(tmp_file: &mut File, eofstr: &str) -> io::Result<()> {
     let mut buffer = String::new();
     let stdin = io::stdin();
     while let Ok(read_len) = stdin.read_line(&mut buffer) {
@@ -84,16 +84,30 @@ fn read_fill(tmp_file: &mut File, eofstr: Option<&str>) {
             break;
         }
         // Check for manual EOF
-        if let Some(eofstr) = eofstr {
-            // Compare with the trailing newline removed
-            if eofstr == &buffer[0..read_len - 1] {
-                break;
-            }
+        // Compare with the trailing newline removed
+        if eofstr == &buffer[0..read_len - 1] {
+            break;
         }
-        tmp_file.write_all(buffer.as_bytes()).unwrap();
+        tmp_file.write_all(buffer.as_bytes())?;
         // Run clear because read_line appends
         buffer.clear();
     }
+    Ok(())
+}
+
+/// Read from stdin and fill the temporary file (Binary)
+fn read_fill_bin(tmp_file: &mut File) -> io::Result<()> {
+    const CHUNK_SIZE: usize = 120;
+    let mut buffer = [0; CHUNK_SIZE];
+    let mut stdin = io::stdin();
+    loop {
+        let read_len = stdin.read(&mut buffer)?;
+        if read_len == 0 {
+            break;
+        }
+        tmp_file.write_all(&buffer)?;
+    }
+    Ok(())
 }
 
 /// Make temporary file according to the arguments
@@ -132,7 +146,11 @@ fn real_main() -> i32 {
             .unwrap();
 
         // Fill the file
-        read_fill(&mut tmp_file, matches.value_of("eofstr"));
+        match matches.value_of("eofstr") {
+            Some(eofstr) => read_fill_text(&mut tmp_file, eofstr),
+            None => read_fill_bin(&mut tmp_file),
+        }
+        .unwrap();
         // Make sure the file is written to before we invoke the command
         tmp_file.sync_all().unwrap();
     }
