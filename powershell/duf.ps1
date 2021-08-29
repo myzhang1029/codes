@@ -1,63 +1,70 @@
 # Dual-function PowerShell du
 # Licensed under the MIT license.
 # Based on multiple answers at <https://stackoverflow.com/questions/868264/du-in-powershell>.
-function duf(
-        [System.String]
-        $Path=".",
-        [switch]
-        $Recurse
-    ) {
+function Get-ChildInfo([System.String] $Path = ".", [Switch] $Recurse) {
     # Format file sizes in bytes into human-readable form
-    function Format-FileSize([int64] $nbytes) {
-        if ($nbytes -lt 1024)
-        {
+    function Format-FileSize([Int64] $nbytes) {
+        if ($nbytes -lt 1024) {
             return "{0:0.0} B" -f $nbytes
         }
-        if ($nbytes -lt 1MB)
-        {
-            return "{0:0.0} KiB" -f ($nbytes/1KB)
+        if ($nbytes -lt 1MB) {
+            return "{0:0.0} KiB" -f ($nbytes / 1KB)
         }
-        if ($nbytes -lt 1GB)
-        {
-            return "{0:0.0} MiB" -f ($nbytes/1MB)
+        if ($nbytes -lt 1GB) {
+            return "{0:0.0} MiB" -f ($nbytes / 1MB)
         }
-        return "{0:0.0} GiB" -f ($nbytes/1GB)
+        return "{0:0.0} GiB" -f ($nbytes / 1GB)
+    }
+
+    # Reverse the pipeline
+    function Get-Reversed {
+        $arr = @($input)
+        [Array]::reverse($arr)
+        $arr
     }
 
     if ($Recurse) {
         # Recursive, equivelant to unix's `du -h`.
-        # TODO BUG
-        Get-ChildItem -File $Path -Recurse |
-            Group-Object directoryName |
-            Select name, @{Name="Length"; Expression={($_.group | Measure-Object -sum length).sum }} |
-            % {
-                $dn = $_
-                $size = ($groupedList | where { $_.Name -Like "$($dn.Name)*" } | Measure-Object -Sum Length).Sum
-                New-Object PSObject -Property @{
-                    Name=Resolve-Path -Relative $dn.Name
-                    Size=Format-FileSize($size)
-                }
+        # Recursively get all sub directories and their sized without their sub directories
+        $subdirs = Get-ChildItem -Recurse -File $Path |
+        Group-Object DirectoryName |
+        Select-Object Name, @{Name = "Length"; Expression = { ($_.Group | Measure-Object -Sum Length).Sum } }
+        # Sum up each sub directory's sizes
+        $subdirs |
+        Select-Object Name, @{
+            Name       = "Size"
+            Expression = {
+                $thisDir = $_
+                $mySubs = $subdirs | Where-Object { $_.Name.StartsWith($thisDir.Name) }
+                Format-FileSize(($mySubs | Measure-Object -Sum Length).Sum)
             }
-    } else {
-        # Summative, equivalent to unix's `du -hd0`.
-        Get-ChildItem $Path | 
-            % {
-                $f = $_
-                # Calculate the sum size of this sub directory
-                $result = Get-ChildItem -r $f.FullName |
-                    Measure-Object -Sum Length |
-                    Select @{Name="Name";Expression={$f.Name}}, Sum
-                # Still yield a result if the sub directory is empty
-                if ($result -eq $null) {
-                    New-Object PSObject -Property @{Name=$f.Name; Sum=0}
-                } else {
-                    $result
-                }
-            } |
-            # Sort entries from large to small
-            Sort-Object -Descending Sum |
-            # Filter the nbytes into human-readable form
-            Select Name, @{Name="Size"; Expression={Format-FileSize($_.Sum)}}
+        } |
+        # Reverse the order to mimic unix du
+        Get-Reversed
+    }
+    else {
+        # Summative, equivalent to unix's `du -hd0 * | sort -h`.
+        Get-ChildItem $Path |
+        ForEach-Object {
+            $f = $_
+            # Calculate the sum size of this sub directory
+            $result = Get-ChildItem -r $f.FullName |
+            Measure-Object -Sum Length |
+            Select-Object @{Name = "Name"; Expression = { $f.Name } }, Sum
+            # Still yield a result if the sub directory is empty
+            if ($null -eq $result) {
+                New-Object PSObject -Property @{Name = $f.Name; Sum = 0 }
+            }
+            else {
+                $result
+            }
+        } |
+        # Sort entries from large to small
+        Sort-Object -Descending Sum |
+        # Filter the nbytes into human-readable form
+        Select-Object Name, @{Name = "Size"; Expression = { Format-FileSize($_.Sum) } }
     }
 }
 
+# Alias Get-ChildInfo to du
+Set-Alias du Get-ChildInfo
