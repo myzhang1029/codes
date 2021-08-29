@@ -1,7 +1,7 @@
 # Dual-function PowerShell du
 # Licensed under the MIT license.
 # Based on multiple answers at <https://stackoverflow.com/questions/868264/du-in-powershell>.
-function du_full(
+function duf(
         [System.String]
         $Path=".",
         [switch]
@@ -11,7 +11,7 @@ function du_full(
     function Format-FileSize([int64] $nbytes) {
         if ($nbytes -lt 1024)
         {
-            return $nbytes
+            return "{0:0.0} B" -f $nbytes
         }
         if ($nbytes -lt 1MB)
         {
@@ -40,15 +40,21 @@ function du_full(
             }
     } else {
         # Summative, equivalent to unix's `du -hd0`.
-        # TODO BUG: Now it ignores empty sub-directories
         Get-ChildItem $Path | 
             % {
                 $f = $_
                 # Calculate the sum size of this sub directory
-                Get-ChildItem -r $_.FullName |
+                $result = Get-ChildItem -r $f.FullName |
                     Measure-Object -Sum Length |
-                    Select @{Name="Name";Expression={$f}}, Sum
+                    Select @{Name="Name";Expression={$f.Name}}, Sum
+                # Still yield a result if the sub directory is empty
+                if ($result -eq $null) {
+                    New-Object PSObject -Property @{Name=$f.Name; Sum=0}
+                } else {
+                    $result
+                }
             } |
+            # Sort entries from large to small
             Sort-Object -Descending Sum |
             # Filter the nbytes into human-readable form
             Select Name, @{Name="Size"; Expression={Format-FileSize($_.Sum)}}
