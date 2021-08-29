@@ -3,7 +3,7 @@
 # Based on multiple answers at <https://stackoverflow.com/questions/868264/du-in-powershell>.
 function du_full(
         [System.String]
-        $Path=“.”,
+        $Path=".",
         [switch]
         $Recurse
     ) {
@@ -15,13 +15,13 @@ function du_full(
         }
         if ($nbytes -lt 1MB)
         {
-            return "{0:0.0} KiB” -f ($nbytes/1KB)
+            return "{0:0.0} KiB" -f ($nbytes/1KB)
         }
         if ($nbytes -lt 1GB)
         {
-            return "{0:0.0} MiB” -f ($nbytes/1MB)
+            return "{0:0.0} MiB" -f ($nbytes/1MB)
         }
-        return "{0:0.0} GiB“ -f ($nbytes/1GB)
+        return "{0:0.0} GiB" -f ($nbytes/1GB)
     }
 
     if ($Recurse) {
@@ -29,7 +29,7 @@ function du_full(
         # TODO BUG
         Get-ChildItem -File $Path -Recurse |
             Group-Object directoryName |
-            Select name, @{Name=‘Length'; Expression={($_.group | Measure-Object -sum length).sum }} |
+            Select name, @{Name="Length"; Expression={($_.group | Measure-Object -sum length).sum }} |
             % {
                 $dn = $_
                 $size = ($groupedList | where { $_.Name -Like "$($dn.Name)*" } | Measure-Object -Sum Length).Sum
@@ -51,7 +51,7 @@ function du_full(
             } |
             Sort-Object -Descending Sum |
             # Filter the nbytes into human-readable form
-            Select Name, @{Name=“Size”; Expression={Format-FileSize($_.Sum)}}
+            Select Name, @{Name="Size"; Expression={Format-FileSize($_.Sum)}}
     }
 }
 
