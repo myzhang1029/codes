@@ -21,9 +21,9 @@
 """Send an arbitrary Unicode block through AppleScript.
 Make sure to select the appropriate persion."""
 
-import random
 import subprocess as sp
 import time
+from itertools import zip_longest
 
 tk = """
 tell application "WeChat"
@@ -34,7 +34,8 @@ tell application "System Events" to keystroke "v" using command down
 tell application "System Events" to keystroke return
 """
 
-from itertools import zip_longest
+# From https://stackoverflow.com/a/434411/9347959
+
 
 def grouper(iterable, n):
     args = [iter(iterable)] * n
@@ -46,7 +47,8 @@ if __name__ == "__main__":
     lines = grouper(chars, 7)
     poems = grouper(lines, 8)
     for poem in poems:
-        s = '\n'.join(''.join(c if c else '' for c in line) for line in poem if line)
+        s = '\n'.join(''.join(c if c else '' for c in line)
+                      for line in poem if line)
         print(s)
         cmd = tk.format(s)
         sp.Popen(["osascript"], stdin=sp.PIPE).communicate(cmd.encode())
