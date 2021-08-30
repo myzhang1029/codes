@@ -23,7 +23,7 @@ function Get-ChildInfo([System.String] $Path = ".", [Switch] $Recurse) {
         $arr
     }
 
-    if ($Recurse) {
+    $(if ($Recurse) {
         # Recursive, equivelant to unix's `du -h`.
         # Recursively get all sub directories and their sized without their sub directories
         $subdirs = Get-ChildItem -Recurse -File $Path |
@@ -63,7 +63,9 @@ function Get-ChildInfo([System.String] $Path = ".", [Switch] $Recurse) {
         Sort-Object -Descending Sum |
         # Filter the nbytes into human-readable form
         Select-Object Name, @{Name = "Size"; Expression = { Format-FileSize($_.Sum) } }
-    }
+    }) |
+    # Reorder the fields and adjust align
+    Format-Table @{Name="Size"; Expression={$_.Size}; Align="Right"}, Name
 }
 
 # Alias Get-ChildInfo to du
