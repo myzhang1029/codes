@@ -34,12 +34,11 @@ tell application "System Events" to keystroke "v" using command down
 tell application "System Events" to keystroke return
 """
 
-# From https://stackoverflow.com/a/434411/9347959
-
 
 def grouper(iterable, n):
+    # From https://stackoverflow.com/a/434411/9347959
     args = [iter(iterable)] * n
-    return zip_longest(*args)
+    return zip_longest(*args, fillvalue='')
 
 
 if __name__ == "__main__":
@@ -47,8 +46,7 @@ if __name__ == "__main__":
     lines = grouper(chars, 7)
     poems = grouper(lines, 8)
     for poem in poems:
-        s = '\n'.join(''.join(c if c else '' for c in line)
-                      for line in poem if line)
+        s = '\n'.join(''.join(line) for line in poem)
         print(s)
         cmd = tk.format(s)
         sp.Popen(["osascript"], stdin=sp.PIPE).communicate(cmd.encode())
