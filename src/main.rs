@@ -1,4 +1,4 @@
-/// Create a temporary file from stdin and execute command.
+//! Create a temporary file from stdin and execute command.
 //
 //  Copyright (C) 2021 Zhang Maiyun <myzhang1029@hotmail.com>
 //
@@ -14,16 +14,14 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-//
+
 extern crate clap;
-extern crate rand;
 extern crate tempfile;
 
 use clap::{crate_version, App, Arg, ArgMatches};
-use rand::{distributions::Alphanumeric, Rng};
 use std::fs::{File, OpenOptions};
 use std::io;
-use std::io::{Read, Write};
+use std::io::Write;
 use std::process::{exit, Command};
 use tempfile::TempDir;
 
@@ -97,27 +95,15 @@ fn read_fill_text(tmp_file: &mut File, eofstr: &str) -> io::Result<()> {
 
 /// Read from stdin and fill the temporary file (Binary)
 fn read_fill_bin(tmp_file: &mut File) -> io::Result<()> {
-    const CHUNK_SIZE: usize = 120;
-    let mut buffer = [0; CHUNK_SIZE];
-    let mut stdin = io::stdin();
-    loop {
-        let read_len = stdin.read(&mut buffer)?;
-        if read_len == 0 {
-            break;
-        }
-        tmp_file.write_all(&buffer)?;
-    }
+    io::copy(&mut io::stdin(), tmp_file)?;
     Ok(())
 }
 
 /// Make temporary file according to the arguments
 fn mktmp(tmp_dir: &TempDir, suffix: Option<&str>) -> std::path::PathBuf {
-    // Generate name for the file
-    let file_name: String = rand::thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(10)
-        .map(char::from)
-        .collect();
+    // Name for the file
+    // No need to be random because we already have a tempdir
+    let file_name: String = String::from("tmp_output");
 
     // Then construct the path to create
     tmp_dir.path().join(match suffix {
