@@ -22,23 +22,23 @@
 """Simple script to translate UTF-8 encoded Chinese to Pinyin on-the-fly.
 Dataset:
     ftp://ftp.cuhk.hk/pub/chinese/ifcss/software/data/Uni2Pinyin.gz
+    Replace [0xAB, 0xA6] with "ve" first.
 """
 
 import os.path as op
 import sys
 
 dbfile = op.dirname(op.abspath(__file__)) + "/Uni2Pinyin"
-db = open(dbfile)
 entries = {}
-for line in db.readlines():
+for line in open(dbfile, encoding="ascii"):
     if line[0] == '#':
         continue
     pair = line.split()
-    entries[pair[0]] = ':'.join(pair[1:])
+    entries[int(pair[0], 16)] = ':'.join(pair[1:])
 
 data = sys.stdin.read()
 for c in data:
-    code = hex(ord(c))[2:].upper()
+    code = ord(c)
     if code in entries:
         print(entries[code], end='')
     else:
