@@ -27,7 +27,7 @@ use tempfile::TempDir;
 
 const PROGRAM_NAME: &str = "mkf";
 
-/// Parse program arguments and return ArgMatches
+/// Parse program arguments and return `ArgMatches`
 fn parse_args<'a>() -> ArgMatches<'a> {
     App::new(PROGRAM_NAME)
         .version(crate_version!())

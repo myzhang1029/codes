@@ -31,7 +31,7 @@ const URI: &str = "https://objectstorage.ca-toronto-1.oraclecloud.com/n/yzoe51nh
 fn get_file() -> Result<BufReader<impl io::Read + std::marker::Send>, ureq::Error> {
     let resp = ureq::get(URI).call()?;
     match resp.status() {
-        200u16 => {
+        200_u16 => {
             let bufreader = BufReader::new(resp.into_reader());
             Ok(bufreader)
         }
@@ -47,7 +47,7 @@ fn unpack_from_tar<'a, R: Read>(
 ) -> io::Result<tar::Entry<'a, R>> {
     archive
         .entries()?
-        .filter_map(|entry| -> Option<tar::Entry<_>> {
+        .find_map(|entry| -> Option<tar::Entry<_>> {
             let entry_unwr = entry.ok()?;
             let path = entry_unwr.path().ok()?;
             if path == path_for {
@@ -56,7 +56,6 @@ fn unpack_from_tar<'a, R: Read>(
                 None
             }
         })
-        .next()
         .ok_or_else(|| {
             io::Error::new(
                 io::ErrorKind::NotFound,
