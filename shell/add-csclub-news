@@ -1,0 +1,56 @@
+#!/bin/sh
+#
+#  add-csclub-news - Display some news when a user logs in
+#  Copyright (C) 2021 Zhang Maiyun <myzhang1029@hotmail.com>
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+BASE="/srv/CSclub-ChangeLog"
+OUTPUT="$BASE/ChangeLog"
+
+# Do not touch the trailing newline
+MESSAGE="---
+
+Updates today ($(date +"%b %d, %Y")):
+"
+
+cat << 'EOF'
+Start typing your message. As a tradition, please include your name and PC year
+in the last line.
+
+Press Enter and Ctrl-D when you are done.
+EOF
+
+while IFS="" read -r MSGLINE
+do
+    # Do not touch the trailing newline
+    MESSAGE="$MESSAGE> $MSGLINE
+"
+done
+
+echo
+echo 'Everything below this line will be added to CS Club ChangeLog:'
+echo "$MESSAGE"
+echo 'If you are satisfied, press Enter. Otherwise, press Ctrl-C and do it again.'
+read -r _
+echo 'Writing output.'
+# shellcheck disable=SC2016
+echo 'If you see permission error, it means you are not root and should use `sudo`.'
+
+echo "$MESSAGE" >> "$OUTPUT"
+
+cat "$BASE/motd-pre" "$OUTPUT" "$BASE/motd-post" > /etc/motd
+
+exit 0
