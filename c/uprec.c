@@ -66,6 +66,11 @@ time_t get_boot_time(void)
         return 0;
     return time(NULL) - sinfo.uptime;
 }
+#elif defined(_WIN32)
+#include <sysinfoapi.h>
+
+/* Get epoch of the last boot */
+time_t get_boot_time(void) { return time(NULL) - GetTickCount64() / 1000; }
 #endif
 
 /* Create or update the entry in the database.
