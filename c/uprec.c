@@ -98,40 +98,52 @@ int update(const char *db_filename)
     /* Real boot time */
     time_t boot_time = 0;
     /* Position of the last newline */
-    long int last_newline = 0;
+    fpos_t last_newline;
 
     /* Get the boot time of the running boot */
     boot_time = get_boot_time();
     if (boot_time == 0)
         return 2;
 
-    /* First try read write mode, using binary to make sure ftell() stamp
-     * corresponds to the number of bytes */
+    /* First try read write mode */
     errno = 0;
-    db = fopen(db_filename, "rb+");
+    db = fopen(db_filename, "r+");
     if (db == NULL && errno == ENOENT)
     {
         /* Then create it */
-        db = fopen(db_filename, "ab+");
+        db = fopen(db_filename, "a+");
         rewind(db);
     }
     if (db == NULL)
         /* Fail */
         return 1;
 
+    /* Initialize this variable with the start of the file */
+    if (fgetpos(db, &last_newline) != 0)
+        return 1;
+
     /* Try to see if a record is about the current boot */
     while (fgets(linebuf, RECORD_SIZE, db) != NULL)
     {
-        time_t record_upsince =
-            (time_t)strtol(strchr(linebuf, SEP) + 1, NULL, 16);
-        if (labs(record_upsince - boot_time) <= TIME_EPSILON)
+        char *separator_pos;
+        long last_uptime = strtol(linebuf, &separator_pos, 16);
+        time_t last_upsince = (time_t)strtol(separator_pos + 1, NULL, 16);
+        if (labs(last_upsince - boot_time) <= TIME_EPSILON ||
+            last_upsince + last_uptime >= boot_time)
         {
-            /* In the same boot, let's rewrite the current entry */
-            fseek(db, last_newline, SEEK_SET);
+            /* In the same boot, or
+             * the system seems to have booted before it was last shutdown:
+             * assuming a time sync problem in the previous record.
+             *
+             * Let's rewrite the current entry.
+             */
+            if (fsetpos(db, &last_newline) != 0)
+                return 1;
             break;
         }
         /* Save this newline */
-        last_newline = ftell(db);
+        if (fgetpos(db, &last_newline) != 0)
+            return 1;
     }
 
     /* Compute uptime */
@@ -157,11 +169,11 @@ int show(const char *db_filename)
 
     while (fgets(linebuf, RECORD_SIZE, db) != NULL)
     {
-        char *separator;
+        char *separator_pos;
         /* +1 for NUL */
         char upbuf[DATE_LEN + 1] = {0}, downbuf[DATE_LEN + 1] = {0};
-        long uptime = strtol(linebuf, &separator, 16);
-        time_t upsince = (time_t)strtol(separator + 1, NULL, 16);
+        long uptime = strtol(linebuf, &separator_pos, 16);
+        time_t upsince = (time_t)strtol(separator_pos + 1, NULL, 16);
         /* BEWARE: localtime() overwrites the buffer from previous calls */
         struct tm *buf;
         /* Print up since */
@@ -196,8 +208,18 @@ int main(int argc, char **argv)
     if (argc != 3)
         return usage(argv[0]);
     if (strcmp(argv[1], "-s") == 0)
-        return show(argv[2]);
+    {
+        int stat = show(argv[2]);
+        if (stat != 0)
+            fprintf(stderr, "%s\n", strerror(errno));
+        return stat;
+    }
     if (strcmp(argv[1], "-u") == 0)
-        return update(argv[2]);
+    {
+        int stat = update(argv[2]);
+        if (stat != 0)
+            fprintf(stderr, "%s\n", strerror(errno));
+        return stat;
+    }
     return usage(argv[0]);
 }
