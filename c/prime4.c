@@ -39,7 +39,7 @@ int main(void)
     if (MAXPRIME - MINPRIME <= 0)
         return 0;
 
-#pragma omp for
+#pragma omp parallel for
     for (i = 2; i < sq; ++i)
     {
         for (j = i * i; j < MAXPRIME; j += i)

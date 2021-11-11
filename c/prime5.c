@@ -28,7 +28,7 @@
 #define MINPRIME 0ULL
 /* Exclusive */
 #define MAXPRIME 1000ULL
-/* base-10 length of MAXPRIME */
+/* base-10 length of MAXPRIME (plus one if its not a power of ten) */
 #define LENGTH 4
 int main(void)
 {
@@ -66,7 +66,7 @@ int main(void)
         i = atoll(line);
         /* Print to stderr */
         fprintf(stderr, "%llu\n", i);
-#pragma omp for
+#pragma omp parallel for
         for (j = i * i; j < MAXPRIME; j += i)
         {
             if (j < MINPRIME)

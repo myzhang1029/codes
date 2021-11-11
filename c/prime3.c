@@ -33,7 +33,7 @@ int main(void)
     if (!primes)
         return fprintf(stderr, "malloc failed\n"); /* 15 */
 
-#pragma omp for
+#pragma omp parallel for
     for (i = 2; i < sq; ++i)
         for (j = i * i; j < MAXPRIME; j += i)
             primes[j] = true;
