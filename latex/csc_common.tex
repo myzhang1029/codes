@@ -37,14 +37,14 @@
 \usepackage{textcomp} % some other symbols
 \usepackage{xcolor} % color names
 \usepackage{csquotes}
-\ifxetex
+\ifxetex{}
   \usepackage{fontspec} % about Chinese fonts
   \usepackage[slantfont, boldfont]{xeCJK}
   \usepackage{polyglossia}
   \setdefaultlanguage[variant=american]{english}
 \else
   \usepackage[american]{babel}
-  \ifluatex
+  \ifluatex{}
     \usepackage{fontspec} % about Chinese fonts
     \usepackage{luatexja-fontspec}
   \else
@@ -55,6 +55,7 @@
 \usepackage{tikz} % drawing support
 \usetikzlibrary{calc} % tikz point calculations
 \usepackage{pgfplots} % plotting in tikz
+\usepackage{pgfplotstable}
 \pgfplotsset{compat=1.17, compat/show suggested version=false}
 \usepgfplotslibrary{units}
 
@@ -93,10 +94,10 @@
             \def\oldarraystretch{\arraystretch}
             \renewcommand{\arraystretch}{1.2}
             \begin{tabular}{rl}
-                Written by& \vlabauthor\\
-                Partners:& \vlabpartners\\
+                Written by& \vlabauthor{}\\
+                Partners:& \vlabpartners{}\\
                 Supervisor:& Peter Muya\\
-                Date:& \vlabdate
+                Date:& \vlabdate{}
                 \vspace{13em}
             \end{tabular}
             \renewcommand{\arraystretch}{\oldarraystretch}
@@ -118,35 +119,35 @@
 % Run this in documents requiring CJK fonts
 \newcommand{\zmyCJKenable}[1]{
     % From ctex/fontset/ctex-fontset-*.def
-    \ifluatex
-      \let\setCJKmainfont\setmainjfont
-      \let\setCJKsansfont\setsansjfont
-      \let\setCJKmonofont\setmonojfont
-    \else\RequireXeTeX
+    \ifluatex{}
+      \let\setCJKmainfont\setmainjfont{}
+      \let\setCJKsansfont\setsansjfont{}
+      \let\setCJKmonofont\setmonojfont{}
+    \else\RequireXeTeX{}
     \fi
     % Fonts for macOS
-    \ifx#1\zmyCJKmacnew
+    \ifx#1\zmyCJKmacnew{}
         % >= EL Capitan
         \setCJKmainfont[UprightFont=* Light,BoldFont=* Bold,ItalicFont=Kaiti SC,BoldItalicFont=Kaiti SC Bold]{Songti SC}
         \setCJKsansfont{PingFang SC}
         \setCJKmonofont{STFangsong}
-    \else\ifx#1\zmyCJKmacold
+    \else\ifx#1\zmyCJKmacold{}
         % <= Yosemite
         \setCJKmainfont[BoldFont=STHeiti,ItalicFont=STKaiti]{STSong}
         \setCJKsansfont[BoldFont=STHeiti]{STXihei}
         \setCJKmonofont{STFangsong}
     % Fonts for Windows
-    \else\ifx#1\zmyCJKwinnew
+    \else\ifx#1\zmyCJKwinnew{}
         % >= Vista
         \setCJKmainfont[BoldFont=SimHei,ItalicFont=KaiTi]{SimSun}
         \setCJKsansfont[BoldFont={* Bold}]{Microsoft YaHei}
         \setCJKmonofont{FangSong}
-    \else\ifx#1\zmyCJKwinold
+    \else\ifx#1\zmyCJKwinold{}
         % <= XP
         \setCJKmainfont[BoldFont=SimHei,ItalicFont=KaiTi_GB2312]{SimSun}
         \setCJKsansfont{SimHei}
         \setCJKmonofont{FangSong_GB2312}
-    \else\ifx#1\zmyCJKlinux
+    \else\ifx#1\zmyCJKlinux{}
         % Fonts for Ubuntu
         \setCJKmainfont[BoldFont=WenQuanYi Zen Hei,ItalicFont=AR PL UKai CN]{AR PL UMing CN}
         \setCJKsansfont{WenQuanYi Zen Hei}
@@ -162,15 +163,15 @@
 % Centered title from https://stackoverflow.com/a/3142372
 \newcommand{\mkctitle}{
     \begin{titlepage}
-        \null  % Empty line
-        \nointerlineskip  % No skip for prev line
+        \null{}  % Empty line
+        \nointerlineskip{}  % No skip for prev line
         \vfill
-        \let\snewpage \newpage
+        \let\snewpage\newpage
         \let\newpage \relax
         \maketitle
-        \let \newpage \snewpage
+        \let\newpage\snewpage{}
         \vfill
-        \break % page break
+        \break{} % page break
     \end{titlepage}
 }
 
