@@ -1,0 +1,193 @@
+/* UART-controlled switch and speaker on RPi Pico. */
+/*
+ *  thekit_pico.c
+ *  Copyright (C) 2021 Zhang Maiyun <myzhang1029@hotmail.com>
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#include "hardware/pwm.h"
+#include "hardware/uart.h"
+#include "malloc.h"
+#include "pico/stdlib.h"
+
+#include "base64.h"
+#include "pcm.h"
+
+#ifndef NO_EMBEDDED_AUDIO
+#include "raw_audio.h"
+#endif
+
+// UART for controlling interface
+#define UART_ID uart0
+#define BAUD_RATE 9600
+#define UART_TX_PIN 0
+#define UART_RX_PIN 1
+
+// Pin that the switch controls
+#define SWITCH_PIN 22
+// Pin for audio output
+#define SPEAKER_PIN 26
+#define QUEUE_SIZE_MAX 2048
+
+bool switch_timer_in_use = false;
+// 1 means high
+bool switch_status = 1;
+struct repeating_timer switch_timer;
+// Speaker stuff
+struct pcmaudio_player player;
+
+/// Initialize all interfaces
+void init() {
+    uart_init(UART_ID, BAUD_RATE);
+    gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
+    gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
+
+    gpio_init(PICO_DEFAULT_LED_PIN);
+    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+
+    gpio_init(SWITCH_PIN);
+    gpio_set_dir(SWITCH_PIN, GPIO_OUT);
+    gpio_put(SWITCH_PIN, switch_status);
+
+    pcmaudio_init(&player, SPEAKER_PIN);
+}
+
+/// Blink the onboard LED
+void blink_led() {
+    gpio_put(PICO_DEFAULT_LED_PIN, 1);
+    sleep_ms(50);
+    gpio_put(PICO_DEFAULT_LED_PIN, 0);
+    sleep_ms(50);
+}
+
+/// Cancel all background tasks
+void cancel_all() {
+    if (switch_timer_in_use)
+        cancel_repeating_timer(&switch_timer);
+    switch_timer_in_use = false;
+    pcmaudio_stop();
+}
+
+/// Toggle the switch
+bool toggle_switch(struct repeating_timer *t) {
+    switch_status = !switch_status;
+    gpio_put(SWITCH_PIN, switch_status);
+    return true;
+}
+
+/// Wait until a char is available on UART and read it
+uint8_t uart_getc_blocking(uart_inst_t *uart) {
+    // Wait until stuff comes
+    while (!uart_is_readable(uart));
+    uint8_t result = uart_getc(uart);
+    return result;
+}
+
+/// Receive five ASCII digits and parse it as an integer (max 99999).
+uint32_t uart_get_int5(uart_inst_t *uart) {
+    uint32_t result = 0;
+    result += 10000 * (uart_getc_blocking(uart) - '0');
+    result += 1000 * (uart_getc_blocking(uart) - '0');
+    result += 100 * (uart_getc_blocking(uart) - '0');
+    result += 10 * (uart_getc_blocking(uart) - '0');
+    result += (uart_getc_blocking(uart) - '0');
+    return result;
+}
+
+void player_proc() {
+    pcmaudio_play(&player);
+    while (1)
+        tight_loop_contents();
+}
+
+/// Receive and dispatch commands
+/// (capitalized commands are background tasks, ARGs are uint8_t as a string)
+/// Commands:
+/// - 'l': Turn off the switch
+/// - 'h': Turn on the switch
+/// - 'B' ARG: Toggle the switch every ARG deciseconds
+/// - 'P' ARG DATA: Receive a blob of base64-encoded 8-bit 8kHz PCM audio, with
+///                 a decoded size of ARG bytes, and play it on the speaker pin
+///                 the padding '=' is not required.
+/// - 's': stop all background tasks
+void dispatch_commands() {
+    if (uart_is_readable(UART_ID)) {
+        blink_led();
+        uint8_t cmd = uart_getc(UART_ID);
+        switch (cmd) {
+            case 'l':
+                gpio_put(SWITCH_PIN, 0);
+                switch_status = 0;
+                break;
+            case 'h':
+                gpio_put(SWITCH_PIN, 1);
+                switch_status = 1;
+                break;
+            case 'B': {
+                uint32_t interval = uart_get_int5(UART_ID);
+                int32_t real_interval = interval * 100;
+                if (switch_timer_in_use)
+                    cancel_repeating_timer(&switch_timer);
+                add_repeating_timer_ms(real_interval, toggle_switch, NULL, &switch_timer);
+                switch_timer_in_use = true;
+                break;
+            }
+#ifndef NO_EMBEDDED_AUDIO
+            case 'R': {
+                pcmaudio_fill(&player, raw_audio, raw_audio_len, false);
+                pcmaudio_play(&player);
+                blink_led();
+                blink_led();
+                break;
+            }
+#endif
+            case 'P': {
+                uint8_t nextchar;
+                uint32_t size = uart_get_int5(UART_ID);
+                struct base64decoder decoder = BASE64_INITIALIZER;
+                uint8_t *buf = malloc(size);
+                pcmaudio_fill(&player, buf, size, true);
+
+                while (size) {
+                    nextchar = uart_getc_blocking(UART_ID);
+                    base64_feed(&decoder, (int) nextchar);
+                    if (decoder.count >= 8) {
+                        size -= 1;
+                        *buf++ = base64_read(&decoder);
+                    }
+                }
+                pcmaudio_play(&player);
+                blink_led();
+                blink_led();
+                break;
+            }
+            case 's':
+                cancel_all();
+                break;
+            default:
+                // Signal an error
+                blink_led();
+                blink_led();
+                blink_led();
+        }
+    }
+}
+
+int main() {
+    init();
+    while (true) {
+        dispatch_commands();
+    }
+}
