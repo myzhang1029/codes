@@ -20,11 +20,10 @@
 /* Basic usage:
  * - pcmaudio_init(struct, PIN);
  * - pcmaudio_play(initialized struct, length)
- * - pcmaudio_stop() to interrupt (safe to call multiple times)
+ * - pcmaudio_stop() to interrupt (safe to call multiple times on one player)
  *
  * if playback is finished, pcmaudio_stop() is automatically called,
  * and the buffer can be free()d.
- * Due to communication limitations, only one playback can be done at a time.
 */
 
 #include "hardware/pwm.h"
@@ -36,17 +35,16 @@
 // 8kHz: 125us per sample
 #define SAMPLE_TIME 125
 
-// If this is not NULL, it should not be overwritten
-static struct pcmaudio_player *pplayer = NULL;
-
 static bool update_pcm_callback(struct repeating_timer *t) {
-    if (pplayer->audio_length > pplayer->index) {
-        uint8_t next = pplayer->audio_buf[pplayer->index++];
-        pwm_set_gpio_level(pplayer->pin, next);
+    struct pcmaudio_player *player = (struct pcmaudio_player *) t->user_data;
+
+    if (player->audio_length > player->index) {
+        uint8_t next = player->audio_buf[player->index++];
+        pwm_set_gpio_level(player->pin, next);
         return true;
     }
     // the audio has been drained
-    pcmaudio_stop();
+    pcmaudio_stop(player);
     return false;
 }
 
@@ -68,29 +66,29 @@ void pcmaudio_fill(struct pcmaudio_player *player, uint8_t *buffer, uint32_t len
 }
 
 /// Start playing
+/// Returns `false` if playback has already started or a timer cannot be initiated.
 bool pcmaudio_play(struct pcmaudio_player *player) {
-    // Player lock to avoid overwriting `pcmaudio_player`
-    if (pplayer)
+    uint slice_num;
+    if (player->started)
         return false;
-    pplayer = player;
-    uint slice_num = pwm_gpio_to_slice_num(player->pin);
+    slice_num = pwm_gpio_to_slice_num(player->pin);
     // 8-bit wraps
     pwm_set_wrap(slice_num, 255);
     pwm_set_gpio_level(player->pin, 1);
     pwm_set_enabled(slice_num, true);
-    add_repeating_timer_us(-(SAMPLE_TIME), update_pcm_callback, NULL, &player->pcm_timer);
+    // Must be before adding timer in case the audio is too short
     player->started = true;
-    return true;
+    return add_repeating_timer_us(-(SAMPLE_TIME), update_pcm_callback, player, &player->pcm_timer);
 }
 
 /// Make sure playback is stopped
-void pcmaudio_stop() {
-    if (pplayer && pplayer->started) {
-        cancel_repeating_timer(&pplayer->pcm_timer);
-        if (pplayer->free_buf)
-            free(pplayer->audio_buf);
-        pplayer->started = false;
-    }
-    pplayer = NULL;
+void pcmaudio_stop(struct pcmaudio_player *player) {
+    if (!player->started)
+        return;
+    // First cancel timer then free buffer
+    cancel_repeating_timer(&player->pcm_timer);
+    if (player->free_buf)
+        free(player->audio_buf);
+    player->started = false;
 }
 

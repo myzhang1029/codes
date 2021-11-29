@@ -42,6 +42,6 @@ struct pcmaudio_player {
 void pcmaudio_init(struct pcmaudio_player *player, uint pin);
 void pcmaudio_fill(struct pcmaudio_player *player, uint8_t *buffer, uint32_t length, bool free_buf);
 bool pcmaudio_play(struct pcmaudio_player *player);
-void pcmaudio_stop();
+void pcmaudio_stop(struct pcmaudio_player *player);
 
 #endif

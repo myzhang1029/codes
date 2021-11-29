@@ -77,7 +77,7 @@ static inline void cancel_all() {
     if (switch_timer_in_use)
         cancel_repeating_timer(&switch_timer);
     switch_timer_in_use = false;
-    pcmaudio_stop();
+    pcmaudio_stop(&player);
 }
 
 /// Toggle the switch
