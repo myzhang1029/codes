@@ -106,12 +106,6 @@ uint32_t uart_get_int5(uart_inst_t *uart) {
     return result;
 }
 
-void player_proc() {
-    pcmaudio_play(&player);
-    while (1)
-        tight_loop_contents();
-}
-
 /// Receive and dispatch commands
 /// (capitalized commands are background tasks, ARGs are uint8_t as a string)
 /// Commands:
@@ -147,9 +141,9 @@ void dispatch_commands() {
 #ifndef NO_EMBEDDED_AUDIO
             case 'R': {
                 pcmaudio_fill(&player, raw_audio, raw_audio_len, false);
+                blink_led();
+                blink_led();
                 pcmaudio_play(&player);
-                blink_led();
-                blink_led();
                 break;
             }
 #endif
@@ -168,9 +162,9 @@ void dispatch_commands() {
                         *buf++ = base64_read(&decoder);
                     }
                 }
+                blink_led();
+                blink_led();
                 pcmaudio_play(&player);
-                blink_led();
-                blink_led();
                 break;
             }
             case 's':
