@@ -49,7 +49,7 @@ struct repeating_timer switch_timer;
 struct pcmaudio_player player;
 
 /// Initialize all interfaces
-void init() {
+static inline void init() {
     uart_init(UART_ID, BAUD_RATE);
     gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
     gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
@@ -65,7 +65,7 @@ void init() {
 }
 
 /// Blink the onboard LED
-void blink_led() {
+static inline void blink_led() {
     gpio_put(PICO_DEFAULT_LED_PIN, 1);
     sleep_ms(50);
     gpio_put(PICO_DEFAULT_LED_PIN, 0);
@@ -73,7 +73,7 @@ void blink_led() {
 }
 
 /// Cancel all background tasks
-void cancel_all() {
+static inline void cancel_all() {
     if (switch_timer_in_use)
         cancel_repeating_timer(&switch_timer);
     switch_timer_in_use = false;
@@ -81,22 +81,26 @@ void cancel_all() {
 }
 
 /// Toggle the switch
-bool toggle_switch(struct repeating_timer *t) {
+static inline bool toggle_switch(struct repeating_timer *t) {
     switch_status = !switch_status;
     gpio_put(SWITCH_PIN, switch_status);
     return true;
 }
 
 /// Wait until a char is available on UART and read it
-uint8_t uart_getc_blocking(uart_inst_t *uart) {
+static inline uint8_t uart_getc_blocking(uart_inst_t *uart) {
     // Wait until stuff comes
-    while (!uart_is_readable(uart));
+    while (!uart_is_readable(uart))
+        tight_loop_contents();
     uint8_t result = uart_getc(uart);
+#ifdef ECHO_UART
+    uart_putc(uart, result);
+#endif
     return result;
 }
 
 /// Receive five ASCII digits and parse it as an integer (max 99999).
-uint32_t uart_get_int5(uart_inst_t *uart) {
+static inline uint32_t uart_get_int5(uart_inst_t *uart) {
     uint32_t result = 0;
     result += 10000 * (uart_getc_blocking(uart) - '0');
     result += 1000 * (uart_getc_blocking(uart) - '0');
@@ -106,82 +110,73 @@ uint32_t uart_get_int5(uart_inst_t *uart) {
     return result;
 }
 
-/// Receive and dispatch commands
+/// Dispatch commands
 /// (capitalized commands are background tasks, ARGs are uint8_t as a string)
 /// Commands:
 /// - 'l': Turn off the switch
 /// - 'h': Turn on the switch
 /// - 'B' ARG: Toggle the switch every ARG deciseconds
+/// - 'R' (optional): Play embedded audio
 /// - 'P' ARG DATA: Receive a blob of base64-encoded 8-bit 8kHz PCM audio, with
 ///                 a decoded size of ARG bytes, and play it on the speaker pin
 ///                 the padding '=' is not required.
 /// - 's': stop all background tasks
-void dispatch_commands() {
-    if (uart_is_readable(UART_ID)) {
-        blink_led();
-        uint8_t cmd = uart_getc(UART_ID);
-        switch (cmd) {
-            case 'l':
-                gpio_put(SWITCH_PIN, 0);
-                switch_status = 0;
-                break;
-            case 'h':
-                gpio_put(SWITCH_PIN, 1);
-                switch_status = 1;
-                break;
-            case 'B': {
-                uint32_t interval = uart_get_int5(UART_ID);
-                int32_t real_interval = interval * 100;
-                if (switch_timer_in_use)
-                    cancel_repeating_timer(&switch_timer);
-                add_repeating_timer_ms(real_interval, toggle_switch, NULL, &switch_timer);
-                switch_timer_in_use = true;
-                break;
-            }
-#ifndef NO_EMBEDDED_AUDIO
-            case 'R': {
-                pcmaudio_fill(&player, raw_audio, raw_audio_len, false);
-                blink_led();
-                blink_led();
-                pcmaudio_play(&player);
-                break;
-            }
-#endif
-            case 'P': {
-                uint8_t nextchar;
-                uint32_t size = uart_get_int5(UART_ID);
-                struct base64decoder decoder = BASE64_INITIALIZER;
-                uint8_t *buf = malloc(size);
-                pcmaudio_fill(&player, buf, size, true);
-
-                while (size) {
-                    nextchar = uart_getc_blocking(UART_ID);
-                    base64_feed(&decoder, (int) nextchar);
-                    if (decoder.count >= 8) {
-                        size -= 1;
-                        *buf++ = base64_read(&decoder);
-                    }
-                }
-                blink_led();
-                blink_led();
-                pcmaudio_play(&player);
-                break;
-            }
-            case 's':
-                cancel_all();
-                break;
-            default:
-                // Signal an error
-                blink_led();
-                blink_led();
-                blink_led();
+static inline void dispatch_commands(uint8_t cmd) {
+    switch (cmd) {
+        case 'l':
+            gpio_put(SWITCH_PIN, 0);
+            switch_status = 0;
+            break;
+        case 'h':
+            gpio_put(SWITCH_PIN, 1);
+            switch_status = 1;
+            break;
+        case 'B': {
+            uint32_t interval = uart_get_int5(UART_ID);
+            int32_t real_interval = interval * 100;
+            if (switch_timer_in_use)
+                cancel_repeating_timer(&switch_timer);
+            add_repeating_timer_ms(real_interval, toggle_switch, NULL, &switch_timer);
+            switch_timer_in_use = true;
+            break;
         }
+#ifndef NO_EMBEDDED_AUDIO
+        case 'R': {
+            pcmaudio_fill(&player, raw_audio, raw_audio_len, false);
+            pcmaudio_play(&player);
+            break;
+        }
+#endif
+        case 'P': {
+            uint8_t nextchar;
+            uint32_t size = uart_get_int5(UART_ID);
+            struct base64decoder decoder = BASE64_INITIALIZER;
+            uint8_t *buf = malloc(size);
+            pcmaudio_fill(&player, buf, size, true);
+
+            while (size) {
+                nextchar = uart_getc_blocking(UART_ID);
+                base64_feed(&decoder, (int) nextchar);
+                if (decoder.count >= 8) {
+                    size -= 1;
+                    *buf++ = base64_read(&decoder);
+                }
+            }
+            pcmaudio_play(&player);
+            break;
+        }
+        case 's':
+            cancel_all();
+            break;
+        default:
+            // Signal an error
+            blink_led();
+            blink_led();
     }
 }
 
 int main() {
     init();
-    while (true) {
-        dispatch_commands();
-    }
+    while (true)
+        dispatch_commands(uart_getc_blocking(UART_ID));
 }
