@@ -156,7 +156,9 @@ static inline void dispatch_commands(uint8_t cmd) {
 
             while (size) {
                 nextchar = uart_getc_blocking(UART_ID);
-                base64_feed(&decoder, (int) nextchar);
+                if (!base64_feed(&decoder, (int) nextchar))
+                    // Cancels the operation if invalid characters are found
+                    return;
                 if (decoder.count >= 8) {
                     size -= 1;
                     *buf++ = base64_read(&decoder);
