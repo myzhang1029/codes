@@ -1,13 +1,31 @@
-// PCM Audio Player
-//
-// Basic usage:
-// pcmaudio_init(struct, PIN);
-// pcmaudio_play(initialized struct, length)
-//
-// if playback is finished, pcmaudio_stop() is automatically called,
-// and the queue is free()d.
-//
-// Due to communication limitations, only one playback can be done at a time.
+/* PCM Audio Player for Raspberry Pi Pico */
+/*
+ *  pcm.c
+ *  Copyright (C) 2021 Zhang Maiyun <myzhang1029@hotmail.com>
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/* Basic usage:
+ * - pcmaudio_init(struct, PIN);
+ * - pcmaudio_play(initialized struct, length)
+ * - pcmaudio_stop() to interrupt (safe to call multiple times)
+ *
+ * if playback is finished, pcmaudio_stop() is automatically called,
+ * and the buffer can be free()d.
+ * Due to communication limitations, only one playback can be done at a time.
+*/
 
 #include "hardware/pwm.h"
 #include "malloc.h"
