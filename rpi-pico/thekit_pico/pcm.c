@@ -71,6 +71,8 @@ bool pcmaudio_play(struct pcmaudio_player *player) {
     uint slice_num;
     if (player->started)
         return false;
+    if (player->audio_buf == NULL)
+        return false;
     slice_num = pwm_gpio_to_slice_num(player->pin);
     // 8-bit wraps
     pwm_set_wrap(slice_num, 255);

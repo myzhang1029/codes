@@ -39,7 +39,6 @@
 #define SWITCH_PIN 22
 // Pin for audio output
 #define SPEAKER_PIN 26
-#define QUEUE_SIZE_MAX 2048
 
 bool switch_timer_in_use = false;
 // 1 means high
@@ -47,6 +46,9 @@ bool switch_status = 1;
 struct repeating_timer switch_timer;
 // Speaker stuff
 struct pcmaudio_player player;
+// Buffer for received data
+uint8_t *received_buf = NULL;
+uint32_t received_size;
 
 /// Initialize all interfaces
 static inline void init() {
@@ -110,17 +112,52 @@ static inline uint32_t uart_get_int5(uart_inst_t *uart) {
     return result;
 }
 
+/// Fill `received_buf` and `received_size` from UART
+/// Returns `false` on failure and `received_buf` is reset to NULL
+static inline bool fill_receiving_buf() {
+    uint32_t size = uart_get_int5(UART_ID);
+    struct base64decoder decoder = BASE64_INITIALIZER;
+    uint8_t *buf;
+
+    // Make sure the previous stuff is free()d before overwriting
+    if (received_buf)
+        free(received_buf);
+    // Allocate after free() to avoid some OOM
+    buf = malloc(size);
+    received_buf = buf;
+    received_size = size;
+    if (buf == NULL)
+        return false;
+
+    while (size) {
+        uint8_t nextchar = uart_getc_blocking(UART_ID);
+        if (!base64_feed(&decoder, (int)nextchar)) {
+            // Cancels the rest if invalid characters are found
+            free(received_buf);
+            received_buf = NULL;
+            return false;
+        }
+        if (decoder.count >= 8) {
+            size -= 1;
+            *buf++ = base64_read(&decoder);
+        }
+    }
+    return true;
+}
+
 /// Dispatch commands
-/// (capitalized commands are background tasks, ARGs are uint8_t as a string)
+/// (capitalized commands are background tasks, ARG is a ASCII 5-digit uint32_t)
 /// Commands:
 /// - 'l': Turn off the switch
 /// - 'h': Turn on the switch
-/// - 'B' ARG: Toggle the switch every ARG deciseconds
+/// - 'g' ARG DATA: Receive a blob of base64-encoded bytes of a decoded length
+///                 of ARG bytes. The padding '=' is not required. Repeated
+///                 use overwrites the previous information.
+/// - 'c': Clear the received data.
+/// - 'P': Play the received data as 8-bit 8kHz PCM audio on the speaker pin.
 /// - 'R' (optional): Play embedded audio
-/// - 'P' ARG DATA: Receive a blob of base64-encoded 8-bit 8kHz PCM audio, with
-///                 a decoded size of ARG bytes, and play it on the speaker pin
-///                 the padding '=' is not required.
-/// - 's': stop all background tasks
+/// - 'B' ARG: Toggle the switch every ARG deciseconds
+/// - 's': Stop all background tasks
 static inline void dispatch_commands(uint8_t cmd) {
     switch (cmd) {
         case 'l':
@@ -131,6 +168,21 @@ static inline void dispatch_commands(uint8_t cmd) {
             gpio_put(SWITCH_PIN, 1);
             switch_status = 1;
             break;
+        case 'g':
+            fill_receiving_buf();
+            break;
+        case 'c':
+            if (received_buf) {
+                free(received_buf);
+                received_buf = NULL;
+            }
+            break;
+        case 'P':
+            // free() handled by 'c' command
+            pcmaudio_fill(&player, received_buf, received_size, false);
+            pcmaudio_play(&player);
+            break;
+
         case 'B': {
             uint32_t interval = uart_get_int5(UART_ID);
             int32_t real_interval = interval * 100;
@@ -147,26 +199,6 @@ static inline void dispatch_commands(uint8_t cmd) {
             break;
         }
 #endif
-        case 'P': {
-            uint8_t nextchar;
-            uint32_t size = uart_get_int5(UART_ID);
-            struct base64decoder decoder = BASE64_INITIALIZER;
-            uint8_t *buf = malloc(size);
-            pcmaudio_fill(&player, buf, size, true);
-
-            while (size) {
-                nextchar = uart_getc_blocking(UART_ID);
-                if (!base64_feed(&decoder, (int) nextchar))
-                    // Cancels the operation if invalid characters are found
-                    return;
-                if (decoder.count >= 8) {
-                    size -= 1;
-                    *buf++ = base64_read(&decoder);
-                }
-            }
-            pcmaudio_play(&player);
-            break;
-        }
         case 's':
             cancel_all();
             break;
