@@ -213,7 +213,7 @@ def main() -> None:
     if len(sys.argv) == 2 and sys.argv[1] == "record":
         temp = thekit.get_temp()
         date = datetime.utcnow().replace(microsecond=0).isoformat() + ".00Z"
-        data = json.dumps({"date": date, "tempC": temp}, indent=2)
+        data = json.dumps({"date": date, "tempC": temp})
         (Path.home() / "temperatures.ldjson").open("at").write(data + "\n")
         sys.exit(0)
 
