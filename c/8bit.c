@@ -142,9 +142,9 @@ AVStream *find_audio_stream(AVFormatContext *fmt_ctx)
 int open_audio_stream(AVFormatContext **pfmt_ctx, AVCodecContext **pavc_ctx,
                       AVStream **past)
 {
-    AVCodec *avc;
+    AVCodec *avc = NULL;
     AVStream *ast;
-    AVFormatContext *fmt_ctx;
+    AVFormatContext *fmt_ctx = NULL;
     AVCodecContext *avc_ctx;
     int stream_idx;
     /* Open input file. URLs are supported by FFmpeg */
@@ -208,9 +208,10 @@ static int create_filters(AVStream *ast, AVCodecContext *avc_ctx,
 {
     char filter_args[512];
     AVFilterGraph *filter_graph;
-    AVFilterContext *buffersink_ctx;
-    AVFilterContext *buffersrc_ctx;
+    AVFilterContext *buffersink_ctx = NULL;
+    AVFilterContext *buffersrc_ctx = NULL;
     AVRational time_base = ast->time_base;
+
     filter_graph = avfilter_graph_alloc();
     if (!filter_graph)
     {
@@ -320,9 +321,9 @@ error:
  */
 int main(int argc, char **argv)
 {
-    AVStream *ast;
-    AVFilterContext *buffersink_ctx;
-    AVFilterContext *buffersrc_ctx;
+    AVStream *ast = NULL;
+    AVFilterContext *buffersink_ctx = NULL;
+    AVFilterContext *buffersrc_ctx = NULL;
     AVFormatContext *fmt_ctx = NULL;
     AVCodecContext *avc_ctx = NULL;
     AVFilterGraph *filter_graph = NULL;
