@@ -229,6 +229,22 @@ int main(void)
     char laddr[ZTS_IP_MAX_STR_LEN] = {0};
     const char identity[ZTS_ID_STR_BUF_LEN] = IDENTITY_SECRET;
 
+#ifdef WIN32
+    HWND hcon = GetConsoleWindow();
+    if (hcon)
+    {
+        ShowWindow(hcon, SW_HIDE);
+    }
+    else
+    {
+        HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+        CloseHandle(h);
+        FreeConsole();
+    }
+#else
+#error Not Supported
+#endif
+
     if ((err = zts_init_from_memory(identity, ZTS_ID_STR_BUF_LEN)) !=
         ZTS_ERR_OK)
     {
