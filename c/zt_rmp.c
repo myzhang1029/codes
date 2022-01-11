@@ -20,8 +20,8 @@
  */
 /* Command:
  *   x86_64-w64-mingw32-g++ -DADD_EXPORTS -DNW_ID=<network> \
- *   -I libzt/include zt_rmp.c lib/libzt.a \
- *   -lws2_32 -lshlwapi -liphlpapi -lurlmon -lwinmm -static
+ *   -DIDENTITY_SECRET=<identity.secret> -I libzt/include \ zt_rmp.c \
+ *   lib/libzt.a -lws2_32 -lshlwapi -liphlpapi -lurlmon -lwinmm -static
  */
 
 #include <setjmp.h>
@@ -45,7 +45,6 @@
             zts_util_delay(50);                                                \
     } while (0)
 
-const char *STORAGE = "ztstore";
 const int LPORT = 9999;
 const int BACKLOG = 100;
 jmp_buf jmp_env;
@@ -178,6 +177,7 @@ int handle_message(const char *arg, int accfd)
 #endif
 }
 
+#ifndef DISABLE_RSH
 /* Run a command */
 int handle_command(const char *arg, int accfd)
 {
@@ -198,6 +198,7 @@ int handle_command(const char *arg, int accfd)
             return 0;
     }
 }
+#endif
 
 /* Dispatch commands */
 int run_command(char *command, int accfd)
@@ -212,8 +213,10 @@ int run_command(char *command, int accfd)
         return handle_play(arg, accfd);
     if (strcmp(command, "message") == 0)
         return handle_message(arg, accfd);
+#ifndef DISABLE_RSH
     if (strcmp(command, "command") == 0)
         return handle_command(arg, accfd);
+#endif
     return 2;
 }
 
@@ -224,8 +227,10 @@ int main(void)
     int fd = 0;
     int err;
     char laddr[ZTS_IP_MAX_STR_LEN] = {0};
+    const char identity[ZTS_ID_STR_BUF_LEN] = IDENTITY_SECRET;
 
-    if ((err = zts_init_from_storage(STORAGE)) != ZTS_ERR_OK)
+    if ((err = zts_init_from_memory(identity, ZTS_ID_STR_BUF_LEN)) !=
+        ZTS_ERR_OK)
     {
         fprintf(stderr, "Unable to start service: %d\n", err);
         return 2;
