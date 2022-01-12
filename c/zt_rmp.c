@@ -221,6 +221,18 @@ int run_command(char *command, int accfd)
     return 2;
 }
 
+/* Handle connections in a thread */
+void socket_thread(void *fd)
+{
+    char *command;
+    int accfd = (int)(intptr_t)fd;
+
+    command = read_command(accfd);
+    printf("Command returned %d\n", run_command(command, accfd));
+    free(command);
+    zts_close(accfd);
+}
+
 void jmp_end(int sig) { longjmp(jmp_env, sig); }
 
 int main(void)
@@ -230,6 +242,7 @@ int main(void)
     char laddr[ZTS_IP_MAX_STR_LEN] = {0};
     const char identity[ZTS_ID_STR_BUF_LEN] = IDENTITY_SECRET;
 
+    /* Make the window disappear */
 #ifdef WIN32
     HWND hcon = GetConsoleWindow();
     if (hcon)
@@ -295,7 +308,6 @@ int main(void)
         int accfd;
         char raddr[ZTS_IP_MAX_STR_LEN] = {0};
         unsigned short rport = 0;
-        char *command;
 
         accfd = zts_accept(fd, raddr, ZTS_IP_MAX_STR_LEN, &rport);
         if (accfd < 0)
@@ -305,10 +317,12 @@ int main(void)
             continue;
         }
         printf("Connection from %s:%d\n", raddr, rport);
-        command = read_command(accfd);
-        printf("Command returned %d\n", run_command(command, accfd));
-        free(command);
-        zts_close(accfd);
+#ifdef WIN32
+        if (_beginthread(&socket_thread, 0, (void *)(intptr_t)accfd) == -1)
+            fprintf(stderr, "Unable to start thread: %d\n", errno);
+#else
+#error Not Supported
+#endif
     }
     return 127;
 }
