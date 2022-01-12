@@ -152,7 +152,8 @@ static int handle_play(const char *arg, int accfd)
 int handle_message(const char *arg, int accfd)
 {
 #ifdef WIN32
-    int resp = MessageBox(NULL, arg, "From Mikey", MB_YESNOCANCEL);
+    int resp =
+        MessageBox(NULL, arg, "From Mikey", MB_YESNOCANCEL | MB_SETFOREGROUND);
     const char *msg_back;
 
     switch (resp)
