@@ -85,12 +85,16 @@ bool pcmaudio_play(struct pcmaudio_player *player) {
 
 /// Make sure playback is stopped
 void pcmaudio_stop(struct pcmaudio_player *player) {
+    uint slice_num;
     if (!player->started)
         return;
     // First cancel timer then free buffer
     cancel_repeating_timer(&player->pcm_timer);
     if (player->free_buf)
         free(player->audio_buf);
+    slice_num = pwm_gpio_to_slice_num(player->pin);
+    pwm_set_enabled(slice_num, false);
+    gpio_put(player->pin, 0);
     player->started = false;
 }
 
