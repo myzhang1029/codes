@@ -1,0 +1,94 @@
+#!/bin/sh
+#
+#  mactk - MAC toolkit: various commands for network social-engineering
+#  Copyright (C) 2022 Zhang Maiyun <myzhang1029@hotmail.com>
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+
+# Get MAC vendor
+get_mac_vendor()
+{
+    curl http://api.macvendors.com/"$1"
+}
+
+# Get MAC address from IP or hostname
+get_mac()
+{
+    MAC_REGEX='[a-fA-F0-9]\{1,2\}\(:[a-fA-F0-9]\{1,2\}\)\{5\}'
+    arp_out="$(arp -n "$1" | grep -io "$MAC_REGEX")"
+    ndp_out="$(ndp "$1" | grep -io "$MAC_REGEX")"
+
+    if [ "$arp_out" = "$ndp_out" ]
+    then
+        # arping is slower, don't use unless necessary
+        if [ "$ndp_out" = "" ]
+        then
+            ndp_out="$(arping -c3 "$1"  | grep -io "$MAC_REGEX" | tail -n1)"
+        fi
+        echo "$ndp_out"
+    # Use the non-empty one if there is one
+    elif [ "$ndp_out" = "" ]
+    then
+        echo "$arp_out"
+    else
+        echo "$ndp_out"
+    fi
+}
+
+# Takes an input of format (avahi-resolve -a) $IP <SPACE> $HOSTNAME
+# and add a third or fourth column of the MAC addresses
+resolve_all()
+{
+    # Read the input line by line
+    while IFS= read -r line
+    do
+        ip=$(echo "$line" | awk '{print $1}')
+        hn=$(echo "$line" | awk '{print $2}')
+        # Get MAC from the IP
+        mac1="$(get_mac "$ip")"
+        # Double check if that host name still point to the same IP
+        mac2="$(get_mac "$hn")"
+
+        if [ "$mac1" = "$mac2" ]
+        then
+            printf "%s\t%s\t%s\n" "$ip" "$hn" "$mac1" | tee -a m
+        else
+            # Problem: the host has changed its IP or hostname
+            printf "%s\t%s\t%s\t%s\n" "$ip" "$hn" "$mac1" "$mac2" | tee -a m
+        fi
+    done
+}
+
+COMMAND="$1"
+shift
+
+while [ "$#" -ge 1 ]
+do
+    case "$COMMAND" in
+        m)
+            get_mac "$1"
+            ;;
+        v)
+            get_mac_vendor "$1"
+            # Conform to rate limit
+            sleep 0.5
+            echo
+            ;;
+        r)
+            resolve_all < "$1"
+            ;;
+    esac
+    shift
+done
