@@ -22,21 +22,17 @@
 # ip or arp and ndp
 # curl or wget
 # arping, nbtscan, nmblookup, ping6
-# tr, grep, sed, awk, sort, uniq
+# tr, grep, awk, sort, uniq
 
 # We use REGEX instead of parsing the fields so that we get nothing if the
 # link is incomplete, instead of some non-MAC nonsense.
 MAC_REGEX='[a-fA-F0-9]\{1,2\}\(:[a-fA-F0-9]\{1,2\}\)\{5\}'
 IP4_REGEX='\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}'
-PING_TO_IP_SED='s/.*[(]\([0-9a-fA-F.:]*\)[)].*/\1/'
 
 # Pad MAC addresses with 0 if they are omitted
 _pad_mac()
 {
-    sed 's/^\([0-9A-Fa-f]\):/0\1:/;
-    s/:\([0-9A-Fa-f]\)$/:0\1/;
-    s/\([^0-9A-Fa-f]\)\([0-9A-Fa-f]\):/\10\2:/g;
-    s/\([^0-9A-Fa-f]\)\([0-9A-Fa-f]\):/\10\2:/g'
+    awk -F'[:-]' '{printf "%02s:%02s:%02s:%02s:%02s:%02s\n", $1, $2, $3, $4, $5, $6}'
 }
 
 # Check whether a command is present
@@ -106,13 +102,18 @@ _resolve_hostname()
         # Deal with potential multiple answers
         printf "%s\n" "${result}" | head -n1
     else
-        ping -nqc1 "$1" | head -n1 | sed "${PING_TO_IP_SED}"
+        ping -nqc1 "$1" | head -n1 | awk -F'[()]' '{print $2}'
     fi
 }
 
 # Get MAC vendor
 get_mac_vendor()
 {
+    if [ -z "$1" ]
+    then
+        return
+    fi
+
     if _has curl
     then
         curl -sL http://api.macvendors.com/"$1"
@@ -122,13 +123,18 @@ get_mac_vendor()
     fi
     ret=$?
     # Conform to rate limit
-    sleep 0.5 2> /dev/null || true
+    sleep 0.8 2> /dev/null || true
     return "${ret}"
 }
 
 # Get MAC address from IP or hostname
 get_mac()
 {
+    if [ -z "$1" ]
+    then
+        return
+    fi
+
     # Try to discover the link for IPv6, arping takes care of this case for IPv4
     if _is_ipv6 "$1" && _has ping6
     then
@@ -185,6 +191,11 @@ get_mac()
 # Get IPv4 address from MAC
 get_ipv4()
 {
+    if [ -z "$1" ]
+    then
+        return
+    fi
+
     if _has ip
     then
         result="$(ip neigh | grep "\<$1\>" | grep -io "${IP4_REGEX}")"
@@ -238,10 +249,8 @@ _get_mac2()
 resolve_all()
 {
     # Read the input line by line
-    while IFS= read -r line
+    while read -r ip hn
     do
-        ip="$(printf "%s" "${line}" | awk '{print $1}')"
-        hn="$(printf "%s" "${line}" | awk '{print $2}')"
         printf "%s\t%s\t" "${ip}" "${hn}"
         _get_mac2 "${ip}" "${hn}"
     done
@@ -266,14 +275,10 @@ scan_ips()
         tmp_file="$(mktemp)"
         printf "%s\n" "$@" | tr ' ' '\n' > "${tmp_file}"
         nbtscan -qf "${tmp_file}" | \
-            while IFS= read -r ln
+            while read -r ip hn _ _ mac
             do
-                ip="$(printf "%s\n" "${ln}" | awk '{print $1}')"
                 # Don't add .local at this step to ease resolution.
                 # macOS also does not respond to NetBIOS name queries over mDNS
-                hn="$(printf "%s\n" "${ln}" | awk '{print $2}')"
-                mac="$(printf "%s\n" "${ln}" | awk '{print $5}')"
-
                 if [ "${hn}" = "<unknown>" ]
                 then
                     # Skip it - we can't really do anything
