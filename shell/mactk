@@ -18,10 +18,16 @@
 #
 
 # For full functionality, have these commands handy:
-# avahi-resolve or dns-sd
+# avahi-resolve (linux only)
 # ip or arp and ndp
-# arping, nbtscan, curl, ping6
+# curl or wget
+# arping, nbtscan, ping6
 # tr, grep, sed, awk, sort, uniq
+
+# We use REGEX instead of parsing the fields so that we get nothing if the
+# link is incomplete, instead of some non-MAC nonsense.
+MAC_REGEX='[a-fA-F0-9]\{1,2\}\(:[a-fA-F0-9]\{1,2\}\)\{5\}'
+IP4_REGEX='\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}'
 
 # Pad MAC addresses with 0 if they are omitted
 _pad_mac()
@@ -36,6 +42,44 @@ _pad_mac()
 _has()
 {
     which "$1" > /dev/null 2>&1
+}
+
+# Check if $1 is not a hostname
+# We are currently not trying to match IPv6 addresses with regex but
+# instead we check if a colon is present
+_is_ipv6()
+{
+    [ -z "${1##*:*}" ]
+}
+
+_is_ipv4()
+{
+    printf "%s\n" "$1" | grep "$IP4_REGEX" > /dev/null 2>&1
+}
+
+_is_ip()
+{
+    _is_ipv6 "$1" || _is_ipv4 "$1"
+}
+
+# Resolve hostname to IP (either v4 or v6)
+_resolve_hostname()
+{
+    if [ -z "$1" ]
+    then
+        return
+    elif [ -z "${1##*".local"}" ] && _has avahi-resolve
+    then
+        avahi-resolve -n "$1" | awk '{print $2}'
+    elif [ -z "${1##*".local"}" ] && _has dig
+    then
+        dig +short -p 5353 @224.0.0.251 "$1"
+    elif _has dig
+    then
+        dig +short "$1"
+    else
+        ping -nqc1 "$1" | head -n1 | sed 's/.*[(]\([0-9a-fA-F.]*\)[)].*/\1/'
+    fi
 }
 
 # Get MAC vendor
@@ -56,12 +100,8 @@ get_mac_vendor()
 # Get MAC address from IP or hostname
 get_mac()
 {
-    # We use REGEX instead of parsing the fields so that we get nothing if the
-    # link is incomplete, instead of some non-MAC nonsense.
-    MAC_REGEX='[a-fA-F0-9]\{1,2\}\(:[a-fA-F0-9]\{1,2\}\)\{5\}'
-
     # Try to discover the link for IPv6, arping takes care of this case for IPv4
-    if _has ping6
+    if _is_ipv6 "$1" && _has ping6
     then
         ping6 -nqc1 "$1" > /dev/null 2>&1
     fi
@@ -71,8 +111,15 @@ get_mac()
     if _has ip
     then
         # Prefer `ip` regardless
+        # `ip` command does not support hostnames
+        if ! _is_ip "$1"
+        then
+            target="$(_resolve_hostname "$1")"
+        else
+            target="$1"
+        fi
         # This command returns matches on any interfaces
-        result="$(ip neigh show "$1" | \
+        result="$(ip neigh show "$target" | \
             grep -io "$MAC_REGEX" | \
             # So we dedupe
             sort | uniq | \
@@ -97,7 +144,7 @@ get_mac()
 
     # arping is slower, don't use unless necessary (i.e. we have to discover that device)
     # arping does not work for IPv6, but ndisc6 would require us to specify an interface
-    if [ -z "$result" ] && _has arping
+    if [ -z "$result" ] && _has arping && ! _is_ipv6 "$1"
     then
         result="$(arping -c3 "$1" | grep -io "$MAC_REGEX" | tail -n1)"
     fi
@@ -108,8 +155,6 @@ get_mac()
 # Get IPv4 address from MAC
 get_ipv4()
 {
-    IP4_REGEX='\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}'
-
     if _has ip
     then
         result="$(ip neigh | grep "\<$1\>" | grep -io "$IP4_REGEX")"
@@ -132,18 +177,24 @@ _get_mac2()
 {
     # Get MAC from the IP
     mac1="$(get_mac "$1")"
-    # Double check if that host name still point to the same IP
-    mac2="$(get_mac "$2")"
     
-    if [ "$mac1" = "$mac2" ] || [ -z "$mac2" ]
+    # Double check if that hostname still point to the same IP
+    ip2="$(_resolve_hostname "$2")"
+    if [ "$ip2" = "$ip" ]
     then
         printf "%s\n" "$mac1"
-    elif [ -z "$mac1" ]
-    then
-        printf "%s\n" "$mac2"
     else
-        # Problem: the host has changed its IP or hostname
-        printf "%s\t%s\n" "$mac1" "$mac2"
+        mac2="$(get_mac "$ip2")"
+        if [ "$mac1" = "$mac2" ] || [ -z "$mac2" ]
+        then
+            printf "%s\n" "$mac1"
+        elif [ -z "$mac1" ]
+        then
+            printf "%s\n" "$mac2"
+        else
+            # Problem: the host has changed its IP or hostname
+            printf "%s\t%s\n" "$mac1" "$mac2"
+        fi
     fi
 }
 
@@ -166,6 +217,7 @@ resolve_all()
 # avahi-resolve supports IPv6, but nbtscan doesn't
 scan_ips()
 {
+    # TODO: Implement discovery with dns-sd?
     if _has avahi-resolve
     then
         avahi_out="$(avahi-resolve -a "$@" | resolve_all)"
