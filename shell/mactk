@@ -274,6 +274,12 @@ scan_ips()
                 hn="$(printf "%s\n" "${ln}" | awk '{print $2}')"
                 mac="$(printf "%s\n" "${ln}" | awk '{print $5}')"
 
+                if [ "${hn}" = "<unknown>" ]
+                then
+                    # Skip it - we can't really do anything
+                    continue
+                fi
+
                 if [ -z "${mac}" ]
                 then
                     mac="$(_get_mac2 "${ip}" "${hn}")"
