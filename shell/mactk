@@ -21,13 +21,14 @@
 # avahi-resolve (linux only)
 # ip or arp and ndp
 # curl or wget
-# arping, nbtscan, ping6
+# arping, nbtscan, nmblookup, ping6
 # tr, grep, sed, awk, sort, uniq
 
 # We use REGEX instead of parsing the fields so that we get nothing if the
 # link is incomplete, instead of some non-MAC nonsense.
 MAC_REGEX='[a-fA-F0-9]\{1,2\}\(:[a-fA-F0-9]\{1,2\}\)\{5\}'
 IP4_REGEX='\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}'
+PING_TO_IP_SED='s/.*[(]\([0-9a-fA-F.:]*\)[)].*/\1/'
 
 # Pad MAC addresses with 0 if they are omitted
 _pad_mac()
@@ -68,17 +69,44 @@ _resolve_hostname()
     if [ -z "$1" ]
     then
         return
-    elif [ -z "${1##*".local"}" ] && _has avahi-resolve
+    fi
+    # The default resolver can deal with a lot of the cases and is fast
+    if _has dig
     then
-        avahi-resolve -n "$1" | awk '{print $2}'
-    elif [ -z "${1##*".local"}" ] && _has dig
+        result="$(dig +short "$1")" || result=""
+    fi
+    # nbtscan -> NetBIOS names have no dots and is always UPPER CASE
+    if [ -z "${result}" ] && [ -n "${1##*"."*}" ] && [ -n "${1##*[a-z]*}" ]
     then
-        dig +short -p 5353 @224.0.0.251 "$1"
-    elif _has dig
+        if _has nmblookup
+        then
+            # nmblookup output errors to stdout. fix that
+            result="$(nmblookup "$1")" || result=""
+            result="$(printf "%s\n" "${result}" | awk '{print $1}')"
+        fi
+        if [ -z "${result}" ] && _has dig
+        then
+            # macOS does not respond to this
+            # dig also output errors to stdout. fix that
+            result="$(dig +short +noedns -p 5355 @224.0.0.252 "$1")" || result=""
+        fi
+    elif [ -z "${1##*".local"}" ]
     then
-        dig +short "$1"
+        if _has avahi-resolve
+        then
+            result="$(avahi-resolve -n "$1" | awk '{print $2}')" || result=""
+        fi
+        if [ -z "${result}" ] && _has dig
+        then
+            result="$(dig +short -p 5353 @224.0.0.251 "$1")" || result=""
+        fi
+    fi
+    if [ -n "${result}" ]
+    then
+        # Deal with potential multiple answers
+        printf "%s\n" "${result}" | head -n1
     else
-        ping -nqc1 "$1" | head -n1 | sed 's/.*[(]\([0-9a-fA-F.]*\)[)].*/\1/'
+        ping -nqc1 "$1" | head -n1 | sed "${PING_TO_IP_SED}"
     fi
 }
 
@@ -147,7 +175,7 @@ get_mac()
     # arping does not work for IPv6, but ndisc6 would require us to specify an interface
     if [ -z "${result}" ] && _has arping && ! _is_ipv6 "$1"
     then
-        result="$(arping -c3 "$1" | grep -io "${MAC_REGEX}" | tail -n1)"
+        result="$(arping -C1 -c3 "$1" | grep -io "${MAC_REGEX}" | tail -n1)"
     fi
 
     printf "%s\n" "${result}"
@@ -183,7 +211,7 @@ _get_mac2()
     
     # Double check if that hostname still point to the same IP
     ip2="$(_resolve_hostname "$2")"
-    if [ "${ip2}" = "${ip}" ]
+    if [ "${ip2}" = "${ip}" ] || [ -z "${ip2}" ]
     then
         printf "%s\n" "${mac1}"
         return 0
@@ -241,7 +269,9 @@ scan_ips()
             while IFS= read -r ln
             do
                 ip="$(printf "%s\n" "${ln}" | awk '{print $1}')"
-                hn="$(printf "%s\n" "${ln}" | awk '{print $2}').local"
+                # Don't add .local at this step to ease resolution.
+                # macOS also does not respond to NetBIOS name queries over mDNS
+                hn="$(printf "%s\n" "${ln}" | awk '{print $2}')"
                 mac="$(printf "%s\n" "${ln}" | awk '{print $5}')"
 
                 if [ -z "${mac}" ]
@@ -251,9 +281,9 @@ scan_ips()
 
                 # Prefer mDNS hostnames over NBNS names
                 # because e.g. Macs have both, but the mDNS one is juicier
-                if [ -n "${in_avahi##*"|${ip}-${mac};"*}" ]
+                if [ -z "${in_avahi}" ] || [ -n "${in_avahi##*"|${ip}-${mac};"*}" ]
                 then
-                    printf "%s\t%s\t%s\n" "${ip}" "${hn}" "${mac}"
+                    printf "%s\t%s.local\t%s\n" "${ip}" "${hn}" "${mac}"
                 fi
             done
         rm "${tmp_file}"
