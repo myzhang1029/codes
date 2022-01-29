@@ -18,7 +18,7 @@
 extern crate clap;
 extern crate tempfile;
 
-use clap::{crate_version, App, Arg, ArgMatches};
+use clap::{crate_version, App, AppSettings, Arg, ArgMatches};
 use std::fs::{File, OpenOptions};
 use std::io;
 use std::io::Write;
@@ -28,44 +28,47 @@ use tempfile::TempDir;
 const PROGRAM_NAME: &str = "mkf";
 
 /// Parse program arguments and return `ArgMatches`
-fn parse_args<'a>() -> ArgMatches<'a> {
+fn parse_args() -> ArgMatches {
     App::new(PROGRAM_NAME)
         .version(crate_version!())
         .author("Zhang Maiyun <myzhang1029@hotmail.com")
         .about("Create a temporary file from stdin and execute command.")
+        .setting(AppSettings::InferLongArgs)
         .arg(
-            Arg::with_name("utility")
+            Arg::new("utility")
                 .help("Execute utility with the captured stdin.")
                 .default_value("cat")
                 .index(1),
         )
         .arg(
-            Arg::with_name("arguments")
+            Arg::new("arguments")
                 .help("Arguments to utility.")
-                .multiple(true),
+                .index(2)
+                .allow_hyphen_values(true)
+                .multiple_values(true),
         )
         .arg(
-            Arg::with_name("suffix")
-                .short("s")
+            Arg::new("suffix")
+                .short('s')
                 .long("suffix")
                 .takes_value(true)
                 .help("Make sure the generated file has this suffix (with the leading dot if desired). It must not contain a slash."),
         )
         // Several arguments below are derived from xargs(1)
         .arg(
-            Arg::with_name("eofstr")
-                .short("E")
+            Arg::new("eofstr")
+                .short('E')
                 .takes_value(true)
                 .help("Use eofstr as a logical EOF marker. If specified, stdin will be read as text (instead of binary)."),
         )
         .arg(
-            Arg::with_name("replstr")
-                .short("I")
+            Arg::new("replstr")
+                .short('I')
                 .takes_value(true)
                 .help("Replace replstr with the full path to the generated temporary file."),
         )
         .arg(
-            Arg::with_name("reopen").short("o").help(
+            Arg::new("reopen").short('o').help(
                 "Reopen stdin as /dev/tty in the child process before executing the command.",
             ),
         )
