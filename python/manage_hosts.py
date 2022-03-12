@@ -88,16 +88,23 @@ class MacDatabase:
     def __getitem__(self, index: int) -> RecordType: ...
 
     @overload
-    def __getitem__(self, index: Iterable[int]) -> List[RecordType]: ...
+    def __getitem__(
+        self,
+        index: Union[slice, Iterable[Union[int, slice]]]
+    ) -> List[RecordType]: ...
 
     def __getitem__(
             self,
-            index: Union[int, Iterable[int]]
+            index: Union[int, slice, Iterable[Union[int, slice]]]
     ) -> Union[RecordType, List[RecordType]]:
-        """Get items from the database by index."""
-        if isinstance(index, int):
+        """Get items from the database by index, slice, or multiple indices."""
+        if isinstance(index, (int, slice)):
             return self._db[index]
-        return [self._db[i] for i in index]
+        # Unify slice and int to a 2-D array
+        nes = ((self._db[i],) if isinstance(i, int)
+               else self._db[i] for i in index)
+        # Flatten the 2-D array
+        return [itm for sli in nes for itm in sli]
 
     def __iter__(self) -> Iterable[RecordType]:
         return iter(self._db)
