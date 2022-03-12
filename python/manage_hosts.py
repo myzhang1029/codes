@@ -99,6 +99,9 @@ class MacDatabase:
             return self._db[index]
         return [self._db[i] for i in index]
 
+    def __iter__(self) -> Iterable[RecordType]:
+        return iter(self._db)
+
     @staticmethod
     def _jsonip_to_ip(
             jsonip: Union[str, IPv4Address, IPv6Address]
