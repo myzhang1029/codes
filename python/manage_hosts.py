@@ -23,9 +23,11 @@
 
 import json
 from ipaddress import IPv4Address, IPv6Address, ip_address
-from os import PathLike
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Set, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Set, Union, cast
+
+if TYPE_CHECKING:
+    from os import PathLike
 
 # Type for a host record
 JsonRecordType = Dict[str, Union[List[str]]]
@@ -68,7 +70,7 @@ class MacDatabase:
     same host. Otherwise, entries can be merged with `merge()`.
     """
 
-    def __init__(self, db_path: Union[str, PathLike[str]]):
+    def __init__(self, db_path: Union[str, "PathLike[str]"]):
         self._db_path = Path(db_path)
         if self._db_path.exists():
             self.open()
@@ -149,9 +151,10 @@ class MacDatabase:
         for index, entry in enumerate(self._db):
             if hostname in cast(List[str], entry["hostnames"]):
                 results.append(index)
-            elif fuzz and self._hostname_fuzz(hostname,
-                                              cast(str, entry["hostnames"])):
-                results.append(index)
+            elif fuzz:
+                for entry_hn in entry["hostnames"]:
+                    if self._hostname_fuzz(hostname, cast(str, entry_hn)):
+                        results.append(index)
         return results
 
     def find_indices_by_mac(self, mac: str) -> List[int]:
