@@ -24,7 +24,8 @@
 import json
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Set, Union, cast
+from typing import (TYPE_CHECKING, Any, Dict, Iterable, List, Set, Union, cast,
+                    overload)
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -78,6 +79,25 @@ class MacDatabase:
             self._db: List[RecordType] = []
         # Cache for reverse lookup
         self._mac_cache: Dict[str, List[int]] = {}
+
+    def __len__(self) -> int:
+        """Get the length of the database."""
+        return len(self._db)
+
+    @overload
+    def __getitem__(self, index: int) -> RecordType: ...
+
+    @overload
+    def __getitem__(self, index: Iterable[int]) -> List[RecordType]: ...
+
+    def __getitem__(
+            self,
+            index: Union[int, Iterable[int]]
+    ) -> Union[RecordType, List[RecordType]]:
+        """Get items from the database by index."""
+        if isinstance(index, int):
+            return self._db[index]
+        return [self._db[i] for i in index]
 
     @staticmethod
     def _jsonip_to_ip(
