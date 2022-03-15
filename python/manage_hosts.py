@@ -106,6 +106,25 @@ class MacDatabase:
         # Flatten the 2-D array
         return [itm for sli in nes for itm in sli]
 
+    def __delitem__(
+        self,
+        index: Union[int, slice, Iterable[Union[int, slice]]]
+    ) -> None:
+        """Delete items from the database by index, slice, or multiple indices."""
+        if isinstance(index, (int, slice)):
+            del self._db[index]
+            return
+        indices = []
+        for i in index:
+            if isinstance(i, int):
+                indices.append(i)
+            else:
+                # isinstance(i, slice)
+                indices += list(range(*i.indices(len(self._db))))
+        indices_unique = sorted(set(indices), reverse=True)
+        for i in indices_unique:
+            del self._db[i]
+
     def __iter__(self) -> Iterable[RecordType]:
         return iter(self._db)
 
@@ -166,7 +185,7 @@ class MacDatabase:
             base2 = two[:dash2] if dash2 != -1 else two
         except ValueError:
             base2 = two
-        return base1 == base2
+        return base1.lower() == base2.lower()
 
     def find_indices_by_hostname(
             self,
@@ -179,12 +198,10 @@ class MacDatabase:
         """
         results: List[int] = []
         for index, entry in enumerate(self._db):
-            if hostname in cast(List[str], entry["hostnames"]):
-                results.append(index)
-            elif fuzz:
-                for entry_hn in entry["hostnames"]:
-                    if self._hostname_fuzz(hostname, cast(str, entry_hn)):
-                        results.append(index)
+            for entry_hn in cast(List[str], entry["hostnames"]):
+                if hostname.lower() == entry_hn.lower() or (
+                        fuzz and self._hostname_fuzz(hostname, entry_hn)):
+                    results.append(index)
         return results
 
     def find_indices_by_mac(self, mac: str) -> List[int]:
