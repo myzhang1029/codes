@@ -1,0 +1,165 @@
+% Common premable commands for Zhang Maiyun's UWC CSC documents
+% Based on MikTeX article template
+% License: CC BY-SA 4.0
+
+% !TEX TS-program = xelatex
+% !BIB TS-program = biber
+% !TEX encoding = UTF-8 Unicode
+%TC: macro \usetikzlibrary [ignore]
+%TC: macro \usepgfplotslibrary [ignore]
+%TC: macro \pgfplotsset [ignore]
+%TC: macro \labauthor [ignore]
+%TC: macro \labpartners [ignore]
+%TC: macro \labdate [ignore]
+
+%%% Engine selection
+\usepackage{iftex}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+%\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% PACKAGES
+\usepackage{graphicx} % support the \includegraphics command and options
+\usepackage{booktabs} % for much better looking tables
+\usepackage{threeparttable} % three line style table with footnotes
+\usepackage{multirow} % multi row table cells
+%\usepackage{indentfirst} % optional, indent the first paragraph
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage[version=4]{mhchem} % typeset chemical formulas
+\usepackage{siunitx} % typeset SI units
+\usepackage{textcomp} % some other symbols
+\usepackage[level]{fmtcount}
+\usepackage{xcolor} % color names
+\usepackage{csquotes}
+\ifxetex{}
+  \usepackage{fontspec} % about Chinese fonts
+  \usepackage[slantfont, boldfont]{xeCJK}
+  \usepackage{polyglossia}
+  \setdefaultlanguage[variant=american]{english}
+\else
+  \usepackage[american]{babel}
+  \ifluatex{}
+    \usepackage{fontspec} % about Chinese fonts
+    \usepackage{luatexja-fontspec}
+  \else
+    \usepackage[utf8]{inputenc}
+  \fi
+\fi
+\usepackage[style=mla-new, backend=biber]{biblatex} % MLA8 format citation as required
+\usepackage{tikz} % drawing support
+\usetikzlibrary{calc} % tikz point calculations
+\usepackage{pgfplots} % plotting in tikz
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=1.17, compat/show suggested version=false}
+\usepgfplotslibrary{units}
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+\usepackage[hidelinks]{hyperref}
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper}
+\geometry{margin=1in} % for example, change the margins to 2 inches all round
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%% Chinese fonts selection
+\newcommand{\zmyCJKmacnew}{macosnew}
+\newcommand{\zmyCJKwinnew}{windowsnew}
+\newcommand{\zmyCJKmacold}{macosold}
+\newcommand{\zmyCJKwinold}{windowsold}
+\newcommand{\zmyCJKlinux}{linux}
+% Run this in documents requiring CJK fonts
+\newcommand{\zmyCJKenable}[1]{
+    % From ctex/fontset/ctex-fontset-*.def
+    \ifluatex{}
+      \let\setCJKmainfont\setmainjfont{}
+      \let\setCJKsansfont\setsansjfont{}
+      \let\setCJKmonofont\setmonojfont{}
+    \else\RequireXeTeX{}
+    \fi
+    % Fonts for macOS
+    \ifx#1\zmyCJKmacnew{}
+        % >= EL Capitan
+        \setCJKmainfont[UprightFont=* Light,BoldFont=* Bold,ItalicFont=Kaiti SC,BoldItalicFont=Kaiti SC Bold]{Songti SC}
+        \setCJKsansfont{PingFang SC}
+        \setCJKmonofont{STFangsong}
+    \else\ifx#1\zmyCJKmacold{}
+        % <= Yosemite
+        \setCJKmainfont[BoldFont=STHeiti,ItalicFont=STKaiti]{STSong}
+        \setCJKsansfont[BoldFont=STHeiti]{STXihei}
+        \setCJKmonofont{STFangsong}
+    % Fonts for Windows
+    \else\ifx#1\zmyCJKwinnew{}
+        % >= Vista
+        \setCJKmainfont[BoldFont=SimHei,ItalicFont=KaiTi]{SimSun}
+        \setCJKsansfont[BoldFont={* Bold}]{Microsoft YaHei}
+        \setCJKmonofont{FangSong}
+    \else\ifx#1\zmyCJKwinold{}
+        % <= XP
+        \setCJKmainfont[BoldFont=SimHei,ItalicFont=KaiTi_GB2312]{SimSun}
+        \setCJKsansfont{SimHei}
+        \setCJKmonofont{FangSong_GB2312}
+    \else\ifx#1\zmyCJKlinux{}
+        % Fonts for Ubuntu
+        \setCJKmainfont[BoldFont=WenQuanYi Zen Hei,ItalicFont=AR PL UKai CN]{AR PL UMing CN}
+        \setCJKsansfont{WenQuanYi Zen Hei}
+        \setCJKmonofont{AR PL UMing CN}
+    \else
+        \errmessage{Cannot find specified platform to select CJK fonts}
+    \fi\fi\fi\fi\fi
+}
+
+% Convenient centered three part table
+\newenvironment{ctpt}{\center\threeparttable}{\endthreeparttable\endcenter}
+
+% Circle any text from https://latex.org/forum/viewtopic.php?t=22367
+\newcommand*\circled[1]{\tikz[baseline= (char.base)]{
+  \node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
+
+% Theorems https://www.overleaf.com/learn/latex/Theorems_and_proofs
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+% Centered title from https://stackoverflow.com/a/3142372
+\newcommand{\mkctitle}{
+    \begin{titlepage}
+        \null{}  % Empty line
+        \nointerlineskip{}  % No skip for prev line
+        \vfill
+        \let\snewpage\newpage
+        \let\newpage \relax
+        \maketitle
+        \let\newpage\snewpage{}
+        \vfill
+        \break{} % page break
+    \end{titlepage}
+}
+
+\author{Maiyun Zhang}
