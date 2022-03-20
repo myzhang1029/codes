@@ -24,8 +24,8 @@
 import json
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from pathlib import Path
-from typing import (TYPE_CHECKING, Any, Dict, Iterable, List, Set, Union, cast,
-                    overload)
+from typing import (TYPE_CHECKING, Any, Dict, Iterable, List, Set, Tuple,
+                    Union, cast, overload)
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -38,15 +38,59 @@ RecordType = Dict[str, Union[Set[Union[IPv4Address, IPv6Address, str]]]]
 class JSONEncoder(json.JSONEncoder):
     """Encode JSON with IP and set support."""
 
+    def __init__(self, sort: bool = False, **kwargs: Any):
+        super().__init__(**kwargs)
+        self.sort = sort
+
     def default(self, o: Any) -> Union[List[Any], str, Any]:
         """JSON-serialize an object."""
         if isinstance(o, set):
-            return list(o)
+            if self.sort:
+                try:
+                    return sorted(o)
+                except TypeError:
+                    # Cannot sort IPv4 and IPv6 addresses
+                    v4s = {x for x in o if isinstance(x, IPv4Address)}
+                    v6s = o - v4s
+                    return sorted(v4s) + sorted(v6s)
+            else:
+                return list(o)
         if isinstance(o, IPv4Address):
             return "IP4/" + o.compressed
         if isinstance(o, IPv6Address):
             return "IP6/" + o.compressed
         return super().default(o)
+
+
+def jsonip_to_ip(
+        jsonip: Union[str, IPv4Address, IPv6Address]
+) -> Union[IPv4Address, IPv6Address]:
+    """Convert a serialized IP back to `IPvxAddress`."""
+    if isinstance(jsonip, (IPv4Address, IPv6Address)):
+        return jsonip
+    if jsonip[0:4] == "IP4/":
+        return IPv4Address(jsonip[4:])
+    if jsonip[0:4] == "IP6/":
+        return IPv6Address(jsonip[4:])
+    raise ValueError("Expecting an IP address with a IPx/ prefix")
+
+
+def hostname_fuzz(one: str, two: str) -> bool:
+    """See if two hostnames only differ in the part after the last -."""
+    dash1 = one.rfind("-")
+    dash2 = two.rfind("-")
+    # Only accept numeric suffixes, otherwise it is a part of the hostname
+    try:
+        _ = int(one[dash1:])
+        base1 = one[:dash1] if dash1 != -1 else one
+    except ValueError:
+        base1 = one
+    try:
+        _ = int(two[dash2:])
+        base2 = two[:dash2] if dash2 != -1 else two
+    except ValueError:
+        base2 = two
+    return base1.lower() == base2.lower()
 
 
 class MacDatabase:
@@ -71,6 +115,8 @@ class MacDatabase:
     same host. Otherwise, entries can be merged with `merge()`.
     """
 
+    __slots__ = ("_db", "_db_path", "_mac_cache")
+
     def __init__(self, db_path: Union[str, "PathLike[str]"]):
         self._db_path = Path(db_path)
         if self._db_path.exists():
@@ -78,7 +124,7 @@ class MacDatabase:
         else:
             self._db: List[RecordType] = []
         # Cache for reverse lookup
-        self._mac_cache: Dict[str, List[int]] = {}
+        self._mac_cache: Dict[str, Tuple[int, ...]] = {}
 
     def __len__(self) -> int:
         """Get the length of the database."""
@@ -110,7 +156,7 @@ class MacDatabase:
         self,
         index: Union[int, slice, Iterable[Union[int, slice]]]
     ) -> None:
-        """Delete items from the database by index, slice, or multiple indices."""
+        """Delete items by index, slice, or multiple indices and slices."""
         if isinstance(index, (int, slice)):
             del self._db[index]
             return
@@ -129,27 +175,14 @@ class MacDatabase:
         return iter(self._db)
 
     @staticmethod
-    def _jsonip_to_ip(
-            jsonip: Union[str, IPv4Address, IPv6Address]
-    ) -> Union[IPv4Address, IPv6Address]:
-        """Convert a serialized IP back to `IPvxAddress`."""
-        if isinstance(jsonip, (IPv4Address, IPv6Address)):
-            return jsonip
-        if jsonip[0:4] == "IP4/":
-            return IPv4Address(jsonip[4:])
-        if jsonip[0:4] == "IP6/":
-            return IPv6Address(jsonip[4:])
-        raise ValueError("Expecting an IP address with a IPx/ prefix")
-
     def _deserialize_and_check(
-            self,
             record: Union[JsonRecordType, RecordType]) -> RecordType:
         """Deserialize a single host record and check for its integrity."""
         if {"ips", "macs", "hostnames", "comments"} != set(record):
             raise ValueError("Invalid record")
         new_record: RecordType = {}
         ips = cast(List[str], record["ips"])
-        new_record["ips"] = {self._jsonip_to_ip(ip) for ip in ips}
+        new_record["ips"] = {jsonip_to_ip(ip) for ip in ips}
         new_record["macs"] = set(record["macs"])
         new_record["hostnames"] = set(record["hostnames"])
         new_record["comments"] = set(record["comments"])
@@ -164,33 +197,27 @@ class MacDatabase:
             data = json.load(database)
         self._db = [self._deserialize_and_check(host) for host in data]
 
-    def save(self) -> None:
-        """Save the database to the storage file."""
-        with open(self._db_path, "w", encoding="utf-8") as database:
-            json.dump(self._db, database, cls=JSONEncoder)
+    def save(
+            self,
+            sort: bool = False,
+            db_path: Union[None, str, "PathLike[str]"] = None) -> None:
+        """Save the database to the storage file.
 
-    @staticmethod
-    def _hostname_fuzz(one: str, two: str) -> bool:
-        """See if two hostnames only differ in the part after the last -."""
-        dash1 = one.rfind("-")
-        dash2 = two.rfind("-")
-        # Only accept numeric suffixes, otherwise it is a part of the hostname
-        try:
-            _ = int(one[dash1:])
-            base1 = one[:dash1] if dash1 != -1 else one
-        except ValueError:
-            base1 = one
-        try:
-            _ = int(two[dash2:])
-            base2 = two[:dash2] if dash2 != -1 else two
-        except ValueError:
-            base2 = two
-        return base1.lower() == base2.lower()
+        If `sort` is `True`, sets are sorted before serialized. This operation
+        makes saving slower but may help when comparing two databases.
+
+        If `db_path` is not None, the current db_path is overriden and
+        subsequent saves will also go to the new path.
+        """
+        if db_path:
+            self._db_path = Path(db_path)
+        with open(self._db_path, "w", encoding="utf-8") as database:
+            database.write(JSONEncoder(sort).encode(self._db))
 
     def find_indices_by_hostname(
             self,
             hostname: str,
-            fuzz: bool = True) -> List[int]:
+            fuzz: bool = True) -> Tuple[int, ...]:
         """Look up hosts with `hostname`.
 
         If `fuzz` is `True`, hosts that only the "-n" suffixes are different
@@ -198,22 +225,18 @@ class MacDatabase:
         """
         results: List[int] = []
         for index, entry in enumerate(self._db):
-            for entry_hn in cast(List[str], entry["hostnames"]):
+            for entry_hn in cast(Set[str], entry["hostnames"]):
                 if hostname.lower() == entry_hn.lower() or (
-                        fuzz and self._hostname_fuzz(hostname, entry_hn)):
+                        fuzz and hostname_fuzz(hostname, entry_hn)):
                     results.append(index)
-        return results
+        return tuple(results)
 
-    def find_indices_by_mac(self, mac: str) -> List[int]:
+    def find_indices_by_mac(self, mac: str) -> Tuple[int, ...]:
         """Look up hosts with `mac`."""
-        if mac in self._mac_cache:
-            return self._mac_cache[mac]
-        results: List[int] = []
-        for index, entry in enumerate(self._db):
-            if mac in cast(List[str], entry["macs"]):
-                results.append(index)
-        self._mac_cache[mac] = results
-        return results
+        if mac not in self._mac_cache:
+            self._mac_cache[mac] = tuple(n for n, e in enumerate(
+                self._db) if mac in cast(Set[str], e["macs"]))
+        return self._mac_cache[mac]
 
     def add(
         self,
@@ -230,7 +253,7 @@ class MacDatabase:
         existing_records = self.find_indices_by_mac(mac)
         for index in existing_records:
             for this_hostname in self._db[index]["hostnames"]:
-                if self._hostname_fuzz(hostname, cast(str, this_hostname)):
+                if hostname_fuzz(hostname, cast(str, this_hostname)):
                     break
             else:
                 # Not found/matched
