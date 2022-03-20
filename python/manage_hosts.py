@@ -22,6 +22,9 @@
 """Manage MAC and IP databases."""
 
 import json
+import os
+import stat
+import tempfile
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from pathlib import Path
 from typing import (TYPE_CHECKING, Any, Dict, Iterable, List, Set, Tuple,
@@ -211,8 +214,23 @@ class MacDatabase:
         """
         if db_path:
             self._db_path = Path(db_path)
-        with open(self._db_path, "w", encoding="utf-8") as database:
+        # Make sure they are in the same filesystem
+        dirname = os.path.dirname(self._db_path)
+        # Atomic writes to prevent clearing the database
+        fd, path = tempfile.mkstemp(dir=dirname, text=True)
+        with os.fdopen(fd, "w", encoding="utf-8") as database:
             database.write(JSONEncoder(sort).encode(self._db))
+        oldstat = os.stat(self._db_path)
+        try:
+            os.replace(path, self._db_path)
+            os.chown(self._db_path, oldstat.st_uid, oldstat.st_gid)
+            os.chmod(self._db_path, stat.S_IMODE(oldstat.st_mode))
+        finally:
+            # Remove the temporary file if it failed
+            try:
+                os.remove(path)
+            except FileNotFoundError:
+                pass
 
     def find_indices_by_hostname(
             self,
