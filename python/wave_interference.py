@@ -32,7 +32,8 @@ def plot_interference(
     phase_diff: float = 0.0,
     x_width: float = 0.0,
     y_width: float = 0.0,
-    n_points: int = 250
+    n_points: int = 250,
+    adjust_amplitude: bool = False,
 ) -> Tuple[matplotlib.contour.ContourSet, matplotlib.colorbar.Colorbar]:
     """Plot 2-D point interference pattern.
 
@@ -51,6 +52,10 @@ def plot_interference(
         Defaults to 10 times the maximum of `wl` and `dis`.
     n_points : int, optional
         Number of points along both axes. Defaults to 250.
+    adjust_amplitude : bool, optional
+        Whether the amplitude decreases as the wave moves out in order to
+        conserve energy. This option may make the pattern less visible.
+        Defaults to False.
     """
     if y_width == 0.0:
         y_width = 10 * max(wl, dis)
@@ -62,6 +67,9 @@ def plot_interference(
     zh = np.sin(np.sqrt(xx**2 + (yy - dis / 2) ** 2) * 2 * np.pi / wl)
     zl = np.sin(np.sqrt(xx**2 + (yy + dis / 2) ** 2)
                 * 2 * np.pi / wl - phase_diff)
+    if adjust_amplitude:
+        zh = zh * (xx**2 + (yy - dis / 2) ** 2) ** (-1 / 4)
+        zl = zl * (xx**2 + (yy + dis / 2) ** 2) ** (-1 / 4)
     contour = plt.contour(x, y, zh + zl,
                           levels=512,
                           cmap=plt.cm.PiYG_r)
