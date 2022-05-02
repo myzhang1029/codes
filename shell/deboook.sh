@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #  debook - Convert double-sided book style PDFs to single paged PDFs
-#  Copyright (C) 2021 Zhang Maiyun <myzhang1029@hotmail.com>
+#  Copyright (C) 2021-2022 Zhang Maiyun <myzhang1029@hotmail.com>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,9 @@ usage()
     echo
     echo "Options:"
     echo "  -f: Assume the first page is the cover pages (default assumes center page)."
-    echo "  -v: Assume the layout is verticle (i.e. Two pages stack on each other)."
+    echo "  -v: Assume the layout is vertical (i.e. Two pages stack on each other)."
+    echo "  -s: Assume the original document is scanned according to the correct order,"
+    echo "      and only split each page into two. Ignores -f if specified."
     echo "  -q: Prevent additional information from being printed."
     echo "  -h: Print this help."
     echo
@@ -86,6 +88,7 @@ fi
 # Options
 fopt=0
 vopt=0
+sopt=0
 logger="echo"
 
 # Parse dashed arguments
@@ -106,6 +109,7 @@ do
         case "$thisopt" in
             f) fopt=1;;
             v) vopt=1;;
+            s) sopt=1;;
             q) logger="true";;
             h)
                 usage "$1"
@@ -147,20 +151,28 @@ output_dir="$(mktemp -d)"
 for idx in $(seq 1 "$npages")
 do
     # All page numbers start from 1
-    if [ "$fopt" -eq 0 ]
+    if [ "$sopt" -eq 1 ]
     then
+        # Simple mode, just split two pages
+        lopage="$((2 * idx - 1))"
+        hipage="$((2 * idx))"
+    elif [ "$fopt" -eq 0 ]
+    then
+        # Processing from the center
         lopage="$((npages - idx + 1))"
         hipage="$((npages + idx))"
     else
+        # Processing from the cover
         lopage="$idx"
         hipage="$((2 * npages - idx + 1))"
     fi
     # Get page geometry
     get_dim
     # If this page is odd-numbered (from the first page),
-    # then the larger-numbered page is on the left
+    # then the smaller-numbered page is on the left
     # else, it is on the right
-    if [ "$((idx % 2))" -eq 1 ]
+    # For simple mode, the smaller-numbered page is always on the left.
+    if [ "$sopt" -eq 1 ] || [ "$((idx % 2))" -eq 1 ]
     then
         # Odd-numbered page
         if [ "$vopt" -eq 0 ]
