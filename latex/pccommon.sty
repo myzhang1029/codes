@@ -1,5 +1,7 @@
-% Common premable commands for Zhang Maiyun's Pearson College UWC documents
+% Package for the common premable commands for
+% Zhang Maiyun's Pearson College UWC documents
 % Based on csc_common.tex
+% Options: bibstyle=stylename,paper=papergeom,cjkos=os
 % License: CC BY-SA 4.0
 
 % !TEX TS-program = xelatex
@@ -8,90 +10,98 @@
 %TC: macro \usetikzlibrary [ignore]
 %TC: macro \usepgfplotslibrary [ignore]
 %TC: macro \pgfplotsset [ignore]
-%TC: macro \labauthor [ignore]
-%TC: macro \labpartners [ignore]
-%TC: macro \labdate [ignore]
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pccommon}[2022/05/04 Pearson College UWC common]
+\RequirePackage{xkeyval}
+% Select the style of the citations
+\def\pc@bibstyle{mla}
+\DeclareOptionX{bibstyle}{\def\pc@bibstyle{#1}}
+% Select the size of the page
+\def\pc@paper{a4paper}
+\DeclareOptionX{paper}{\def\pc@paper{#1}}
+% Omit to disable CJK fonts, `linux' for GNU/Linux,
+% `winold' for Windows <= XP, `winnew' for Windows >= Vista,
+% `macold' for macOS <= Yosemite, `macnew' for macOS >= EL Capitan
+\DeclareOptionX{cjkos}{\def\pc@cjkos{#1}}
+\ProcessOptionsX
 
 %%% Engine selection
-\usepackage{iftex}
+\RequirePackage{iftex}
+\RequirePackage{ifthen}
 
 %%% SECTION TITLE APPEARANCE
-\usepackage{sectsty}
+\RequirePackage{sectsty}
 %\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
 % (This matches ConTeXt defaults)
 
 %%% PACKAGES
-\usepackage{graphicx} % support the \includegraphics command and options
-\usepackage{booktabs} % for much better looking tables
-\usepackage{threeparttable} % three line style table with footnotes
-\usepackage{multirow} % multi row table cells
-%\usepackage{indentfirst} % optional, indent the first paragraph
-\usepackage{array} % for better arrays (eg matrices) in maths
-\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
-\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
-\usepackage[normalem]{ulem}
-\usepackage{makecell}
-\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{mathtools}
-\usepackage[version=4]{mhchem} % typeset chemical formulas
-\usepackage{siunitx} % typeset SI units
-\usepackage{textcomp} % some other symbols
-\usepackage[level]{fmtcount}
-\usepackage{xcolor} % color names
-\usepackage{csquotes}
+\RequirePackage{graphicx} % support the \includegraphics command and options
+\RequirePackage{wrapfig} % for wrapping figures around text
+\RequirePackage{booktabs} % for much better looking tables
+\RequirePackage{threeparttable} % three line style table with footnotes
+\RequirePackage{multirow} % multi row table cells
+%\RequirePackage{indentfirst} % optional, indent the first paragraph
+\RequirePackage{array} % for better arrays (eg matrices) in maths
+\RequirePackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\RequirePackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\RequirePackage[normalem]{ulem}
+\RequirePackage{makecell}
+\RequirePackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{amsthm}
+\RequirePackage{mathtools}
+\RequirePackage[version=4]{mhchem} % typeset chemical formulas
+\RequirePackage{siunitx} % typeset SI units
+\RequirePackage{textcomp} % some other symbols
+\RequirePackage[level]{fmtcount}
+\RequirePackage{xcolor} % color names
+\RequirePackage{csquotes}
 \ifxetex{}
-  \usepackage{fontspec} % about Chinese fonts
-  \usepackage[slantfont, boldfont]{xeCJK}
-  \usepackage{polyglossia}
+  \RequirePackage{fontspec} % about Chinese fonts
+  \RequirePackage[slantfont, boldfont]{xeCJK}
+  \RequirePackage{polyglossia}
   \setdefaultlanguage[variant=american]{english}
 \else
-  \usepackage[american]{babel}
+  \RequirePackage[american]{babel}
   \ifluatex{}
-    \usepackage{fontspec} % about Chinese fonts
-    \usepackage{luatexja-fontspec}
+    \RequirePackage{fontspec} % about Chinese fonts
+    \RequirePackage{luatexja-fontspec}
   \else
-    \usepackage[utf8]{inputenc}
+    \RequirePackage[utf8]{inputenc}
   \fi
 \fi
-\usepackage[style=mla-new, backend=biber]{biblatex} % MLA8 format citation as required
-\usepackage{tikz} % drawing support
+\RequirePackage[style=\pc@bibstyle,backend=biber]{biblatex}
+\RequirePackage{tikz} % drawing support
 \usetikzlibrary{calc} % tikz point calculations
-\usepackage{pgfplots} % plotting in tikz
-\usepackage{pgfplotstable}
+\RequirePackage{pgfplots} % plotting in tikz
+\RequirePackage{pgfplotstable}
 \pgfplotsset{compat=1.17, compat/show suggested version=false}
 \usepgfplotslibrary{units}
 
 %%% ToC (table of contents) APPEARANCE
-\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
-\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\RequirePackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\RequirePackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
 \renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
 \renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
 
-\usepackage[hidelinks]{hyperref}
+\RequirePackage[hidelinks]{hyperref}
 
 %%% PAGE DIMENSIONS
-\usepackage{geometry} % to change the page dimensions
-\geometry{a4paper}
+\RequirePackage{geometry} % to change the page dimensions
+\geometry{\pc@paper}
 \geometry{margin=1in} % for example, change the margins to 2 inches all round
 
 %%% HEADERS & FOOTERS
-\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\RequirePackage{fancyhdr} % This should be set AFTER setting up the page geometry
 \pagestyle{fancy} % options: empty , plain , fancy
 \renewcommand{\headrulewidth}{0pt} % customise the layout...
 \lhead{}\chead{}\rhead{}
 \lfoot{}\cfoot{\thepage}\rfoot{}
 
-%% Chinese fonts selection
-\newcommand{\zmyCJKmacnew}{macosnew}
-\newcommand{\zmyCJKwinnew}{windowsnew}
-\newcommand{\zmyCJKmacold}{macosold}
-\newcommand{\zmyCJKwinold}{windowsold}
-\newcommand{\zmyCJKlinux}{linux}
-% Run this in documents requiring CJK fonts
-\newcommand{\zmyCJKenable}[1]{
+% To set up CJK fonts
+\ifthenelse{\isundefined\pc@cjkos}{}{
     % From ctex/fontset/ctex-fontset-*.def
     \ifluatex{}
       \let\setCJKmainfont\setmainjfont{}
@@ -99,36 +109,34 @@
       \let\setCJKmonofont\setmonojfont{}
     \else\RequireXeTeX{}
     \fi
-    % Fonts for macOS
-    \ifx#1\zmyCJKmacnew{}
+    \ifthenelse{\equal\pc@cjkos{macnew}}{
         % >= EL Capitan
         \setCJKmainfont[UprightFont=* Light,BoldFont=* Bold,ItalicFont=Kaiti SC,BoldItalicFont=Kaiti SC Bold]{Songti SC}
         \setCJKsansfont{PingFang SC}
         \setCJKmonofont{STFangsong}
-    \else\ifx#1\zmyCJKmacold{}
+    }{\ifthenelse{\equal\pc@cjkos{macold}}{
         % <= Yosemite
         \setCJKmainfont[BoldFont=STHeiti,ItalicFont=STKaiti]{STSong}
         \setCJKsansfont[BoldFont=STHeiti]{STXihei}
         \setCJKmonofont{STFangsong}
-    % Fonts for Windows
-    \else\ifx#1\zmyCJKwinnew{}
+    }{\ifthenelse{\equal\pc@cjkos{winnew}}{
         % >= Vista
         \setCJKmainfont[BoldFont=SimHei,ItalicFont=KaiTi]{SimSun}
         \setCJKsansfont[BoldFont={* Bold}]{Microsoft YaHei}
         \setCJKmonofont{FangSong}
-    \else\ifx#1\zmyCJKwinold{}
+    }{\ifthenelse{\equal\pc@cjkos{winold}}{
         % <= XP
         \setCJKmainfont[BoldFont=SimHei,ItalicFont=KaiTi_GB2312]{SimSun}
         \setCJKsansfont{SimHei}
         \setCJKmonofont{FangSong_GB2312}
-    \else\ifx#1\zmyCJKlinux{}
+    }{\ifthenelse{\equal\pc@cjkos{linux}}{
         % Fonts for Ubuntu
         \setCJKmainfont[BoldFont=WenQuanYi Zen Hei,ItalicFont=AR PL UKai CN]{AR PL UMing CN}
         \setCJKsansfont{WenQuanYi Zen Hei}
         \setCJKmonofont{AR PL UMing CN}
-    \else
-        \errmessage{Cannot find specified platform to select CJK fonts}
-    \fi\fi\fi\fi\fi
+    }{
+        \errmessage{Incorrect OS specification for CJK fonts: `\pc@cjkos'}
+    }}}}}
 }
 
 % Convenient centered three part table
