@@ -29,11 +29,13 @@
 #include "raw_audio.h"
 #endif
 
+#define ECHO_UART 1
+
 // UART for controlling interface
-#define UART_ID uart0
+#define UART_ID uart1
 #define BAUD_RATE 9600
-#define UART_TX_PIN 0
-#define UART_RX_PIN 1
+#define UART_TX_PIN 8
+#define UART_RX_PIN 9
 
 // Pin that the switch controls
 #define SWITCH_PIN 22
@@ -188,6 +190,9 @@ static inline void dispatch_commands(uint8_t cmd) {
             int32_t real_interval = interval * 100;
             if (switch_timer_in_use)
                 cancel_repeating_timer(&switch_timer);
+            if (real_interval == 0)
+                /* clear the timer if the interval is 0 */
+                break;
             add_repeating_timer_ms(real_interval, toggle_switch, NULL, &switch_timer);
             switch_timer_in_use = true;
             break;
