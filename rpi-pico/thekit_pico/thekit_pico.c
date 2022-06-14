@@ -124,7 +124,7 @@ static inline bool fill_receiving_buf() {
     // Make sure the previous stuff is free()d before overwriting
     if (received_buf)
         free(received_buf);
-    // Allocate after free() to avoid some OOM
+    // Allocate after free() to make OOM less likely
     buf = malloc(size);
     received_buf = buf;
     received_size = size;
