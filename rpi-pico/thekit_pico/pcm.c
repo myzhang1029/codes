@@ -51,6 +51,8 @@ static bool update_pcm_callback(struct repeating_timer *t) {
 /// Initialize player on the pin
 void pcmaudio_init(struct pcmaudio_player *player, uint pin) {
     gpio_set_function(pin, GPIO_FUNC_PWM);
+    /* for BJT amps */
+    gpio_set_drive_strength(pin, GPIO_DRIVE_STRENGTH_12MA);
     player->pin = pin;
     player->started = false;
 }
@@ -76,7 +78,7 @@ bool pcmaudio_play(struct pcmaudio_player *player) {
     slice_num = pwm_gpio_to_slice_num(player->pin);
     // 8-bit wraps
     pwm_set_wrap(slice_num, 255);
-    pwm_set_gpio_level(player->pin, 1);
+    pwm_set_gpio_level(player->pin, 0);
     pwm_set_enabled(slice_num, true);
     // Must be before adding timer in case the audio is too short
     player->started = true;
@@ -88,13 +90,25 @@ void pcmaudio_stop(struct pcmaudio_player *player) {
     uint slice_num;
     if (!player->started)
         return;
+    player->started = false;
     // First cancel timer then free buffer
+    // `cancel_repeating_timer` should work on already-cancelled timers
     cancel_repeating_timer(&player->pcm_timer);
     if (player->free_buf)
         free(player->audio_buf);
     slice_num = pwm_gpio_to_slice_num(player->pin);
+    // Disable PWM
+    pwm_set_chan_level(slice_num, pwm_gpio_to_channel(player->pin), 0);
     pwm_set_enabled(slice_num, false);
-    gpio_put(player->pin, 0);
-    player->started = false;
+    // Advance the counter by pulsing the PH_ADV bit in its CSR (4.1.19.3.24)
+    // If we make sure the counter passes 0 (the newly-set `level` once,
+    // we can keep the pin low when halten
+    while (pwm_hw->slice[slice_num].ctr != 1) {
+        // Called at most 254 times
+        hw_set_bits(&pwm_hw->slice[slice_num].csr, PWM_CH0_CSR_PH_ADV_BITS);
+        while (pwm_hw->slice[slice_num].csr & PWM_CH0_CSR_PH_ADV_BITS) {
+            tight_loop_contents();
+        }
+    }
 }
 
