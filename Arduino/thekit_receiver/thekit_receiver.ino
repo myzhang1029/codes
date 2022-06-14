@@ -42,6 +42,10 @@ void send_and_check(String data) {
     for (long index = 0; index < data.length(); ++index) {
         char c = data[index];
         Serial.print(c);
+        while (Serial.available() == 0) {
+            /* wait until Pico confirms */
+            delay(1);
+        }
         (void)(Serial.read() == c);
     }
 }
@@ -85,11 +89,8 @@ void setup(void) {
         else {
             Serial.print(F("g"));
             print_pad5(size);
-            for (uint8_t i = 0; i < server.args(); i++)
-                if (server.argName(i) == "payload")
-                    send_and_check(server.arg(i));
-            server.send(200, F("text/plain"),
-                        F("Sent ") + sizestr + F(" bytes."));
+            send_and_check(server.arg(F("plain")));
+            server.send(200, F("text/plain"), F("Sent ") + sizestr + F(" bytes."));
         }
     });
 
