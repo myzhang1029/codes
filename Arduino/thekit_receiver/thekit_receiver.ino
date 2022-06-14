@@ -44,7 +44,7 @@ void send_and_check(String data) {
         Serial.print(c);
         while (Serial.available() == 0) {
             /* wait until Pico confirms */
-            delay(1);
+            delay(0);
         }
         (void)(Serial.read() == c);
     }
@@ -71,17 +71,26 @@ void setup(void) {
                     F("This is an ESP8266 for Stephanie!"));
     });
 
-    server.on(F("/l"), [](){
+    server.on(F("/off"), [](){
         Serial.print(F("l"));
         server.send(200, F("text/plain"), F("Light turned off."));
     });
 
-    server.on(F("/h"), [](){
+    server.on(F("/on"), [](){
         Serial.print(F("h"));
         server.send(200, F("text/plain"), F("Light turned on."));
     });
 
-    server.on(UriBraces(F("/g/{}")), [](){
+    server.on(UriBraces(F("/send_raw")), [](){
+        if (server.method() != HTTP_POST)
+            server.send(405, "text/plain", "Method Not Allowed");
+        else {
+            send_and_check(server.arg(F("plain")));
+            server.send(200, F("text/plain"), F("Sent"));
+        }
+    });
+
+    server.on(UriBraces(F("/send/{}")), [](){
         String sizestr = server.pathArg(0);
         long size = sizestr.toInt();
         if (server.method() != HTTP_POST)
@@ -94,27 +103,27 @@ void setup(void) {
         }
     });
 
-    server.on(F("/c"), [](){
+    server.on(F("/clear_buffer"), [](){
         Serial.print(F("c"));
         server.send(200, F("text/plain"), F("Buffer cleared."));
     });
 
-    server.on(F("/s"), [](){
+    server.on(F("/clear_tasks"), [](){
         Serial.print(F("s"));
         server.send(200, F("text/plain"), F("Background tasks cleared."));
     });
 
-    server.on(F("/P"), [](){
+    server.on(F("/play_sent"), [](){
         Serial.print(F("P"));
         server.send(200, F("text/plain"), F("Playing background audio."));
     });
 
-    server.on(F("/R"), [](){
+    server.on(F("/play_rec"), [](){
         Serial.print(F("R"));
         server.send(200, F("text/plain"), F("Playing recorded audio."));
     });
 
-    server.on(UriBraces(F("/B/{}")), [](){
+    server.on(UriBraces(F("/blink/{}")), [](){
         String intstr = server.pathArg(0);
         long interval = intstr.toInt();
         Serial.print(F("B"));
