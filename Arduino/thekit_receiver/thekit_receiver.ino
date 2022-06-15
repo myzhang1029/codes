@@ -24,6 +24,9 @@
 #include <WiFiClient.h>
 #include <uri/UriBraces.h>
 
+// Timeout for the reply of "reliable send"
+const unsigned long HS_TIMEOUT = 100;
+
 ESP8266WebServer server(80);
 
 void print_pad5(long n) {
@@ -39,12 +42,20 @@ void print_pad5(long n) {
 }
 
 void send_and_check(String data) {
+    while (Serial.available()) {
+        // Make sure the incoming buffer is already empty
+        // otherwise this protocol won't work
+        (void)Serial.read();
+    }
     for (long index = 0; index < data.length(); ++index) {
         char c = data[index];
         Serial.print(c);
+        unsigned long timeout = millis() + HS_TIMEOUT;
         while (Serial.available() == 0) {
-            /* wait until Pico confirms */
+            // wait until Pico confirms
             delay(0);
+            if (millis() > timeout)
+                break;
         }
         (void)(Serial.read() == c);
     }
@@ -81,9 +92,11 @@ void setup(void) {
         server.send(200, F("text/plain"), F("Light turned on."));
     });
 
+    // For partitioned `send`. It is good practice to send an '-' after
+    // all data has been sent.
     server.on(UriBraces(F("/send_raw")), [](){
         if (server.method() != HTTP_POST)
-            server.send(405, "text/plain", "Method Not Allowed");
+            server.send(405, F("text/plain"), F("Method Not Allowed"));
         else {
             send_and_check(server.arg(F("plain")));
             server.send(200, F("text/plain"), F("Sent"));
@@ -94,12 +107,19 @@ void setup(void) {
         String sizestr = server.pathArg(0);
         long size = sizestr.toInt();
         if (server.method() != HTTP_POST)
-            server.send(405, "text/plain", "Method Not Allowed");
+            server.send(405, F("text/plain"), F("Method Not Allowed"));
         else {
             Serial.print(F("g"));
             print_pad5(size);
-            send_and_check(server.arg(F("plain")));
-            server.send(200, F("text/plain"), F("Sent ") + sizestr + F(" bytes."));
+            // An opportunistic check for OOM. It may not work.
+            delay(0);
+            if (Serial.read() == '-') {
+                server.send(500, F("text/plain"), F("Out of memory"));
+            }
+            else {
+                send_and_check(server.arg(F("plain")));
+                server.send(200, F("text/plain"), F("Sent ") + sizestr + F(" bytes."));
+            }
         }
     });
 

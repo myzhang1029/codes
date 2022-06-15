@@ -128,15 +128,18 @@ static inline bool fill_receiving_buf() {
     buf = malloc(size);
     received_buf = buf;
     received_size = size;
-    if (buf == NULL)
+    if (buf == NULL) {
+        // Send a "cancel" signal
+        uart_putc(UART_ID, '-');
         return false;
+    }
 
     while (size) {
         uint8_t nextchar = uart_getc_blocking(UART_ID);
         if (!base64_feed(&decoder, (int)nextchar)) {
-            // Cancels the rest if invalid characters are found
-            free(received_buf);
-            received_buf = NULL;
+            // Cancel the rest if invalid characters are found
+            // but keep the received portion
+            received_size -= size;
             return false;
         }
         if (decoder.count >= 8) {
