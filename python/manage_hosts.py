@@ -96,6 +96,14 @@ def hostname_fuzz(one: str, two: str) -> bool:
     return base1.lower() == base2.lower()
 
 
+def canonicalize_mac(mac: str) -> str:
+    """Convert MAC addresses to colon-separated lowercase."""
+    return ''.join(
+        ch + ("" if idx & 1 == 0 or idx == 11 else ":")
+        for idx, ch in enumerate(ch.lower() for ch in mac if ch.isalnum())
+    )
+
+
 class MacDatabase:
     """The database for storing MAC, IP, and hostname relationships.
 
@@ -195,6 +203,7 @@ class MacDatabase:
         """Open and load the storage.
 
         Can also be used to reload the file.
+        (WARNING: the original in-memory content is discarded!)
         """
         with open(self._db_path, encoding="utf-8") as database:
             data = json.load(database)
@@ -251,6 +260,7 @@ class MacDatabase:
 
     def find_indices_by_mac(self, mac: str) -> Tuple[int, ...]:
         """Look up hosts with `mac`."""
+        mac = canonicalize_mac(mac)
         if mac not in self._mac_cache:
             self._mac_cache[mac] = tuple(n for n, e in enumerate(
                 self._db) if mac in cast(Set[str], e["macs"]))
@@ -279,7 +289,7 @@ class MacDatabase:
             # Matched
             self._db[index]["ips"].add(ipaddr)
             self._db[index]["hostnames"].add(hostname)
-            self._db[index]["macs"].add(mac)
+            self._db[index]["macs"].add(canonicalize_mac(mac))
             self._db[index]["comments"].update(comments)
             # We assume previous records are all unique and correct
             break
@@ -324,7 +334,7 @@ class MacDatabase:
             comment = [fields[-1][comment_pos+1:].strip()]
             fields[-1] = fields[-1][:comment_pos-1].strip()
         for mac in fields[2:]:
-            self.add(ipaddr, hostname, mac, comment)
+            self.add(ipaddr, hostname, canonicalize_mac(mac), comment)
 
     def get_db(self) -> List[RecordType]:
         """Get the underlying database."""
