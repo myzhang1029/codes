@@ -21,3 +21,4 @@ add_compile_options(-Ofast
 )
 
 add_subdirectory(thekit_pico)
+add_subdirectory(differential_watt_meter)
