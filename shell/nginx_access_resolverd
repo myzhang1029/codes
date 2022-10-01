@@ -17,8 +17,10 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+# Set in nginx.conf:
+# access_log syslog:server=unix:/dev/log,tag=ngx_access;
 
-INPUT=/var/log/nginx/access.log
+
 OUTPUT=/var/log/nginx/access_froms.log
 
 # stdin for ssh
@@ -59,7 +61,12 @@ resolve_ip_ctx() {
     echo "$(date -Iseconds), $1 is $(resolve_ip "$1")"
 }
 
-stdbuf -oL -eL tail -n0 -f "$INPUT" | stdbuf -oL -eL cut -f1 -d\  | while read -r
+# Stream the log, parse into IP addresses, merge adjacent dups, and process
+stdbuf -oL journalctl -n0 -fu nginx -o cat | \
+    stdbuf -oL sed "s/^$(hostname) ngx_access: \(\([0-9]*\.\)\{3\}[0-9]*\).*/\1/" | \
+    stdbuf -oL grep -o '[0-9.]*' | \
+    stdbuf -oL uniq | \
+    while read -r
 do
     echo "Resolving $REPLY"
     resolve_ip_ctx "$REPLY" | tee -a "$OUTPUT"
