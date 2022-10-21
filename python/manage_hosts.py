@@ -98,9 +98,18 @@ def hostname_fuzz(one: str, two: str) -> bool:
 
 def canonicalize_mac(mac: str) -> str:
     """Convert MAC addresses to colon-separated lowercase."""
+    # Keep alphanumeric characters
+    alnums = ''.join(ch.lower() for ch in mac if ch.isalnum())
+    # Sanity check
+    if len(alnums) != 12:
+        raise ValueError(f"'{mac}' does not appear to be a MAC address")
+    try:
+        _ = int(alnums, 16)
+    except ValueError:
+        raise ValueError(f"'{mac}' does not appear to be a MAC address")
     return ''.join(
         ch + ("" if idx & 1 == 0 or idx == 11 else ":")
-        for idx, ch in enumerate(ch.lower() for ch in mac if ch.isalnum())
+        for idx, ch in enumerate(alnums)
     )
 
 
@@ -147,19 +156,37 @@ class MacDatabase:
     @overload
     def __getitem__(
         self,
-        index: Union[slice, Iterable[Union[int, slice]]]
+        index: Union[slice, str, Iterable[Union[int, slice, str]]]
     ) -> List[RecordType]: ...
 
     def __getitem__(
             self,
-            index: Union[int, slice, Iterable[Union[int, slice]]]
+            index: Union[int, slice, str, Iterable[Union[int, slice, str]]]
     ) -> Union[RecordType, List[RecordType]]:
-        """Get items from the database by index, slice, or multiple indices."""
+        """Get items from the database by index, slice, MAC,
+        hostname, IP, or multiple indices."""
         if isinstance(index, (int, slice)):
             return self._db[index]
+        # MAC or hostname
+        # Find matching indices and return the corresponding items
+        if isinstance(index, (str, IPv4Address, IPv6Address)):
+            matches = self.find_indices_by_hostname(index, fuzz=False)
+            try:
+                matches += self.find_indices_by_mac(index)
+            except ValueError:
+                pass
+            try:
+                matches += self.find_indices_by_ipaddr(index)
+            except ValueError:
+                pass
+            return self[matches]
         # Unify slice and int to a 2-D array
-        nes = ((self._db[i],) if isinstance(i, int)
-               else self._db[i] for i in index)
+        nes = (
+            # Is an int, should give only one match
+            (self._db[i],) if isinstance(i, int) else
+            # Is a slice, a MAC, a hostname, or an IP
+            self[i] for i in index
+        )
         # Flatten the 2-D array
         return [itm for sli in nes for itm in sli]
 
@@ -258,6 +285,20 @@ class MacDatabase:
                     results.append(index)
         return tuple(results)
 
+    def find_indices_by_ipaddr(
+        self,
+        ipaddr: Union[IPv4Address, IPv6Address, str]
+    ) -> Tuple[int, ...]:
+        """Look up hosts that have `ipaddr` in its IP addresses."""
+        # Convert to `IPvXAddress` if we have a `str`
+        if isinstance(ipaddr, str):
+            ipaddr = ip_address(ipaddr)
+        results: List[int] = []
+        for index, entry in enumerate(self._db):
+            if ipaddr in entry["ips"]:
+                results.append(index)
+        return tuple(results)
+
     def find_indices_by_mac(self, mac: str) -> Tuple[int, ...]:
         """Look up hosts with `mac`."""
         mac = canonicalize_mac(mac)
@@ -268,12 +309,15 @@ class MacDatabase:
 
     def add(
         self,
-        ipaddr: Union[IPv4Address, IPv6Address],
+        ipaddr: Union[IPv4Address, IPv6Address, str],
         hostname: str,
         mac: str,
         comments: Iterable[str]
     ) -> None:
         """Add a new entry, potentially merging it."""
+        # Convert to `IPvXAddress` if we have a `str`
+        if isinstance(ipaddr, str):
+            ipaddr = ip_address(ipaddr)
         # Remove the mDNS .local suffix
         if hostname[-6:] == ".local":
             hostname = hostname[:-6]
