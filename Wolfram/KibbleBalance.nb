@@ -1,0 +1,705 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='WolframDesktop 13.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       161,          7]
+NotebookDataLength[     26672,        697]
+NotebookOptionsPosition[     22385,        621]
+NotebookOutlinePosition[     22820,        638]
+CellTagsIndexPosition[     22777,        635]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Planning a Kibble Balance", "Title",
+ CellChangeTimes->{{3.8724404583362617`*^9, 3.872440470788164*^9}, {
+  3.872440580356517*^9, 
+  3.872440583864925*^9}},ExpressionUUID->"41e70d95-91e6-4b3b-9c53-\
+eec2252259ea"],
+
+Cell[TextData[{
+ "Maiyun ",
+ Cell[BoxData[
+  FormBox[
+   SuperscriptBox["Zhang", "*"], TraditionalForm]],
+  FormatType->TraditionalForm,ExpressionUUID->
+  "082982fe-a1c9-4442-87a3-2026c4928922"]
+}], "Author",
+ CellChangeTimes->{{3.8724404905438967`*^9, 3.8724404964249907`*^9}, {
+  3.8725338267294807`*^9, 
+  3.8725338313338947`*^9}},ExpressionUUID->"d557c165-7c56-4507-8064-\
+d1a75a99631e"],
+
+Cell["*: Pearson College UWC, Victoria, BC V9C 4H7, Canada", "Affiliation",
+ CellChangeTimes->{{3.872533797318327*^9, 
+  3.872533870590481*^9}},ExpressionUUID->"d07fbd50-0f48-4070-9b2d-\
+2969ab36609a"],
+
+Cell[CellGroupData[{
+
+Cell["Introduction", "Section",
+ CellChangeTimes->{{3.872440477121668*^9, 3.872440477296311*^9}, {
+  3.872440571441436*^9, 
+  3.872440573881756*^9}},ExpressionUUID->"e7921eb3-e802-40b4-abfa-\
+8327ff9ddb16"],
+
+Cell["\<\
+A Kibble balance is used to accurately measure gravitational force and \
+therefore define the kilogram. This paper describes the the process of making \
+and operating an amateur-grade Kibble balance.\
+\>", "Text",
+ CellChangeTimes->{{3.872532889909491*^9, 3.8725329119233294`*^9}, {
+  3.8725338760642853`*^9, 
+  3.8725339111389093`*^9}},ExpressionUUID->"07ed6c37-0d45-446a-b134-\
+db63445bf178"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Estimations", "Section",
+ CellChangeTimes->{{3.872532720603643*^9, 3.8725327253712263`*^9}, {
+  3.872532880421317*^9, 
+  3.872532882353087*^9}},ExpressionUUID->"23b4d925-2e5f-41c6-b819-\
+138a1aad4918"],
+
+Cell[CellGroupData[{
+
+Cell["Magnetic Force", "Subsection",
+ CellChangeTimes->{{3.872532926941032*^9, 
+  3.872532931063486*^9}},ExpressionUUID->"652ab71a-d959-4b7a-962e-\
+0db56c41cdb8"],
+
+Cell["We are using some copper 32 AWG wire to make the coil.", "Text",
+ CellChangeTimes->{{3.872440473541831*^9, 3.872440475344185*^9}, {
+  3.872532565287272*^9, 3.872532569334902*^9}, {3.872532735780822*^9, 
+  3.872532754891801*^9}},ExpressionUUID->"3ce8f73a-b52b-4c5b-951e-\
+d8466babeabe"],
+
+Cell["Diameter:", "CodeText",
+ CellChangeTimes->{{3.872532757088397*^9, 
+  3.872532759839843*^9}},ExpressionUUID->"ceeb0284-5b11-4897-aaff-\
+cee197d6f0b4"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"dWire", "=", 
+  RowBox[{
+   TemplateBox[{"0.127", "\"mm\"", "millimeters", "\"Millimeters\""},
+    "Quantity"], " ", 
+   SuperscriptBox["92", 
+    FractionBox[
+     RowBox[{"36", "-", "32"}], "39"]]}]}]], "Input",
+ CellChangeTimes->{{3.872532574158716*^9, 3.872532576224245*^9}},
+ CellLabel->
+  "In[287]:=",ExpressionUUID->"26318e14-30c7-4a69-a41f-75a0ef987825"],
+
+Cell[BoxData[
+ TemplateBox[{
+  "0.20193790998675562`", "\"mm\"", "millimeters", "\"Millimeters\""},
+  "Quantity"]], "Output",
+ CellChangeTimes->{3.872532576770932*^9},
+ CellLabel->
+  "Out[287]=",ExpressionUUID->"12afba6c-81f8-422a-8165-c437dadbd280"]
+}, Open  ]],
+
+Cell["Cross-section area:", "CodeText",
+ CellChangeTimes->{{3.8725327618231297`*^9, 
+  3.872532769722283*^9}},ExpressionUUID->"df15fde4-ada2-4bdd-9af0-\
+1333f929c57a"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"wireArea", " ", "=", " ", 
+  RowBox[{"Pi", " ", 
+   SuperscriptBox[
+    RowBox[{"(", 
+     FractionBox["dWire", "2"], ")"}], "2"]}]}]], "Input",
+ CellChangeTimes->{{3.872532638081406*^9, 3.8725326942061243`*^9}},
+ CellLabel->
+  "In[292]:=",ExpressionUUID->"bd84fe85-ef65-4e7c-b562-d65b0399bed2"],
+
+Cell[BoxData[
+ TemplateBox[{"0.03202768847263626`", 
+   RowBox[{
+     SuperscriptBox["\"mm\"", "2"]}], "millimeters squared", 
+   SuperscriptBox["\"Millimeters\"", "2"]},
+  "Quantity"]], "Output",
+ CellChangeTimes->{{3.872532645451398*^9, 3.872532657381199*^9}, 
+   3.872532695842697*^9},
+ CellLabel->
+  "Out[292]=",ExpressionUUID->"55faea4c-01ea-41f5-9887-8d25f356a778"]
+}, Open  ]],
+
+Cell["Resistivity:", "CodeText",
+ CellChangeTimes->{{3.872532776269939*^9, 
+  3.8725327785601482`*^9}},ExpressionUUID->"4d78d242-cba7-4469-afb5-\
+f6635434e32b"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"rWire", "[", "l_", "]"}], ":=", 
+  RowBox[{
+   FractionBox["l", "wireArea"], 
+   RowBox[{
+    TemplateBox[{"\"copper\"", 
+      RowBox[{"Entity", "[", 
+        RowBox[{"\"Element\"", ",", "\"Copper\""}], "]"}], 
+      "\"Entity[\\\"Element\\\", \\\"Copper\\\"]\"", "\"element\""},
+     "Entity"], "[", 
+    TemplateBox[{"\"resistivity\"", 
+      RowBox[{"EntityProperty", "[", 
+        RowBox[{"\"Element\"", ",", "\"Resistivity\""}], "]"}], 
+      "\"EntityProperty[\\\"Element\\\", \\\"Resistivity\\\"]\""},
+     "EntityProperty"], "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.872532703989233*^9, 3.872532706973415*^9}, {
+  3.87253278101021*^9, 3.872532798874069*^9}},
+ CellLabel->
+  "In[294]:=",ExpressionUUID->"4e597cbf-001e-4c55-9d81-8848893a5135"],
+
+Cell[TextData[{
+ "The circuit is powered at ",
+ Cell[BoxData[
+  FormBox[
+   TemplateBox[<|"boxes" -> FormBox[
+       RowBox[{"3.3", 
+         StyleBox["V", FontSlant -> "Plain"]}], TraditionalForm], 
+     "errors" -> {}, "input" -> "3.3\\mathrm{V}", "state" -> "Boxes"|>,
+    "TeXAssistantTemplate"], TraditionalForm]],ExpressionUUID->
+  "9d813694-006d-4cd6-91e7-748f246fcf42"],
+ " and there is a shunt of ",
+ Cell[BoxData[
+  FormBox[
+   TemplateBox[<|"boxes" -> FormBox[
+       RowBox[{"500", "\[CapitalOmega]"}], TraditionalForm], "errors" -> {}, 
+     "input" -> "500\\Omega", "state" -> "Boxes"|>,
+    "TeXAssistantTemplate"], TraditionalForm]],ExpressionUUID->
+  "bbd38386-164f-445d-bdb5-fed55964b2d9"],
+ " (",
+ Cell[BoxData[
+  FormBox[
+   TemplateBox[<|
+    "boxes" -> FormBox["0.1", TraditionalForm], "errors" -> {}, "input" -> 
+     "0.1", "state" -> "Boxes"|>,
+    "TeXAssistantTemplate"], TraditionalForm]],ExpressionUUID->
+  "cb702196-c8b9-48a4-895c-10c20336cee6"],
+ "%) in series with the coil. The magnetic flux density is approximately ",
+ Cell[BoxData[
+  FormBox[
+   TemplateBox[<|"boxes" -> FormBox[
+       RowBox[{"12100", 
+         StyleBox["G", FontSlant -> "Plain"]}], TraditionalForm], 
+     "errors" -> {}, "input" -> "12100\\mathrm{G}", "state" -> "Boxes"|>,
+    "TeXAssistantTemplate"], TraditionalForm]],ExpressionUUID->
+  "b7c4effc-4cf3-43ae-946f-d94c9a65990e"],
+ " according to the manufacturer. When the current is constant, there is no \
+induced voltage across the coil."
+}], "Text",
+ CellChangeTimes->{{3.872532817234672*^9, 3.872532819211088*^9}, {
+  3.872532954407391*^9, 3.8725330247086353`*^9}, {3.872533078736061*^9, 
+  3.872533092219883*^9}, {3.872533279538849*^9, 3.8725332843283873`*^9}, {
+  3.872533353591803*^9, 3.872533393407565*^9}, {3.872534888044283*^9, 
+  3.872534903133935*^9}},ExpressionUUID->"66675be4-fabb-41a0-a662-\
+189104f261af"],
+
+Cell[TextData[{
+ Cell[BoxData[
+  FormBox[
+   TemplateBox[<|"boxes" -> FormBox[
+       RowBox[{
+         StyleBox["F", "TI"], "\[LongEqual]", 
+         StyleBox["B", "TI"], 
+         StyleBox["I", "TI"], 
+         StyleBox["L", "TI"]}], TraditionalForm], "errors" -> {}, "input" -> 
+     "F=BIL", "state" -> "Boxes"|>,
+    "TeXAssistantTemplate"], TraditionalForm]],ExpressionUUID->
+  "22bb6108-e744-4a9d-a935-52b17fb44eaa"],
+ ":"
+}], "CodeText",
+ CellChangeTimes->{{3.872533094034635*^9, 
+  3.8725330947780743`*^9}},ExpressionUUID->"0edb877c-9789-41f4-9401-\
+ac9e1ca813b7"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"force", "[", "L_", "]"}], ":=", 
+  RowBox[{
+   TemplateBox[{"12100", "\"G\"", "gauss", "\"Gauss\""},
+    "Quantity"], 
+   FractionBox[
+    TemplateBox[{"3.3", "\"V\"", "volts", "\"Volts\""},
+     "Quantity"], 
+    RowBox[{
+     RowBox[{"rWire", "[", "L", "]"}], "+", " ", 
+     TemplateBox[{"500", "\"\[CapitalOmega]\"", "ohms", "\"Ohms\""},
+      "Quantity"]}]], "L"}]}]], "Input",
+ CellChangeTimes->{{3.8725330503318577`*^9, 3.872533108826518*^9}, {
+  3.8725331576593237`*^9, 3.872533191021793*^9}, {3.872533499587215*^9, 
+  3.8725335027807837`*^9}, {3.872533533029532*^9, 3.872533536582806*^9}},
+ CellLabel->
+  "In[311]:=",ExpressionUUID->"0ea06fe6-2fc7-45c5-9796-e12ccaf68a7f"],
+
+Cell["Force at infinity length:", "CodeText",
+ CellChangeTimes->{{3.872534290872671*^9, 
+  3.8725343026827517`*^9}},ExpressionUUID->"c8430c5a-c35c-4376-ae03-\
+fc3dc74ec739"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"UnitSimplify", "@", 
+  RowBox[{"Limit", "[", 
+   RowBox[{
+    RowBox[{"force", "[", 
+     RowBox[{"Quantity", "[", 
+      RowBox[{"x", ",", " ", "\"\<Meters\>\""}], "]"}], "]"}], ",", " ", 
+    RowBox[{"x", "->", "Infinity"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.872533448581112*^9, 3.872533487987554*^9}, {
+  3.872533534272293*^9, 3.872533535225902*^9}},
+ CellLabel->
+  "In[312]:=",ExpressionUUID->"67b8f94a-126c-4b47-8f1d-4b126ccab0d3"],
+
+Cell[BoxData[
+ TemplateBox[{"7.522738827719799`", "\"N\"", "newtons", "\"Newtons\""},
+  "Quantity"]], "Output",
+ CellChangeTimes->{{3.8725334514293633`*^9, 3.8725335044990177`*^9}, 
+   3.872533538026153*^9},
+ CellLabel->
+  "Out[312]=",ExpressionUUID->"6eda1893-2ac7-4c38-98f3-f09b4d71fe22"]
+}, Open  ]],
+
+Cell["Plot force vs. length of wire:", "CodeText",
+ CellChangeTimes->{{3.872534332249249*^9, 
+  3.872534344026527*^9}},ExpressionUUID->"48452efd-3d44-4600-9e1d-\
+f86ef3cc38ab"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Plot", "[", 
+  RowBox[{
+   RowBox[{"UnitConvert", "[", 
+    RowBox[{
+     RowBox[{"force", "[", 
+      RowBox[{"Quantity", "[", 
+       RowBox[{"x", ",", " ", "\"\<Meters\>\""}], "]"}], "]"}], ",", " ", 
+     "\"\<Millinewtons\>\""}], "]"}], ",", 
+   InterpretationBox[
+    DynamicModuleBox[{Typeset`open = False}, 
+     TemplateBox[{"Expression", "SequenceIcon", 
+       GridBox[{{
+          RowBox[{
+            TagBox["\"Head: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            TagBox["Sequence", "IconizedItem"]}]}, {
+          RowBox[{
+            TagBox["\"Length: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            TagBox["3", "IconizedItem"]}]}, {
+          RowBox[{
+            TagBox["\"Byte count: \"", "IconizedLabel"], "\[InvisibleSpace]", 
+            
+            TagBox["456", "IconizedItem"]}]}}, 
+        GridBoxAlignment -> {"Columns" -> {{Left}}}, DefaultBaseStyle -> 
+        "Column", 
+        GridBoxItemSize -> {
+         "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}], 
+       Dynamic[Typeset`open]},
+      "IconizedObject"]],
+    Sequence[{$CellContext`x, 10, 1000}, PlotLabel -> "Force vs. Wire Length",
+      AxesLabel -> {"Length/m", "Force/mN"}],
+    SelectWithContents->True,
+    Selectable->False]}], "]"}]], "Input",
+ CellChangeTimes->{{3.872533413331712*^9, 3.872533435778763*^9}, {
+  3.872533523404554*^9, 3.8725335237455397`*^9}, {3.8725335782096148`*^9, 
+  3.8725335783621492`*^9}, {3.8725341582454443`*^9, 3.872534276965055*^9}},
+ CellLabel->
+  "In[327]:=",ExpressionUUID->"e89704b5-8356-4726-bf22-688a9dfb83db"],
+
+Cell[BoxData[
+ GraphicsBox[{{{}, {}, 
+    TagBox[
+     {RGBColor[0.368417, 0.506779, 0.709798], AbsoluteThickness[1.6], Opacity[
+      1.], LineBox[CompressedData["
+1:eJwVxXk01AkAB/ARKbGIypHFlhzJteQK86VXKkZbuUIabMTT6pGmLaORM40Z
+MzYk7Mg1TebHSpRY7Rqa1fAkvZon29Y4O0nuGrv7x+d9votMOHxiFYlEovzn
+/8PbP1avIpnA1239vbA/jsBQ1czg3HUTPB26OuJ51B9/B4dz3ztug8zHc6/6
+tD+Of5akPj9lCiU/P1GYcSColoIgYsgcD9TK/R/TgxF17UeVkBYrjKpcWWfo
+cAxNrfHNwS32ENtxRE7eUbhb+Eqv4Sd3HOZYuZfR4/EPXWI3Qd6PJzSJo/c7
+GlSezctf5x5Cg1YlZ5cvA4kxjeNGxwIRrCI6mRiVgc1RxnaLRaGQNpFYq/k5
+6FPXq21zoyJZrfLrTjoT9RXLoz2vIpG0X0xN8chHS8P3pozzJ1Ak/6vHYAsX
+lr/u6s8ZiwH/gKgATwtA3l0ueJkVh4XEwenC0qvo6B74cHkpHhlqfm2zjkWI
+7g51GIpIQMjgqm7ztmI8czcKaJefBvPgwGKqfwnschZFjo6JqLrRLFHruo4Q
+IYnyLDsJiQOFqPAuQ5FmY4DPkzM4c6H4m8bmcuRG+WrHrj2LtLDOt04KPFA4
+2pPCIBpeN+qEldXz0E10JpXmn4OvlVicRKmARi1vU6PsZ8yL2VlBMxWIHzZz
+vW57AY9EA0c9ODdwUbFYyzomBQop5q/8jCsRqbRTcaKFDhuXDRby5kosf27l
++3xKhUVWU00juQqDnOQYT20G7pR2OWz9swrcTVVZp1sZyFdSCZX4VMNS25tx
+JjANX8Y7Sh+Jq7GDTlJmrqQhtsSDWuVbAydlDd+86ksIdm+WsXpqYLCGGx+F
+dGgKGyVLbrWITbbUo0ykw8s0QDZypxacUBeeamYGvCcquGNb+eiklo7fNszE
+QseLK2Z5fBx7svF+QlcmTo5qfuF+4WOgXTGWFJGFDOteG4XIm6jfuLaySiUb
+L+Lv1/v13kTMKKPl29psPHRuZujZCGAx6MdkeObAef5xk4QpwBFb+/dzEznQ
+eCNo2jglQLAS09wr8zJ0yF6/lR24ha49yx951rmgZvD3nBfcgltNB21yMBe9
+7B7LaOU6sFIXpMqnr8D2VN8iQuqwT+QtdtJl4uDwWYb17ToMp6ly3O8w8cPR
+5pkoJSFSwk30rQ7moXhmzCf0sBDp/CM2tnN5iJRR1ltUC3Eibt5wLZeF11LL
+gt4pIR5YHZJ3/MJCwmdIN38SQn9aMEwrYoGsoakQNyNEPy28dLyUhbiWd7Or
+54RwzezSe1jLwl2RVrLbshDqvIINWe0smC3VSCpXE7j71Gad0iQLtpTEr6H6
+BLSuXZ68/5aFWW7DpZrNBE6FycRJH1jQXdn+ZsqAwBZZYbZshgX38JHjmUYE
+8qa+KnXKWVhTIh2rMyEQqSpZSdvAhlarX/ScNYG2vm0vXXTY6He2XU+2JaDD
+vfj7tB4bNGleebYdAYmuPT3CiI090b1UXQcCjqYlS9jORnKfJN3ZhUD+5Ix0
+YQcbpEtyL4Yrgbd1lHsNNmxc1JSMPNxFgGevcM54JxsBeQf6Az0ILM+FBD13
+YiM+QlG/nEwgsLXJMd+VjY9DMXtHQaCBrr5pnzsb8+8vBOzwIqDqeXJ2hczG
+RPZu76TdBP4Fz65FdA==
+       "]]},
+     Annotation[#, "Charting`Private`Tag$340336#1"]& ]}, {}},
+  AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+  Axes->{True, True},
+  AxesLabel->{
+    FormBox[
+     TagBox["\"Length/m\"", HoldForm], TraditionalForm], 
+    FormBox[
+     TagBox["\"Force/mN\"", HoldForm], TraditionalForm]},
+  AxesOrigin->{0, 0},
+  DisplayFunction->Identity,
+  Frame->{{False, False}, {False, False}},
+  FrameLabel->{{None, None}, {None, None}},
+  FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+  GridLines->{None, None},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  ImagePadding->All,
+  Method->{
+   "DefaultBoundaryStyle" -> Automatic, 
+    "DefaultGraphicsInteraction" -> {
+     "Version" -> 1.2, "TrackMousePosition" -> {True, False}, 
+      "Effects" -> {
+       "Highlight" -> {"ratio" -> 2}, "HighlightPoint" -> {"ratio" -> 2}, 
+        "Droplines" -> {
+         "freeformCursorMode" -> True, 
+          "placement" -> {"x" -> "All", "y" -> "None"}}}}, "DefaultMeshStyle" -> 
+    AbsolutePointSize[6], "ScalingFunctions" -> None, 
+    "CoordinatesToolOptions" -> {"DisplayFunction" -> ({
+        (Identity[#]& )[
+         Part[#, 1]], 
+        (Identity[#]& )[
+         Part[#, 2]]}& ), "CopiedValueFunction" -> ({
+        (Identity[#]& )[
+         Part[#, 1]], 
+        (Identity[#]& )[
+         Part[#, 2]]}& )}},
+  PlotLabel->FormBox["\"Force vs. Wire Length\"", TraditionalForm],
+  PlotRange->{{10, 1000}, {0., 3873.725153074589}},
+  PlotRangeClipping->True,
+  PlotRangePadding->{{
+     Scaled[0.02], 
+     Scaled[0.02]}, {
+     Scaled[0.05], 
+     Scaled[0.05]}},
+  Ticks->{Automatic, Automatic}]], "Output",
+ CellChangeTimes->{{3.8725334299680653`*^9, 3.8725334366937923`*^9}, {
+   3.872533517188075*^9, 3.872533539967205*^9}, 3.872533579582423*^9, {
+   3.8725342047810087`*^9, 3.872534247988347*^9}, 3.872534350625651*^9},
+ CellLabel->
+  "Out[327]=",ExpressionUUID->"471a1dd8-0e50-4ea4-8b17-316499450386"]
+}, Open  ]],
+
+Cell["\<\
+As one can see, the measurable range increases as the length increases.\
+\>", "Text",
+ CellChangeTimes->{{3.872533553069005*^9, 
+  3.872533572058565*^9}},ExpressionUUID->"a550ffed-220b-49bc-9304-\
+454ccc79f1cd"],
+
+Cell["Example range at 200m:", "CodeText",
+ CellChangeTimes->{{3.872533740026*^9, 3.8725337466788893`*^9}, {
+  3.872533781739995*^9, 
+  3.872533782627859*^9}},ExpressionUUID->"a61562d4-0fa4-472c-94ad-\
+9e882dd387d9"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"UnitSimplify", "[", 
+  FractionBox[
+   RowBox[{"force", "[", 
+    TemplateBox[{"200", "\"m\"", "meters", "\"Meters\""},
+     "Quantity"], "]"}], 
+   TemplateBox[{"9.81", 
+     RowBox[{
+      "\"N\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", "\"kg\""}], 
+     "newtons per kilogram", 
+     FractionBox["\"Newtons\"", "\"Kilograms\""]},
+    "Quantity"]], "]"}]], "Input",
+ CellChangeTimes->{
+  3.872389041634804*^9, {3.8723894675911617`*^9, 3.872389623317383*^9}, {
+   3.8723897791692257`*^9, 3.8723897931965637`*^9}, 3.872533184164036*^9, {
+   3.872533663975922*^9, 3.872533702184554*^9}, {3.872533779636928*^9, 
+   3.872533779968101*^9}},
+ CellLabel->
+  "In[319]:=",ExpressionUUID->"9a10bcac-dd59-407a-94d7-2ac6e9d53207"],
+
+Cell[BoxData[
+ TemplateBox[{"0.13429948683724705`", "\"kg\"", "kilograms", "\"Kilograms\""},
+  
+  "Quantity"]], "Output",
+ CellChangeTimes->{{3.872389482885558*^9, 3.872389490209588*^9}, {
+   3.8723895394725723`*^9, 3.872389627656872*^9}, 3.872389799367951*^9, {
+   3.872533687971513*^9, 3.872533702466258*^9}, 3.872533783902728*^9},
+ CellLabel->
+  "Out[319]=",ExpressionUUID->"46512ac9-58f1-4384-a7c5-66d1ab9ffae4"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Instrument Parameters", "Section",
+ CellChangeTimes->{{3.872533722829096*^9, 
+  3.872533735661479*^9}},ExpressionUUID->"b1ca1f15-d2ae-48a6-b40e-\
+51760c077e06"],
+
+Cell[TextData[{
+ "To complete a measurement, one needs several parameters: ",
+ Cell[BoxData[
+  FormBox[
+   TemplateBox[<|"boxes" -> FormBox[
+       RowBox[{
+         StyleBox["m", "TI"], "\[LongEqual]", 
+         FractionBox[
+          RowBox[{
+            StyleBox["U", "TI"], 
+            StyleBox["I", "TI"]}], 
+          RowBox[{
+            StyleBox["g", "TI"], 
+            StyleBox["v", "TI"]}]]}], TraditionalForm], "errors" -> {}, 
+     "input" -> "m=\\frac{UI}{gv}", "state" -> "Boxes"|>,
+    "TeXAssistantTemplate"], TraditionalForm]],ExpressionUUID->
+  "659bc3c8-f884-46c4-ae3d-9829005f2de5"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.8725340199711847`*^9, 
+  3.872534064352476*^9}},ExpressionUUID->"ef3ad944-3d69-424e-a16a-\
+ccc3ee7f91ea"],
+
+Cell[CellGroupData[{
+
+Cell["Gravitational Acceleration", "Subsection",
+ CellChangeTimes->{{3.872534071956684*^9, 
+  3.87253407661174*^9}},ExpressionUUID->"53727ca2-a7b2-45a2-8863-\
+1b6262e4399f"],
+
+Cell[TextData[{
+ "Here, we use a pendulum to measure the acceleration due to gravity, ",
+ Cell[BoxData[
+  FormBox[
+   TemplateBox[<|"boxes" -> FormBox[
+       StyleBox["g", "TI"], TraditionalForm], "errors" -> {}, "input" -> "g", 
+     "state" -> "Boxes"|>,
+    "TeXAssistantTemplate"], TraditionalForm]],ExpressionUUID->
+  "ef33280d-bcff-4e7d-bb34-0d05446de12d"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.872534078249359*^9, 
+  3.872534116063821*^9}},ExpressionUUID->"81392329-fb31-490d-beb3-\
+6213c3f546a0"],
+
+Cell[TextData[{
+ "The period of the pendulum is a function of the length, ",
+ Cell[BoxData[
+  FormBox[
+   TemplateBox[<|"boxes" -> FormBox[
+       StyleBox["l", "TI"], TraditionalForm], "errors" -> {}, "input" -> "l", 
+     "state" -> "Boxes"|>,
+    "TeXAssistantTemplate"], TraditionalForm]],ExpressionUUID->
+  "76f94b8f-2b7e-4adf-a359-856f8f018eaf"],
+ ", angle of oscillation, ",
+ Cell[BoxData[
+  FormBox[
+   TemplateBox[<|
+    "boxes" -> FormBox["\[Theta]", TraditionalForm], "errors" -> {}, "input" -> 
+     "\\theta", "state" -> "Boxes"|>,
+    "TeXAssistantTemplate"], TraditionalForm]],ExpressionUUID->
+  "5d7ea6ce-4569-4dce-87b4-a0983d1a4cd8"],
+ ", and the local acceleration due to gravity, ",
+ Cell[BoxData[
+  FormBox[
+   TemplateBox[<|"boxes" -> FormBox[
+       StyleBox["g", "TI"], TraditionalForm], "errors" -> {}, "input" -> "g", 
+     "state" -> "Boxes"|>,
+    "TeXAssistantTemplate"], TraditionalForm]],ExpressionUUID->
+  "93bdeac8-d217-478e-9ea4-44b7c4111f91"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.872534406109181*^9, 
+  3.872534459427472*^9}},ExpressionUUID->"02006d6a-225f-4947-a370-\
+521fec764b76"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"PendulumPeriod", "[", 
+   RowBox[{"\[Theta]_", ",", " ", "l_", ",", " ", 
+    RowBox[{"iter_", ":", "2"}], ",", " ", 
+    RowBox[{"g_", ":", "9.81"}]}], "]"}], ":=", 
+  RowBox[{"2", "Pi", " ", 
+   RowBox[{"Sqrt", "[", 
+    FractionBox["l", "g"], "]"}], 
+   RowBox[{"Sum", "[", 
+    RowBox[{
+     RowBox[{
+      SuperscriptBox[
+       RowBox[{"Product", "[", 
+        RowBox[{
+         FractionBox[
+          RowBox[{
+           RowBox[{"2", "m"}], "-", "1"}], 
+          RowBox[{"2", "m"}]], ",", 
+         RowBox[{"{", 
+          RowBox[{"m", ",", " ", "1", ",", " ", "n"}], "}"}]}], "]"}], "2"], 
+      SuperscriptBox[
+       RowBox[{"Sin", "[", 
+        FractionBox["\[Theta]", "2"], "]"}], 
+       RowBox[{"2", "n"}]]}], ",", 
+     RowBox[{"{", 
+      RowBox[{"n", ",", " ", "0", ",", " ", "iter"}], "}"}]}], 
+    "]"}]}]}]], "Input",
+ CellChangeTimes->{{3.872439912981283*^9, 3.8724400475245323`*^9}, {
+  3.8724400783580713`*^9, 3.8724401009575853`*^9}, {3.872440145860672*^9, 
+  3.872440168278943*^9}, {3.872534468459661*^9, 3.87253448974717*^9}, {
+  3.8725347554611607`*^9, 
+  3.872534764240114*^9}},ExpressionUUID->"608ee8f3-b85e-4547-b974-\
+7b19417e7fdc"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"PendulumPeriod", "[", 
+  RowBox[{
+   RowBox[{
+    FractionBox["50", "180"], "Pi"}], ",", " ", 
+   FractionBox["1627", "1000"]}], "]"}]], "Input",
+ CellChangeTimes->{{3.872440048833096*^9, 3.87244005060446*^9}, {
+  3.872440104939604*^9, 3.872440121458682*^9}, {3.8724401518847647`*^9, 
+  3.872440154960697*^9}, {3.872440252318522*^9, 3.872440296643269*^9}, {
+  3.872534486962489*^9, 3.872534491940843*^9}, {3.8725345236665163`*^9, 
+  3.8725345629709587`*^9}},
+ CellLabel->
+  "In[336]:=",ExpressionUUID->"39bad882-b8a7-45d0-8fe8-df2b2366ec84"],
+
+Cell[BoxData["2.684550364410431`"], "Output",
+ CellChangeTimes->{
+  3.872440051458066*^9, {3.872440123989325*^9, 3.8724401551959047`*^9}, {
+   3.872440243889773*^9, 3.8724402969317703`*^9}, {3.872534475060597*^9, 
+   3.872534493327882*^9}, {3.8725345244523373`*^9, 3.872534563996338*^9}},
+ CellLabel->
+  "Out[336]=",ExpressionUUID->"2534f9a9-bbd2-46be-ba91-c589129c08ee"]
+}, Open  ]],
+
+Cell[TextData[{
+ "Similarly, ",
+ Cell[BoxData[
+  FormBox[
+   TemplateBox[<|"boxes" -> FormBox[
+       StyleBox["g", "TI"], TraditionalForm], "errors" -> {}, "input" -> "g", 
+     "state" -> "Boxes"|>,
+    "TeXAssistantTemplate"], TraditionalForm]],ExpressionUUID->
+  "a27d7006-6a05-44c6-bb26-759862a477ef"],
+ " can be obtained from the periods by fitting the equations."
+}], "Text",
+ CellChangeTimes->{{3.872534703398138*^9, 
+  3.872534740306573*^9}},ExpressionUUID->"cbdd9669-b760-46da-97e3-\
+c6572adec985"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{808, 648},
+WindowMargins->{{20, Automatic}, {Automatic, 44}},
+TaggingRules-><|"TryRealOnly" -> False|>,
+FrontEndVersion->"13.1 for Mac OS X ARM (64-bit) (June 21, 2022)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"0a03f3d4-e170-4f58-9e9d-ecc0babdf619"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[583, 22, 219, 4, 98, "Title",ExpressionUUID->"41e70d95-91e6-4b3b-9c53-eec2252259ea"],
+Cell[805, 28, 391, 11, 32, "Author",ExpressionUUID->"d557c165-7c56-4507-8064-d1a75a99631e"],
+Cell[1199, 41, 201, 3, 31, "Affiliation",ExpressionUUID->"d07fbd50-0f48-4070-9b2d-2969ab36609a"],
+Cell[CellGroupData[{
+Cell[1425, 48, 206, 4, 67, "Section",ExpressionUUID->"e7921eb3-e802-40b4-abfa-8327ff9ddb16"],
+Cell[1634, 54, 404, 8, 58, "Text",ExpressionUUID->"07ed6c37-0d45-446a-b134-db63445bf178"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2075, 67, 207, 4, 67, "Section",ExpressionUUID->"23b4d925-2e5f-41c6-b819-138a1aad4918"],
+Cell[CellGroupData[{
+Cell[2307, 75, 162, 3, 54, "Subsection",ExpressionUUID->"652ab71a-d959-4b7a-962e-0db56c41cdb8"],
+Cell[2472, 80, 291, 4, 35, "Text",ExpressionUUID->"3ce8f73a-b52b-4c5b-951e-d8466babeabe"],
+Cell[2766, 86, 155, 3, 38, "CodeText",ExpressionUUID->"ceeb0284-5b11-4897-aaff-cee197d6f0b4"],
+Cell[CellGroupData[{
+Cell[2946, 93, 386, 10, 39, "Input",ExpressionUUID->"26318e14-30c7-4a69-a41f-75a0ef987825"],
+Cell[3335, 105, 250, 6, 36, "Output",ExpressionUUID->"12afba6c-81f8-422a-8165-c437dadbd280"]
+}, Open  ]],
+Cell[3600, 114, 167, 3, 38, "CodeText",ExpressionUUID->"df15fde4-ada2-4bdd-9af0-1333f929c57a"],
+Cell[CellGroupData[{
+Cell[3792, 121, 319, 8, 51, "Input",ExpressionUUID->"bd84fe85-ef65-4e7c-b562-d65b0399bed2"],
+Cell[4114, 131, 371, 9, 38, "Output",ExpressionUUID->"55faea4c-01ea-41f5-9887-8d25f356a778"]
+}, Open  ]],
+Cell[4500, 143, 160, 3, 38, "CodeText",ExpressionUUID->"4d78d242-cba7-4469-afb5-f6635434e32b"],
+Cell[4663, 148, 786, 19, 49, "Input",ExpressionUUID->"4e597cbf-001e-4c55-9d81-8848893a5135"],
+Cell[5452, 169, 1881, 43, 85, "Text",ExpressionUUID->"66675be4-fabb-41a0-a662-189104f261af"],
+Cell[7336, 214, 573, 16, 40, "CodeText",ExpressionUUID->"0edb877c-9789-41f4-9401-ac9e1ca813b7"],
+Cell[7912, 232, 716, 17, 56, "Input",ExpressionUUID->"0ea06fe6-2fc7-45c5-9796-e12ccaf68a7f"],
+Cell[8631, 251, 173, 3, 38, "CodeText",ExpressionUUID->"c8430c5a-c35c-4376-ae03-fc3dc74ec739"],
+Cell[CellGroupData[{
+Cell[8829, 258, 469, 11, 30, "Input",ExpressionUUID->"67b8f94a-126c-4b47-8f1d-4b126ccab0d3"],
+Cell[9301, 271, 290, 6, 36, "Output",ExpressionUUID->"6eda1893-2ac7-4c38-98f3-f09b4d71fe22"]
+}, Open  ]],
+Cell[9606, 280, 176, 3, 38, "CodeText",ExpressionUUID->"48452efd-3d44-4600-9e1d-f86ef3cc38ab"],
+Cell[CellGroupData[{
+Cell[9807, 287, 1593, 37, 35, "Input",ExpressionUUID->"e89704b5-8356-4726-bf22-688a9dfb83db"],
+Cell[11403, 326, 3788, 83, 237, "Output",ExpressionUUID->"471a1dd8-0e50-4ea4-8b17-316499450386"]
+}, Open  ]],
+Cell[15206, 412, 221, 5, 35, "Text",ExpressionUUID->"a550ffed-220b-49bc-9304-454ccc79f1cd"],
+Cell[15430, 419, 216, 4, 38, "CodeText",ExpressionUUID->"a61562d4-0fa4-472c-94ad-9e882dd387d9"],
+Cell[CellGroupData[{
+Cell[15671, 427, 755, 18, 61, "Input",ExpressionUUID->"9a10bcac-dd59-407a-94d7-2ac6e9d53207"],
+Cell[16429, 447, 416, 8, 38, "Output",ExpressionUUID->"46512ac9-58f1-4384-a7c5-66d1ab9ffae4"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[16906, 462, 166, 3, 67, "Section",ExpressionUUID->"b1ca1f15-d2ae-48a6-b40e-51760c077e06"],
+Cell[17075, 467, 750, 21, 54, "Text",ExpressionUUID->"ef3ad944-3d69-424e-a16a-ccc3ee7f91ea"],
+Cell[CellGroupData[{
+Cell[17850, 492, 173, 3, 54, "Subsection",ExpressionUUID->"53727ca2-a7b2-45a2-8863-1b6262e4399f"],
+Cell[18026, 497, 507, 13, 35, "Text",ExpressionUUID->"81392329-fb31-490d-beb3-6213c3f546a0"],
+Cell[18536, 512, 1120, 29, 60, "Text",ExpressionUUID->"02006d6a-225f-4947-a370-521fec764b76"],
+Cell[19659, 543, 1199, 33, 75, "Input",ExpressionUUID->"608ee8f3-b85e-4547-b974-7b19417e7fdc"],
+Cell[CellGroupData[{
+Cell[20883, 580, 565, 12, 48, "Input",ExpressionUUID->"39bad882-b8a7-45d0-8fe8-df2b2366ec84"],
+Cell[21451, 594, 371, 6, 34, "Output",ExpressionUUID->"2534f9a9-bbd2-46be-ba91-c589129c08ee"]
+}, Open  ]],
+Cell[21837, 603, 508, 13, 35, "Text",ExpressionUUID->"cbdd9669-b760-46da-97e3-c6572adec985"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
