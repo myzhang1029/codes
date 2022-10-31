@@ -1,3 +1,4 @@
 *.gco   linguist-generated
 *.mtl   linguist-generated
 *.ipynb linguist-generated
+*.nb    linguist-generated
