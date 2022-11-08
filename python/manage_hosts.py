@@ -163,8 +163,7 @@ class MacDatabase:
             self,
             index: Union[int, slice, str, Iterable[Union[int, slice, str]]]
     ) -> Union[RecordType, List[RecordType]]:
-        """Get items from the database by index, slice, MAC,
-        hostname, IP, or multiple indices."""
+        """Get items from the database by index, slice, MAC, or hostnames."""
         if isinstance(index, (int, slice)):
             return self._db[index]
         # MAC or hostname
