@@ -59,9 +59,9 @@ int main() {
         uint32_t tstamp = to_ms_since_boot(abstime);
         float voltage = (source - bias) * TO_VOLTAGE;
 
-        fputs(state ? "true" : "false", stdout);
         printf(
-            "\t%05d\t" "%f\t" "%05d\t" "%ld\n",
+            "%s\t" "%05d\t" "%f\t" "%05d\t" "%ld\n",
+            state ? " on" : "off",
             source, voltage,
             bias, tstamp
         );
