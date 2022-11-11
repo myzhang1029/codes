@@ -1,6 +1,6 @@
 //! Create a temporary file from stdin and execute command.
 //
-//  Copyright (C) 2021 Zhang Maiyun <myzhang1029@hotmail.com>
+//  Copyright (C) 2021 Zhang Maiyun <me@myzhangll.xyz>
 //
 //  This program is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ const PROGRAM_NAME: &str = "mkf";
 fn parse_args() -> ArgMatches {
     App::new(PROGRAM_NAME)
         .version(crate_version!())
-        .author("Zhang Maiyun <myzhang1029@hotmail.com")
+        .author("Zhang Maiyun <me@myzhangll.xyz")
         .about("Create a temporary file from stdin and execute command.")
         .setting(AppSettings::InferLongArgs)
         .arg(

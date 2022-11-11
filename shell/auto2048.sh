@@ -2,7 +2,7 @@
 #
 #  auto2048.sh - Play the famous 2048 game automatically, and see how
 #  smart (or silly) your computer is!
-#  Copyright (C) 2018 Zhang Maiyun <myzhang1029@hotmail.com>
+#  Copyright (C) 2018 Zhang Maiyun <me@myzhangll.xyz>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by

@@ -1,7 +1,7 @@
 /* third.c - Calculate n/3 by recursively calculate n/4,2n/4 */
 /*
  *  third.c
- *  Copyright (C) 2017 Zhang Maiyun <myzhang1029@hotmail.com>
+ *  Copyright (C) 2017 Zhang Maiyun <me@myzhangll.xyz>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

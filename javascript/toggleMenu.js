@@ -2,7 +2,7 @@
  * 1. Toggle a list of text.
  * 2. Mimic three count ups.
  *
- * Copyright (C) 2020 Zhang Maiyun <myzhang1029@hotmail.com>, <myzhang20@uwcchina.org>.
+ * Copyright (C) 2020 Zhang Maiyun <me@myzhangll.xyz>, <myzhang20@uwcchina.org>.
  * All rights reserved.
  */
 // API Reference: https://www.wix.com/corvid/reference

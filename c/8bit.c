@@ -1,7 +1,7 @@
 /* Resample and convert any audio to mono 8kHz 8-bit PCM. */
 /*
  *  8bit.c
- *  Copyright (C) 2021 Zhang Maiyun <myzhang1029@hotmail.com>
+ *  Copyright (C) 2021 Zhang Maiyun <me@myzhangll.xyz>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

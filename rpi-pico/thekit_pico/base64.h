@@ -1,7 +1,7 @@
 /* Simple base64 decoder */
 /*
  *  base64.h
- *  Copyright (C) 2021 Zhang Maiyun <myzhang1029@hotmail.com>
+ *  Copyright (C) 2021 Zhang Maiyun <me@myzhangll.xyz>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

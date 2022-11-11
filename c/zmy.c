@@ -1,7 +1,7 @@
 /* Identify my kernel. */
 /*
  *  zmy.c
- *  Copyright (C) 2021 Zhang Maiyun <myzhang1029@hotmail.com>
+ *  Copyright (C) 2021 Zhang Maiyun <me@myzhangll.xyz>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -186,6 +186,6 @@ static loff_t zmy_llseek(struct file *fp, loff_t off, int whence)
 
 module_init(zmy_init);
 module_exit(zmy_cleanup);
-MODULE_AUTHOR("Zhang Maiyun <myzhang1029@hotmail.com>");
+MODULE_AUTHOR("Zhang Maiyun <me@myzhangll.xyz>");
 MODULE_DESCRIPTION("Zhang Maiyun Kernel Identification Module");
 MODULE_LICENSE("GPL");

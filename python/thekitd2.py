@@ -2,7 +2,7 @@
 #
 #  thekitd2.py
 #
-#  Copyright (C) 2019-2020 Zhang Maiyun <myzhang1029@hotmail.com>
+#  Copyright (C) 2019-2020 Zhang Maiyun <me@myzhangll.xyz>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by

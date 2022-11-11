@@ -1,7 +1,7 @@
 /* Creates a fake Blue Screen Of Death which looks like the win7 version of it*/
 /*
  *  bsod.c
- *  Copyright (C) 2018 Zhang Maiyun <myzhang1029@hotmail.com>
+ *  Copyright (C) 2018 Zhang Maiyun <me@myzhangll.xyz>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
