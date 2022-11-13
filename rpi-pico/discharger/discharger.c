@@ -28,9 +28,11 @@
 // Connect a LM4040@3V to ADC_VREF
 const float TO_VOLTAGE = 3.f / (1 << 12);
 // Number of milliseconds to sleep
-const uint32_t INTV = 1000;
+const uint32_t INTV = 10;
+// Number of INTVs before printing the data
+const uint32_t PRINT_EVERY = 100;
 // Target voltage
-const float TARGET_VOLTAGE = 0.8f;
+const float TARGET_VOLTAGE = 0.73f;
 
 int main() {
     bool state = true;
@@ -50,14 +52,25 @@ int main() {
     adc_set_temp_sensor_enabled(false);
 
     while (1) {
-        adc_select_input(2);
-        uint16_t bias = adc_read();
-        adc_select_input(1);
-        uint16_t source = adc_read();
+        float voltage;
+        uint16_t bias, source;
+
+        for (uint32_t count = 0; count < PRINT_EVERY; ++count) {
+            adc_select_input(2);
+            bias = adc_read();
+            adc_select_input(1);
+            source = adc_read();
+            voltage = (source - bias) * TO_VOLTAGE;
+
+            if (voltage <= TARGET_VOLTAGE)
+                gpio_put(TRANSISTOR_PIN, (state = false));
+            else
+                gpio_put(TRANSISTOR_PIN, (state = true));
+            sleep_ms(INTV);
+        }
         // Receive a timestamp for the measurement
         absolute_time_t abstime = get_absolute_time();
         uint32_t tstamp = to_ms_since_boot(abstime);
-        float voltage = (source - bias) * TO_VOLTAGE;
 
         printf(
             "%s\t" "%05d\t" "%f\t" "%05d\t" "%ld\n",
@@ -65,10 +78,5 @@ int main() {
             source, voltage,
             bias, tstamp
         );
-        if (voltage <= TARGET_VOLTAGE)
-            gpio_put(TRANSISTOR_PIN, (state = false));
-        else
-            gpio_put(TRANSISTOR_PIN, (state = true));
-        sleep_ms(INTV);
     }
 }
