@@ -1,7 +1,7 @@
 /* PWM light controller with a dev interface and button on/off support
  * as a kernel module. */
 /*
- *  thekit_pwm.c
+ *  thekit3_pwm.c
  *  Copyright (C) 2022 Zhang Maiyun <me@myzhangll.xyz>
  *
  *  This program is free software; you can redistribute it and/or modify
