@@ -12,7 +12,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2022/05/04 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2022/11/14 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pc@bibstyle{mla}
@@ -81,6 +81,7 @@
 \RequirePackage{pgfplotstable}
 \pgfplotsset{compat=1.17, compat/show suggested version=false}
 \usepgfplotslibrary{units}
+\usepackage[american, europeanresistors, american voltages, straightvoltages, fetbodydiode]{circuitikz}
 
 %%% ToC (table of contents) APPEARANCE
 \RequirePackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
@@ -88,7 +89,7 @@
 \renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
 \renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
 
-\RequirePackage[hidelinks]{hyperref}
+\RequirePackage[hidelinks]{hyperref} % Load hyperref BEFORE geometry
 
 %%% PAGE DIMENSIONS
 \RequirePackage{geometry} % to change the page dimensions
