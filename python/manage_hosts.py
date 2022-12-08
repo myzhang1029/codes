@@ -34,8 +34,8 @@ if TYPE_CHECKING:
     from os import PathLike
 
 # Type for a host record
-JsonRecordType = Dict[str, Union[List[str]]]
-RecordType = Dict[str, Union[Set[Union[IPv4Address, IPv6Address, str]]]]
+JsonRecordType = Dict[str, List[str]]
+RecordType = Dict[str, Set[Union[IPv4Address, IPv6Address, str]]]
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -81,18 +81,24 @@ def jsonip_to_ip(
 def hostname_fuzz(one: str, two: str) -> bool:
     """See if two hostnames only differ in the part after the last -."""
     dash1 = one.rfind("-")
-    dash2 = two.rfind("-")
     # Only accept numeric suffixes, otherwise it is a part of the hostname
-    try:
-        _ = int(one[dash1:])
-        base1 = one[:dash1] if dash1 != -1 else one
-    except ValueError:
+    if dash1 == -1:
         base1 = one
-    try:
-        _ = int(two[dash2:])
-        base2 = two[:dash2] if dash2 != -1 else two
-    except ValueError:
+    else:
+        try:
+            _ = int(one[dash1:])
+            base1 = one[:dash1]
+        except ValueError:
+            base1 = one
+    dash2 = two.rfind("-")
+    if dash2 == -1:
         base2 = two
+    else:
+        try:
+            _ = int(two[dash2:])
+            base2 = two[:dash2]
+        except ValueError:
+            base2 = two
     return base1.lower() == base2.lower()
 
 
@@ -382,3 +388,59 @@ class MacDatabase:
     def get_db(self) -> List[RecordType]:
         """Get the underlying database."""
         return self._db
+
+
+# Unit tests
+
+def test_json_encoder() -> None:
+    # Note that `set` is not ordered but comparison works
+    assert json.loads(JSONEncoder().encode([
+        {IPv4Address("10.0.4.2"), IPv6Address("2001:db8::")},
+        "test",
+        {1, 2, 4}
+    ])) == [
+        ["IP4/10.0.4.2", "IP6/2001:db8::"],
+        "test",
+        [1, 2, 4]
+    ]
+
+
+def test_jsonip_to_ip() -> None:
+    """Test for `jsonip_to_ip`."""
+    assert jsonip_to_ip("IP4/10.0.4.2") == IPv4Address("10.0.4.2")
+    assert jsonip_to_ip("IP4/0.0.0.0") == IPv4Address("0.0.0.0")
+    assert jsonip_to_ip(IPv4Address("0.0.0.0")) == IPv4Address("0.0.0.0")
+    assert jsonip_to_ip("IP6/::ffff:0.0.0.0") == IPv6Address("::ffff:0:0")
+    assert jsonip_to_ip("IP6/2001:db8::") == IPv6Address("2001:db8::")
+    assert jsonip_to_ip(IPv6Address("2001:db8::")) == IPv6Address("2001:db8::")
+    try:
+        jsonip_to_ip("0.0.0.0")
+    except ValueError:
+        pass
+    else:
+        assert True == False, "Should raise"
+
+
+def test_hostname_fuzz() -> None:
+    """Test for `hostname_fuzz`."""
+    assert hostname_fuzz("Android", "Android-10")
+    assert hostname_fuzz("Android-20", "ANDROID-10")
+    assert not hostname_fuzz("Android-abc", "Andriod-10")
+
+
+def test_canonicalize_mac() -> None:
+    """Test for `canonicalize_mac`."""
+    test_cases = [
+        ("6F-A1-34-98-69-DF", "6f:a1:34:98:69:df"),
+        ("cf-d8-a5-b4-ae-95", "cf:d8:a5:b4:ae:95"),
+        ("ff:aa:86-69-40-53", "ff:aa:86:69:40:53"),
+        ("8B:A4:88:F7:2D:BC", "8b:a4:88:f7:2d:bc"),
+        ("3BF20D-a9dfc7", "3b:f2:0d:a9:df:c7"),
+        #("3-F3-e7-e9-39-73", "03:f3:e7:e9:39:73"),
+        ("F7A02DAD14E0", "f7:a0:2d:ad:14:e0"),
+        ("7B58.2cbb.12f9", "7b:58:2c:bb:12:f9"),
+        #("6:51:64:e:b2:8e", "06:51:64:0e:b2:8e"),
+    ]
+    for n, (question, correct) in enumerate(test_cases):
+        assert canonicalize_mac(question) == correct, \
+            f"Incorrect MAC canonicalization of {question} at position {n}"
