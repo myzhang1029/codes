@@ -293,7 +293,7 @@ char *psh_fgets(FILE *fp)
                 }
                 break;
             }
-            if (ch == '\n')
+            if (ch == '\n' || ch == '\r')
                 break;
             *ptr++ = ch;
             if ((++charcount) == nowhave)
