@@ -79,7 +79,11 @@ def jsonip_to_ip(
 
 
 def hostname_fuzz(one: str, two: str) -> bool:
-    """See if two hostnames only differ in the part after the last -."""
+    """See if two hostnames only differ in the part after the last -.
+
+    See also: RFC6762 Section 9
+    (https://www.rfc-editor.org/rfc/rfc6762.html#page-31)
+    """
     dash1 = one.rfind("-")
     # Only accept numeric suffixes, otherwise it is a part of the hostname
     if dash1 == -1:

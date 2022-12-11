@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 # Pull in SDK (must be before project)
-include(pico_sdk_import.cmake)
+include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
 project(rpi-pico-sketches C CXX ASM)
 set(CMAKE_C_STANDARD 11)
@@ -20,6 +20,7 @@ add_compile_options(-Ofast
     -Wno-format          # int != int32_t as far as the compiler is concerned because gcc has int32_t as long int
 )
 
-add_subdirectory(thekit_pico)
+add_subdirectory(../thekit/thekit2_pico thekit2_pico)
 add_subdirectory(differential_watt_meter)
 add_subdirectory(discharger)
+add_subdirectory(../thekit/thekit4_pico_w thekit4_pico_w)

@@ -58,8 +58,10 @@ static inline void init() {
     gpio_set_function(UART_TX_PIN, GPIO_FUNC_UART);
     gpio_set_function(UART_RX_PIN, GPIO_FUNC_UART);
 
+#ifdef PICO_DEFAULT_LED_PIN
     gpio_init(PICO_DEFAULT_LED_PIN);
     gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
     gpio_init(SWITCH_PIN);
     gpio_set_dir(SWITCH_PIN, GPIO_OUT);
@@ -70,10 +72,12 @@ static inline void init() {
 
 /// Blink the onboard LED
 static inline void blink_led() {
+#ifdef PICO_DEFAULT_LED_PIN
     gpio_put(PICO_DEFAULT_LED_PIN, 1);
     sleep_ms(50);
     gpio_put(PICO_DEFAULT_LED_PIN, 0);
     sleep_ms(50);
+#endif
 }
 
 /// Cancel all background tasks

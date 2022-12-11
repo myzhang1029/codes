@@ -152,7 +152,7 @@ static int __init thekit_pwm_init(void)
     }
 
     /* Do some debouncing. I don't care it succeed or not */
-    gpio_set_debounce(SW_PIN, 1000);
+    gpio_set_debounce(SW_PIN, 4000);
 
     /* Allocate device number */
     if (alloc_chrdev_region(&ctrl_dev_number, 0, 1, DRIVER_NAME) < 0)
