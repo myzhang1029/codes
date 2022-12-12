@@ -3,6 +3,9 @@
 
 #include "thekit4_pico_w.h"
 
+// Define WOLFRAM_DATABIN_ID, DDNS_HOSTNAME, DDNS_KEY, wifi_config, HOSTNAME
+#include "private_config.h"
+
 // Light-related
 // Definitions
 static const uint LIGHT_PIN = 2;
@@ -36,18 +39,19 @@ static const float T0 = 25.0 + 273.15; // Kelvin
 static const float R = 1e4;     // Ohm \pm 1%
 static const float BETA = 3977; // Kelvin \pm 0.75%
 
-static const WIFI_CONFIG_T wifi_config[] = {
-    {WIFI1_SSID, WIFI1_PASSWORD, CYW43_AUTH_WPA2_AES_PSK},
-    {WIFI2_SSID, WIFI2_PASSWORD, CYW43_AUTH_WPA2_AES_PSK},
-};
-
-#define HOSTNAME "rpipicow"
+// Tasks-related
+// 5 minutes
+static const int32_t TASKS_INTERVAL_MS = (5 * 60 * 1000);
+static const char WOLFRAM_HOST[] = "datadrop.wolframcloud.com";
+static const char WOLFRAM_URI[] = "/api/v1.0/Add?bin=%s&temperature=%2.4f";
+static const char DDNS_HOST[] = "dyn.dns.he.net";
+static const char DDNS_URI[] = "/nic/update?hostname=%s&password=%s&myip=%s";
 
 // Time-related
-#define NTP_SERVER "pool.ntp.org"
-#define NTP_PORT 123
+static const char NTP_SERVER[] = "pool.ntp.org";
+static const uint16_t NTP_PORT = 123;
 // One hour between syncs
-#define NTP_INTERVAL_MS (3600 * 1000)
-#define NTP_RESEND_TIME_MS (10 * 1000)
+static const uint32_t NTP_INTERVAL_MS = 3600 * 1000;
+static const uint32_t NTP_RESEND_TIME_MS = 10 * 1000;
 // Crude TZ conversion
-#define TZ_DIFF_SEC (-8 * 3600)
+static const int TZ_DIFF_SEC = -8 * 3600;

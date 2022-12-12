@@ -32,7 +32,7 @@ bool time_in_sync = false;
 NTP_T ntp_state = {};
 HTTP_SERVER_T http_state = {NULL, NULL, 0, NULL, 0};
 
-int init() {
+static void init() {
     stdio_init_all();
 
     rtc_init();
@@ -41,27 +41,28 @@ int init() {
 
     if (cyw43_arch_init() != 0) {
         puts("WARNING: Cannot init CYW43");
-        return -1;
+        return;
     }
     has_cyw43 = true;
     // Depends on cyw43
     wifi_connect();
-    if (!ntp_init(&ntp_state)) {
+    if (!ntp_init(&ntp_state))
         puts("WARNING: Cannot init NTP client");
-        return -1;
-    }
     // Start HTTP server
-    if (!http_server_open(&http_state)) {
+    if (!http_server_open(&http_state))
         puts("WARNING: Cannot open HTTP server");
-        return -1;
-    }
+
+    // Start periodic tasks
+    if (!register_tasks())
+        puts("WARNING: Cannot register tasks");
+    // Fire a first run if possible
+    if (has_wifi)
+        trigger_tasks();
 
     puts("Successfully initialized everything");
 
     print_ip();
     printf("Temperature: %f\n", temperature_measure());
-
-    return 0;
 }
 
 int main() {

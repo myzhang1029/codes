@@ -76,4 +76,7 @@ void ntp_check_run(NTP_T *state);
 bool http_server_open(HTTP_SERVER_T *state);
 void http_server_close(void *arg);
 
+bool trigger_tasks(void);
+bool register_tasks(void);
+
 #endif
