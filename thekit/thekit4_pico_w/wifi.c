@@ -39,13 +39,16 @@ bool wifi_connect(void) {
     cyw43_arch_enable_sta_mode();
     int n_configs = sizeof(wifi_config) / sizeof(WIFI_CONFIG_T);
     for (int i = 0; i < n_configs; ++i) {
-        if (cyw43_arch_wifi_connect_timeout_ms(
+        printf("Attempting Wi-Fi %s\n", wifi_config[i].ssid);
+        int result = cyw43_arch_wifi_connect_timeout_ms(
             wifi_config[i].ssid,
             wifi_config[i].password,
             wifi_config[i].auth,
             30000
-        ) != 0)
+        );
+        if (result == 0)
             goto succeed;
+        printf("Failed with status %d\n", result);
     }
     puts("WARNING: Cannot connect to Wi-Fi");
     return false;

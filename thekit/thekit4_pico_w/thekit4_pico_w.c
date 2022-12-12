@@ -44,8 +44,8 @@ int init() {
         return -1;
     }
     has_cyw43 = true;
-    wifi_connect();
     // Depends on cyw43
+    wifi_connect();
     if (!ntp_init(&ntp_state)) {
         puts("WARNING: Cannot init NTP client");
         return -1;
@@ -70,9 +70,10 @@ int main() {
     init();
 
     while (1) {
-        if (has_cyw43 && !has_wifi)
-            // Reconnect Wi-Fi
+        if (has_cyw43 && !has_wifi) {
+            puts("Reconnecting Wi-Fi");
             wifi_connect();
+        }
         ntp_check_run(&ntp_state);
 #if PICO_CYW43_ARCH_POLL
         if (has_cyw43)
@@ -80,8 +81,8 @@ int main() {
 #endif
         if (!alarm_first_register_done) {
             // It waits for NTC to be up
-            alarm_first_register_done = light_register_next_alarm();
             puts("Alarm waiting for RTC");
+            alarm_first_register_done = light_register_next_alarm();
         }
         sleep_ms(10);
     }
