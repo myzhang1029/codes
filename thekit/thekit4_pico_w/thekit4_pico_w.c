@@ -85,7 +85,10 @@ int main() {
             puts("Alarm waiting for RTC");
             alarm_first_register_done = light_register_next_alarm();
         }
-        sleep_ms(10);
+        sleep_ms(25);
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+        sleep_ms(25);
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
     }
     http_server_close(&http_state);
     if (has_cyw43)

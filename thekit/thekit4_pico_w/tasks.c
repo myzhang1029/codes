@@ -24,6 +24,7 @@
 repeating_timer_t tasks_timer;
 
 static void http_recv_callback(void *arg, struct altcp_pcb *conn, struct pbuf *p, err_t err) {
+    cyw43_arch_lwip_check();
     // I'll simply discard the data
     if (err != ERR_OK)
         printf("HTTP request for %s received error %d\n", (const char *)arg, err);
@@ -33,7 +34,8 @@ static bool send_ddns(void) {
     char uri[256] = {0};
     snprintf(uri, 256, DDNS_URI, DDNS_HOSTNAME, DDNS_KEY, ipaddr_ntoa(&WIFI_NETIF.ip_addr));
     puts("Sending DDNS");
-    return httpc_get_file_dns(
+    cyw43_arch_lwip_begin();
+    bool result = httpc_get_file_dns(
         DDNS_HOST,
         HTTP_DEFAULT_PORT,
         uri,
@@ -42,6 +44,8 @@ static bool send_ddns(void) {
         (void *)DDNS_URI,
         NULL
     ) == ERR_OK;
+    cyw43_arch_lwip_end();
+    return result;
 }
 
 static bool send_temperature(void) {
@@ -49,7 +53,8 @@ static bool send_temperature(void) {
     char uri[64] = {0};
     snprintf(uri, 64, WOLFRAM_URI, WOLFRAM_DATABIN_ID, temperature);
     puts("Sending temperature");
-    return httpc_get_file_dns(
+    cyw43_arch_lwip_begin();
+    bool result = httpc_get_file_dns(
         WOLFRAM_HOST,
         HTTP_DEFAULT_PORT,
         uri,
@@ -58,6 +63,8 @@ static bool send_temperature(void) {
         (void *)WOLFRAM_URI,
         NULL
     ) == ERR_OK;
+    cyw43_arch_lwip_end();
+    return result;
 }
 
 static bool do_run_tasks(struct repeating_timer *t) {
