@@ -6,6 +6,11 @@
 // Define WOLFRAM_DATABIN_ID, DDNS_HOSTNAME, DDNS_KEY, wifi_config, HOSTNAME
 #include "private_config.h"
 
+#ifndef ENABLE_WATCHDOG
+#define ENABLE_WATCHDOG 0
+#endif
+#define PICO_DEBUG_MALLOC 1
+
 // Light-related
 // Definitions
 static const uint LIGHT_PIN = 2;

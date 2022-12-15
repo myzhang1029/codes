@@ -17,6 +17,9 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+#include "thekit4_pico_w.h"
+
 #include <stdio.h>
 
 #include "pico/cyw43_arch.h"
@@ -24,12 +27,13 @@
 #include "pico/time.h"
 
 #include "hardware/rtc.h"
-
-#include "thekit4_pico_w.h"
+#if ENABLE_WATCHDOG
+#include "hardware/watchdog.h"
+#endif
 
 bool has_cyw43 = false;
 bool time_in_sync = false;
-NTP_T ntp_state = {};
+NTP_T ntp_state;
 HTTP_SERVER_T http_state = {NULL, NULL, 0, NULL, 0};
 
 static void init() {
@@ -45,6 +49,7 @@ static void init() {
     }
     has_cyw43 = true;
     // Depends on cyw43
+    cyw43_arch_enable_sta_mode();
     wifi_connect();
     if (!ntp_init(&ntp_state))
         puts("WARNING: Cannot init NTP client");
@@ -52,12 +57,11 @@ static void init() {
     if (!http_server_open(&http_state))
         puts("WARNING: Cannot open HTTP server");
 
-    // Start periodic tasks
-    if (!register_tasks())
-        puts("WARNING: Cannot register tasks");
-    // Fire a first run if possible
-    if (has_wifi)
-        trigger_tasks();
+#if ENABLE_WATCHDOG
+    // Init watchdog last so it doesn't interrupt other steps
+    // Needs to be larger than `wifi_connect`'s timeout
+    watchdog_enable(60000, 1);
+#endif
 
     puts("Successfully initialized everything");
 
@@ -71,24 +75,30 @@ int main() {
     init();
 
     while (1) {
-        if (has_cyw43 && !has_wifi) {
-            puts("Reconnecting Wi-Fi");
+        int wifi_state = cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA);
+#if ENABLE_WATCHDOG
+        watchdog_update();
+#endif
+        if (has_cyw43 && wifi_state != CYW43_LINK_JOIN) {
+            printf("Wi-Fi link status is %d, reconnecting\n", wifi_state);
             wifi_connect();
+            // Re-open clients to fix dead PCBs
+            ntp_close(&ntp_state);
+            if (!ntp_init(&ntp_state))
+                puts("WARNING: Cannot reinit NTP client");
         }
         ntp_check_run(&ntp_state);
+        tasks_check_run();
 #if PICO_CYW43_ARCH_POLL
         if (has_cyw43)
             cyw43_arch_poll();
 #endif
         if (!alarm_first_register_done) {
-            // It waits for NTC to be up
-            puts("Alarm waiting for RTC");
+            // It waits for NTP to be up
+            puts("Alarm awaiting RTC");
             alarm_first_register_done = light_register_next_alarm();
         }
-        sleep_ms(25);
-        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
-        sleep_ms(25);
-        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
+        sleep_ms(20);
     }
     http_server_close(&http_state);
     if (has_cyw43)

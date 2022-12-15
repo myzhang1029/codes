@@ -16,14 +16,18 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+#include "thekit4_pico_w.h"
+
 #include "pico/cyw43_arch.h"
+
+#if ENABLE_WATCHDOG
+#include "hardware/watchdog.h"
+#endif
 
 #include "lwip/netif.h"
 #include "mdns_fix.h"
 #include "lwip/apps/mdns.h"
-
-#include "config.h"
-#include "thekit4_pico_w.h"
 
 extern cyw43_t cyw43_state;
 
@@ -36,7 +40,6 @@ static void register_mdns(void) {
 
 /// Connect to Wi-Fi
 bool wifi_connect(void) {
-    cyw43_arch_enable_sta_mode();
     int n_configs = sizeof(wifi_config) / sizeof(WIFI_CONFIG_T);
     for (int i = 0; i < n_configs; ++i) {
         printf("Attempting Wi-Fi %s\n", wifi_config[i].ssid);
@@ -46,6 +49,9 @@ bool wifi_connect(void) {
             wifi_config[i].auth,
             30000
         );
+#if ENABLE_WATCHDOG
+        watchdog_update();
+#endif
         if (result == 0)
             goto succeed;
         printf("Failed with status %d\n", result);
@@ -59,7 +65,5 @@ succeed:
 }
 
 void print_ip(void) {
-    if (!has_wifi)
-        return;
     printf("IP Address: %s\n", ipaddr_ntoa(&WIFI_NETIF.ip_addr));
 }

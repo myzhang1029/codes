@@ -16,15 +16,15 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+#include "thekit4_pico_w.h"
+
 #include <math.h>
 
 #include "pico/stdlib.h"
 #include "pico/util/datetime.h"
 #include "hardware/pwm.h"
 #include "hardware/rtc.h"
-
-#include "config.h"
-#include "thekit4_pico_w.h"
 
 /// Initialize everything we need
 uint16_t current_pwm_level = 0;
@@ -187,8 +187,10 @@ bool light_register_next_alarm(void) {
         // Go to the next one
     }
     // We past the last one. Register the first alarm after incrementing `day`
-    current.day += 1;
     next_day(&current);
+    char buf[256];
+    datetime_to_str(buf, 256, &current);
+    puts(buf);
     do_register_alarm(&current, 0);
     return true;
 }

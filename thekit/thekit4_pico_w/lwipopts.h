@@ -46,7 +46,8 @@
 #define LWIP_DNS                    1
 #define LWIP_MDNS_RESPONDER         1
 #define LWIP_TCP_KEEPALIVE          1
-#define LWIP_NETIF_TX_SINGLE_PBUF   1
+// Can't allocate that much memory
+#define LWIP_NETIF_TX_SINGLE_PBUF   0
 #define DHCP_DOES_ARP_CHECK         0
 #define LWIP_DHCP_DOES_ACD_CHECK    0
 #define LWIP_NUM_NETIF_CLIENT_DATA  (LWIP_MDNS_RESPONDER)
@@ -55,8 +56,7 @@
 #define LWIP_DEBUG                  1
 #define LWIP_STATS                  1
 #define LWIP_STATS_DISPLAY          1
-#endif
-
+#else
 #define ETHARP_DEBUG                LWIP_DBG_OFF
 #define NETIF_DEBUG                 LWIP_DBG_OFF
 #define PBUF_DEBUG                  LWIP_DBG_OFF
@@ -85,6 +85,7 @@
 #define PPP_DEBUG                   LWIP_DBG_OFF
 #define SLIP_DEBUG                  LWIP_DBG_OFF
 #define DHCP_DEBUG                  LWIP_DBG_OFF
+#endif
 
 #endif /* __LWIPOPTS_H__ */
 

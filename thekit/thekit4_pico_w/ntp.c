@@ -6,6 +6,9 @@
  * Adopted by Zhang Maiyun
  */
 
+#include "config.h"
+#include "thekit4_pico_w.h"
+
 #include <string.h>
 #include <time.h>
 
@@ -17,9 +20,6 @@
 #include "lwip/dns.h"
 #include "lwip/pbuf.h"
 #include "lwip/udp.h"
-
-#include "config.h"
-#include "thekit4_pico_w.h"
 
 #define NTP_MSG_LEN 48
 // Seconds between 1 Jan 1900 and 1 Jan 1970
@@ -115,11 +115,14 @@ static void ntp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_ad
     pbuf_free(p);
 }
 
-// Perform initialisation
+/// Perform initialisation
 bool ntp_init(NTP_T *state) {
     if (!state)
         return false;
+    state->dns_request_sent = false;
     state->ntp_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
+    // So that next check_run is triggered
+    state->next_sync_time = get_absolute_time();
     if (!state->ntp_pcb) {
         puts("Failed to create pcb");
         return false;
@@ -128,13 +131,19 @@ bool ntp_init(NTP_T *state) {
     return true;
 }
 
+/// Close the PCB
+void ntp_close(NTP_T *state) {
+    if (!state)
+        return;
+    udp_remove(state->ntp_pcb);
+}
+
 /// Check and see if the time should be synchronized
 void ntp_check_run(NTP_T *state) {
     if (!state)
         return;
-    // `state` is zero-inited by `calloc` so it will always fire on the first time
+    // `state` is zero-inited so it will always fire on the first time
     if (absolute_time_diff_us(get_absolute_time(), state->next_sync_time) < 0 && !state->dns_request_sent) {
-
         // Set alarm in case udp requests are lost
         state->ntp_resend_alarm = add_alarm_in_ms(NTP_RESEND_TIME_MS, ntp_failed_handler, state, true);
 

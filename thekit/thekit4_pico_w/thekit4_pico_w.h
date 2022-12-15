@@ -22,7 +22,6 @@
 #include "lwip/ip_addr.h"
 
 #define WIFI_NETIF (cyw43_state.netif[CYW43_ITF_STA])
-#define has_wifi (netif_is_up(&WIFI_NETIF))
 
 typedef struct NTP_T_ {
     ip_addr_t ntp_server_address;
@@ -71,12 +70,13 @@ bool wifi_connect(void);
 void print_ip(void);
 
 bool ntp_init(NTP_T *state);
+void ntp_close(NTP_T *state);
 void ntp_check_run(NTP_T *state);
 
 bool http_server_open(HTTP_SERVER_T *state);
-void http_server_close(void *arg);
+void http_server_close(HTTP_SERVER_T *arg);
 
-bool trigger_tasks(void);
-bool register_tasks(void);
+void tasks_init(void);
+bool tasks_check_run(void);
 
 #endif

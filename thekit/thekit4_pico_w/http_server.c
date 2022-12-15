@@ -24,6 +24,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
+#include "config.h"
+#include "thekit4_pico_w.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -33,14 +36,10 @@
 #include "lwip/pbuf.h"
 #include "lwip/tcp.h"
 
-#include "config.h"
-#include "thekit4_pico_w.h"
-
 #define TCP_PORT 80
 
 static const char resp_common[] = "\r\nContent-Type: application/json\r\n"
                                   "Connection: close\r\n"
-                                  "Server: zmy/0.1\r\n"
                                   "Content-Length: ";
 
 static const char resp_200_pre[] = "HTTP/1.0 200 OK";
@@ -57,15 +56,14 @@ static const char resp_dashboard[] =
     "HTTP/1.0 200 OK\r\n"
     "Content-Type: text/html\r\n"
     "Connection: close\r\n"
-    "Server: zmy/0.1\r\n"
-    "Content-Length: 4045\r\n\r\n"
+    "Content-Length: 4039\r\n\r\n"
 #include "dashboard.h"
     ;
 
 static err_t tcp_conn_close(void *arg) {
     HTTP_SERVER_T *state = (HTTP_SERVER_T *)arg;
     err_t err = ERR_OK;
-    if (state->client_pcb != NULL) {
+    if (state->client_pcb) {
         tcp_arg(state->client_pcb, NULL);
         tcp_sent(state->client_pcb, NULL);
         tcp_recv(state->client_pcb, NULL);
@@ -93,6 +91,7 @@ static err_t http_server_write(HTTP_SERVER_T *state, const char *buf,
     // required, however you can use this method to cause an assertion in debug
     // mode, if this method is called when cyw43_arch_lwip_begin IS needed
     cyw43_arch_lwip_check();
+    assert(size < tcp_sndbuf(tpcb));
     err_t err = tcp_write(tpcb, buf, size, copy);
     if (err != ERR_OK) {
         return tcp_conn_fail((void *)state, err, "write");
@@ -140,15 +139,15 @@ static bool http_req_check_parse(HTTP_SERVER_T *state) {
         goto finish;
     }
     if (strcmp(path, "/") == 0) {
-        http_server_write(state, resp_dashboard, 500, 0);
-        http_server_write(state, resp_dashboard + 500, 500, 0);
-        http_server_write(state, resp_dashboard + 1000, 500, 0);
-        http_server_write(state, resp_dashboard + 1500, 500, 0);
-        http_server_write(state, resp_dashboard + 2000, 500, 0);
-        http_server_write(state, resp_dashboard + 2500, 500, 0);
-        http_server_write(state, resp_dashboard + 3000, 500, 0);
-        http_server_write(state, resp_dashboard + 3500, 500, 0);
-        http_server_write(state, resp_dashboard + 4000, sizeof(resp_dashboard) - 3500 - 1, 0);
+        http_server_write(state, resp_dashboard, 512, 0);
+        http_server_write(state, resp_dashboard + 512, 512, 0);
+        http_server_write(state, resp_dashboard + 1024, 512, 0);
+        http_server_write(state, resp_dashboard + 1536, 512, 0);
+        http_server_write(state, resp_dashboard + 2048, 512, 0);
+        http_server_write(state, resp_dashboard + 2560, 512, 0);
+        http_server_write(state, resp_dashboard + 3072, 512, 0);
+        http_server_write(state, resp_dashboard + 3584, 512, 0);
+        http_server_write(state, resp_dashboard + 4096, sizeof(resp_dashboard) - 4096 - 1, 0);
         goto finish;
     }
     if (strncmp(path, "/3light_dim", 11) == 0) {
@@ -290,11 +289,22 @@ bool http_server_open(HTTP_SERVER_T *state) {
     return true;
 }
 
-void http_server_close(void *arg) {
+void http_server_close(HTTP_SERVER_T *arg) {
     HTTP_SERVER_T *state = (HTTP_SERVER_T *)arg;
+    if (state->client_pcb) {
+        tcp_arg(state->client_pcb, NULL);
+        tcp_close(state->client_pcb);
+        state->client_pcb = NULL;
+    }
     if (state->server_pcb) {
         tcp_arg(state->server_pcb, NULL);
         tcp_close(state->server_pcb);
         state->server_pcb = NULL;
     }
+    state->conn_state = HTTP_OTHER;
+    if (state->received) {
+        free(state->received);
+        state->received = NULL;
+    }
+    state->allocated_len = 0;
 }

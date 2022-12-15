@@ -14,7 +14,6 @@ size_t cyw43_hal_get_mac_ascii(int idx, size_t chr_off, size_t chr_len, char *de
     uint8_t mac[6];
     char *dest = dest_in;
     assert(chr_off + chr_len <= (2 * sizeof(mac)));
-    cyw43_arch_lwip_check();
     cyw43_hal_get_mac(idx, mac);
     for (; chr_len && (chr_off >> 1) < sizeof(mac); ++chr_off, --chr_len) {
         *dest++ = hexchr[mac[chr_off >> 1] >> (4 * (1 - (chr_off & 1))) & 0xf];

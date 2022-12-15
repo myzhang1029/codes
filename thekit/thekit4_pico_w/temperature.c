@@ -16,13 +16,13 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+#include "thekit4_pico_w.h"
+
 #include <math.h>
 
 #include "pico/stdlib.h"
 #include "hardware/adc.h"
-
-#include "config.h"
-#include "thekit4_pico_w.h"
 
 void temperature_init(void) {
     // ADC
