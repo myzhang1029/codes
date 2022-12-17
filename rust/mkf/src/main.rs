@@ -18,22 +18,17 @@
 extern crate clap;
 extern crate tempfile;
 
-use clap::{crate_version, App, AppSettings, Arg, ArgMatches};
+use clap::{command, Arg, ArgMatches};
 use std::fs::{File, OpenOptions};
 use std::io;
 use std::io::Write;
-use std::process::{exit, Command};
+use std::process::Command;
 use tempfile::TempDir;
-
-const PROGRAM_NAME: &str = "mkf";
 
 /// Parse program arguments and return `ArgMatches`
 fn parse_args() -> ArgMatches {
-    App::new(PROGRAM_NAME)
-        .version(crate_version!())
-        .author("Zhang Maiyun <me@myzhangll.xyz")
-        .about("Create a temporary file from stdin and execute command.")
-        .setting(AppSettings::InferLongArgs)
+    command!()
+        .infer_long_args(true)
         .arg(
             Arg::new("utility")
                 .help("Execute utility with the captured stdin.")
@@ -45,32 +40,36 @@ fn parse_args() -> ArgMatches {
                 .help("Arguments to utility.")
                 .index(2)
                 .allow_hyphen_values(true)
-                .multiple_values(true),
+                .num_args(0..),
         )
         .arg(
             Arg::new("suffix")
                 .short('s')
                 .long("suffix")
-                .takes_value(true)
+                .num_args(1)
                 .help("Make sure the generated file has this suffix (with the leading dot if desired). It must not contain a slash."),
         )
         // Several arguments below are derived from xargs(1)
         .arg(
             Arg::new("eofstr")
                 .short('E')
-                .takes_value(true)
+                .long("eofstr")
+                .num_args(1)
                 .help("Use eofstr as a logical EOF marker. If specified, stdin will be read as text (instead of binary)."),
         )
         .arg(
             Arg::new("replstr")
                 .short('I')
-                .takes_value(true)
+                .long("replstr")
+                .num_args(1)
                 .help("Replace replstr with the full path to the generated temporary file."),
         )
         .arg(
-            Arg::new("reopen").short('o').help(
-                "Reopen stdin as /dev/tty in the child process before executing the command.",
-            ),
+            Arg::new("reopen")
+                .short('o')
+                .long("reopen")
+                .action(clap::ArgAction::SetTrue)
+                .help("Reopen stdin as /dev/tty in the child process before executing the command."),
         )
         .get_matches()
 }
@@ -155,34 +154,40 @@ fn real_main() -> i32 {
         TempDir::new().unwrap_or_else(|msg| fail(msg, "Cannot create temporary directory", 2));
 
     // Create temporary path
-    let file_path = mktmp(&tmp_dir, matches.value_of("suffix"));
+    let file_path = mktmp(
+        &tmp_dir,
+        matches.get_one::<String>("suffix").map(|s| s.as_str()),
+    );
     let path_as_str = file_path
         .to_str()
         .unwrap_or_else(|| fail(file_path.display(), "Cannot process this path", 1));
     // Create temporary file
-    prepare_tmp_file(&file_path, matches.value_of("eofstr"))
-        .unwrap_or_else(|msg| fail(msg, "Cannot capture stdin", 2));
+    prepare_tmp_file(
+        &file_path,
+        matches.get_one::<String>("eofstr").map(|s| s.as_str()),
+    )
+    .unwrap_or_else(|msg| fail(msg, "Cannot capture stdin", 2));
 
-    let args_raw = matches.values_of("arguments").unwrap_or_default();
+    let args_raw = matches.get_many::<String>("arguments").unwrap_or_default();
     // Transform arguments by (replstr => path)
     let mut args: Vec<String> = args_raw
-        .map(|itm| match matches.value_of("replstr") {
+        .map(|itm| match matches.get_one::<String>("replstr") {
             Some(replstr) => itm.replace(replstr, path_as_str),
             None => itm.to_string(),
         })
         .collect();
 
     // If no explicit replstr specified, append it to the end
-    if !matches.is_present("replstr") {
+    if !matches.contains_id("replstr") {
         args.push(path_as_str.to_string());
     }
 
     // Run the command
-    // utility has default value so this shouldn't fail
-    let utility = matches.value_of("utility").unwrap();
+    // utility has a default value so this shouldn't fail
+    let utility = matches.get_one::<String>("utility").unwrap();
     let mut cmd = Command::new(utility);
     cmd.args(args);
-    if matches.is_present("reopen") {
+    if matches.get_flag("reopen") {
         cmd.stdin(
             File::open("/dev/tty").unwrap_or_else(|msg| fail(msg, "Cannot open /dev/tty", 2)),
         );
@@ -198,5 +203,5 @@ fn real_main() -> i32 {
 }
 
 fn main() {
-    exit(real_main());
+    std::process::exit(real_main());
 }
