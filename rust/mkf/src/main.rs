@@ -18,60 +18,34 @@
 extern crate clap;
 extern crate tempfile;
 
-use clap::{command, Arg, ArgMatches};
+use clap::{command, Parser};
 use std::fs::{File, OpenOptions};
 use std::io;
 use std::io::Write;
-use std::process::Command;
+use std::process::{Command, Stdio};
 use tempfile::TempDir;
 
-/// Parse program arguments and return `ArgMatches`
-fn parse_args() -> ArgMatches {
-    command!()
-        .infer_long_args(true)
-        .arg(
-            Arg::new("utility")
-                .help("Execute utility with the captured stdin.")
-                .default_value("cat")
-                .index(1),
-        )
-        .arg(
-            Arg::new("arguments")
-                .help("Arguments to utility.")
-                .index(2)
-                .allow_hyphen_values(true)
-                .num_args(0..),
-        )
-        .arg(
-            Arg::new("suffix")
-                .short('s')
-                .long("suffix")
-                .num_args(1)
-                .help("Make sure the generated file has this suffix (with the leading dot if desired). It must not contain a slash."),
-        )
-        // Several arguments below are derived from xargs(1)
-        .arg(
-            Arg::new("eofstr")
-                .short('E')
-                .long("eofstr")
-                .num_args(1)
-                .help("Use eofstr as a logical EOF marker. If specified, stdin will be read as text (instead of binary)."),
-        )
-        .arg(
-            Arg::new("replstr")
-                .short('I')
-                .long("replstr")
-                .num_args(1)
-                .help("Replace replstr with the full path to the generated temporary file."),
-        )
-        .arg(
-            Arg::new("reopen")
-                .short('o')
-                .long("reopen")
-                .action(clap::ArgAction::SetTrue)
-                .help("Reopen stdin as /dev/tty in the child process before executing the command."),
-        )
-        .get_matches()
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about=None, infer_long_args=true)]
+struct Args {
+    /// Execute `utility` with the captured stdin
+    #[arg(default_value_t=String::from("cat"))]
+    utility: String,
+    /// Arguments to `utility`
+    #[arg(allow_hyphen_values = true)]
+    arguments: Vec<String>,
+    /// Make sure the generated file has this suffix (with the leading dot if desired). It must not contain a slash
+    #[arg(short, long, default_value_t=String::default())]
+    suffix: String,
+    /// Use eofstr as a logical EOF marker. If specified, stdin will be read as text (instead of binary)
+    #[arg(short = 'E', long)]
+    eofstr: Option<String>,
+    /// Replace replstr with the full path to the generated temporary file
+    #[arg(short = 'I', long)]
+    replstr: Option<String>,
+    /// Reopen stdin as /dev/tty in the child process before executing the command
+    #[arg(short = 'o', long)]
+    reopen: bool,
 }
 
 /// Read from stdin and fill the temporary file (Text mode)
@@ -102,22 +76,19 @@ fn read_fill_bin(tmp_file: &mut File) -> io::Result<()> {
 }
 
 /// Make temporary file according to the arguments
-fn mktmp(tmp_dir: &TempDir, suffix: Option<&str>) -> std::path::PathBuf {
+fn mktmp(tmp_dir: &TempDir, suffix: &str) -> std::path::PathBuf {
     // Name for the file
     // No need to be random because we already have a tempdir
     let file_name: String = String::from("tmp_output");
 
     // Then construct the path to create
-    tmp_dir.path().join(match suffix {
-        Some(suffix) => file_name + suffix,
-        None => file_name,
-    })
+    tmp_dir.path().join(file_name + suffix)
 }
 
 /// Create and fill a temporary file
 fn prepare_tmp_file<P: AsRef<std::path::Path>>(
     file_path: P,
-    arg_eofstr: Option<&str>,
+    arg_eofstr: Option<&String>,
 ) -> io::Result<()> {
     // Create and truncate that so-named file
     let mut tmp_file = OpenOptions::new()
@@ -142,9 +113,9 @@ fn fail<E: std::fmt::Display>(reason: E, msg: &str, code: i32) -> ! {
     std::process::exit(code)
 }
 
-fn real_main() -> i32 {
+fn main() {
     // First parse the arguments
-    let matches = parse_args();
+    let args = Args::parse();
 
     // Create a temporary directory to accommodate --suffix,
     // TempDir will delete it for us, but we must keep it in main's scope
@@ -154,54 +125,47 @@ fn real_main() -> i32 {
         TempDir::new().unwrap_or_else(|msg| fail(msg, "Cannot create temporary directory", 2));
 
     // Create temporary path
-    let file_path = mktmp(
-        &tmp_dir,
-        matches.get_one::<String>("suffix").map(|s| s.as_str()),
-    );
+    let file_path = mktmp(&tmp_dir, &args.suffix);
     let path_as_str = file_path
         .to_str()
         .unwrap_or_else(|| fail(file_path.display(), "Cannot process this path", 1));
     // Create temporary file
-    prepare_tmp_file(
-        &file_path,
-        matches.get_one::<String>("eofstr").map(|s| s.as_str()),
-    )
-    .unwrap_or_else(|msg| fail(msg, "Cannot capture stdin", 2));
+    prepare_tmp_file(&file_path, args.eofstr.as_ref())
+        .unwrap_or_else(|msg| fail(msg, "Cannot capture stdin", 2));
 
-    let args_raw = matches.get_many::<String>("arguments").unwrap_or_default();
-    // Transform arguments by (replstr => path)
-    let mut args: Vec<String> = args_raw
-        .map(|itm| match matches.get_one::<String>("replstr") {
-            Some(replstr) => itm.replace(replstr, path_as_str),
-            None => itm.to_string(),
-        })
-        .collect();
-
-    // If no explicit replstr specified, append it to the end
-    if !matches.contains_id("replstr") {
-        args.push(path_as_str.to_string());
-    }
+    let prog_args = match args.replstr {
+        // Transform arguments by (replstr => path)
+        Some(replstr) => args
+            .arguments
+            .iter()
+            .map(|itm| itm.replace(&replstr, path_as_str))
+            .collect(),
+        // If no explicit replstr specified, append it to the end
+        None => {
+            let mut new = args.arguments.to_owned();
+            new.push(path_as_str.to_string());
+            new
+        }
+    };
 
     // Run the command
-    // utility has a default value so this shouldn't fail
-    let utility = matches.get_one::<String>("utility").unwrap();
-    let mut cmd = Command::new(utility);
-    cmd.args(args);
-    if matches.get_flag("reopen") {
-        cmd.stdin(
-            File::open("/dev/tty").unwrap_or_else(|msg| fail(msg, "Cannot open /dev/tty", 2)),
-        );
-    }
-    let exit_status = cmd
+    let exit_status = Command::new(args.utility)
+        .args(prog_args)
+        .stdin(if args.reopen {
+            File::open("/dev/tty")
+                .unwrap_or_else(|msg| fail(msg, "Cannot open /dev/tty", 2))
+                .into()
+        } else {
+            Stdio::inherit()
+        })
         .spawn()
         .unwrap_or_else(|msg| fail(msg, "Cannot execute", 3))
         // We must wait, or tmp_dir will be removed before cmd terminates
         .wait()
         // So wait() shouldn't fail normally
-        .unwrap();
-    exit_status.code().unwrap_or_default()
-}
-
-fn main() {
-    std::process::exit(real_main());
+        .unwrap()
+        // Get the exit code
+        .code()
+        .unwrap_or_default();
+    std::process::exit(exit_status)
 }
