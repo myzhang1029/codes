@@ -1,9 +1,21 @@
-/**
- * Copyright (c) 2022 Raspberry Pi (Trading) Ltd.
+/*
+ *  ntp.c
+ *  Heavily refactored from BSD-3-Clause picow_ntp_client.c
+ *  Copyright (c) 2022 Raspberry Pi (Trading) Ltd.
+ *  Copyright (C) 2022 Zhang Maiyun <me@myzhangll.xyz>
  *
- * SPDX-License-Identifier: BSD-3-Clause
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 3 of the License, or
+ *  (at your option) any later version.
  *
- * Adopted by Zhang Maiyun
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -21,13 +33,30 @@
 #include "lwip/pbuf.h"
 #include "lwip/udp.h"
 
-#define NTP_MSG_LEN 48
+static const uint16_t NTP_MSG_LEN = 48;
 // Seconds between 1 Jan 1900 and 1 Jan 1970
-#define NTP_DELTA 2208988800
+static const uint32_t NTP_DELTA = 2208988800;
+// Time to wait in case UDP requests are lost
+static const uint32_t UDP_TIMEOUT_TIME_MS = 10 * 1000;
 
-// Called with results of operation
-static void ntp_result(NTP_T *state, int status, time_t *result) {
-    if (status == 0 && result) {
+/// Close this request
+static void ntp_req_close(struct ntp_client_current_request *req) {
+    if (!req)
+        return;
+    if (req->pcb) {
+        udp_remove(req->pcb);
+        req->pcb = NULL;
+    }
+    if (req->resend_alarm > 0) {
+        // We finished, so cancel it
+        cancel_alarm(req->resend_alarm);
+        req->resend_alarm = 0;
+    }
+    req->in_progress = false;
+}
+
+static void ntp_update_rtc(time_t *result) {
+    if (result) {
         time_t lresult = *result + TZ_DIFF_SEC;
         struct tm *lt = gmtime(&lresult);
         printf("Got NTP response: %02d/%02d/%04d %02d:%02d:%02d\n",
@@ -47,120 +76,110 @@ static void ntp_result(NTP_T *state, int status, time_t *result) {
             puts("RTC set");
         }
     }
-
-    if (state->ntp_resend_alarm > 0) {
-        cancel_alarm(state->ntp_resend_alarm);
-        state->ntp_resend_alarm = 0;
-    }
-    state->next_sync_time = make_timeout_time_ms(NTP_INTERVAL_MS);
-    state->dns_request_sent = false;
 }
 
-static int64_t ntp_failed_handler(alarm_id_t id, void *user_data)
+static int64_t ntp_timeout_alarm_cb(alarm_id_t id, void *user_data)
 {
-    NTP_T *state = (NTP_T*)user_data;
-    puts("NTP request failed");
-    ntp_result(state, -1, NULL);
+    // TODO: UDP resend
+    struct ntp_client_current_request *req = (struct ntp_client_current_request *)user_data;
+    puts("NTP request timed out");
+    ntp_req_close(req);
     return 0;
 }
 
-// Make an NTP request
-static void ntp_request(NTP_T *state) {
-    // cyw43_arch_lwip_begin/end should be used around calls into lwIP to ensure correct locking.
-    // You can omit them if you are in a callback from lwIP. Note that when using pico_cyw_arch_poll
-    // these calls are a no-op and can be omitted, but it is a good practice to use them in
-    // case you switch the cyw43_arch type later.
-    cyw43_arch_lwip_begin();
-    struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, NTP_MSG_LEN, PBUF_RAM);
-    uint8_t *req = (uint8_t *) p->payload;
-    memset(req, 0, NTP_MSG_LEN);
-    req[0] = 0x1b;
-    udp_sendto(state->ntp_pcb, p, &state->ntp_server_address, NTP_PORT);
-    pbuf_free(p);
-    cyw43_arch_lwip_end();
-}
-
-// Call back with a DNS result
-static void ntp_dns_found(const char *hostname, const ip_addr_t *ipaddr, void *arg) {
-    NTP_T *state = (NTP_T*)arg;
-    if (ipaddr) {
-        state->ntp_server_address = *ipaddr;
-        printf("NTP address %s\n", ip4addr_ntoa(ipaddr));
-        ntp_request(state);
-    } else {
-        puts("NTP DNS request failed");
-        ntp_result(state, -1, NULL);
-    }
-}
-
 // NTP data received
-static void ntp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port) {
-    NTP_T *state = (NTP_T*)arg;
+static void ntp_recv_cb(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port) {
+    struct ntp_client_current_request *req = (struct ntp_client_current_request *)arg;
     uint8_t mode = pbuf_get_at(p, 0) & 0x7;
     uint8_t stratum = pbuf_get_at(p, 1);
 
     // Check the result
-    if (ip_addr_cmp(addr, &state->ntp_server_address) && port == NTP_PORT && p->tot_len == NTP_MSG_LEN &&
+    if (ip_addr_cmp(addr, &req->server_address) && port == NTP_PORT && p->tot_len == NTP_MSG_LEN &&
         mode == 0x4 && stratum != 0) {
         uint8_t seconds_buf[4] = {0};
         pbuf_copy_partial(p, seconds_buf, sizeof(seconds_buf), 40);
         uint32_t seconds_since_1900 = seconds_buf[0] << 24 | seconds_buf[1] << 16 | seconds_buf[2] << 8 | seconds_buf[3];
         uint32_t seconds_since_1970 = seconds_since_1900 - NTP_DELTA;
         time_t epoch = seconds_since_1970;
-        ntp_result(state, 0, &epoch);
+        ntp_update_rtc(&epoch);
     } else {
         puts("Invalid NTP response");
-        ntp_result(state, -1, NULL);
     }
+    ntp_req_close(req);
     pbuf_free(p);
 }
 
+// Make an NTP request
+static void do_send_ntp_request(const char *_hostname, const ip_addr_t *ipaddr, void *arg) {
+    struct ntp_client_current_request *req = (struct ntp_client_current_request *)arg;
+    if (ipaddr) {
+        req->server_address = *ipaddr;
+        printf("NTP address %s\n", ip4addr_ntoa(ipaddr));
+    }
+    else {
+        puts("NTP DNS request failed");
+        ntp_req_close(req);
+    }
+    cyw43_arch_lwip_begin();
+    struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, NTP_MSG_LEN, PBUF_RAM);
+    uint8_t *payload = (uint8_t *) p->payload;
+    memset(payload, 0, NTP_MSG_LEN);
+    payload[0] = 0x1b;
+    udp_sendto(req->pcb, p, &req->server_address, NTP_PORT);
+    pbuf_free(p);
+    cyw43_arch_lwip_end();
+}
+
 /// Perform initialisation
-bool ntp_init(NTP_T *state) {
+bool ntp_client_init(struct ntp_client *state) {
     if (!state)
         return false;
-    state->dns_request_sent = false;
-    state->ntp_pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
+    // Meaningful init values
+    state->req.in_progress = false;
+    state->req.pcb = NULL;
+    state->req.resend_alarm = 0;
     // So that next check_run is triggered
     state->next_sync_time = get_absolute_time();
-    if (!state->ntp_pcb) {
-        puts("Failed to create pcb");
-        return false;
-    }
-    udp_recv(state->ntp_pcb, ntp_recv, state);
     return true;
 }
 
-/// Close the PCB
-void ntp_close(NTP_T *state) {
-    if (!state)
-        return;
-    udp_remove(state->ntp_pcb);
-}
-
 /// Check and see if the time should be synchronized
-void ntp_check_run(NTP_T *state) {
+void ntp_client_check_run(struct ntp_client *state) {
     if (!state)
         return;
+    struct ntp_client_current_request *req = &state->req;
     // `state` is zero-inited so it will always fire on the first time
-    if (absolute_time_diff_us(get_absolute_time(), state->next_sync_time) < 0 && !state->dns_request_sent) {
-        // Set alarm in case udp requests are lost
-        state->ntp_resend_alarm = add_alarm_in_ms(NTP_RESEND_TIME_MS, ntp_failed_handler, state, true);
+    if (absolute_time_diff_us(get_absolute_time(), state->next_sync_time) < 0 && !req->in_progress) {
+        // Initialize a NTP sync
+        req->in_progress = true;
+        req->pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
+        if (!req->pcb) {
+            puts("Failed to create pcb");
+            req->in_progress = false;
+            return;
+        }
+        udp_recv(req->pcb, ntp_recv_cb, req);
+
+        // Set alarm to close the connection in case UDP requests are lost
+        req->resend_alarm = add_alarm_in_ms(UDP_TIMEOUT_TIME_MS, ntp_timeout_alarm_cb, req, true);
 
         // cyw43_arch_lwip_begin/end should be used around calls into lwIP to ensure correct locking.
         // You can omit them if you are in a callback from lwIP. Note that when using pico_cyw_arch_poll
         // these calls are a no-op and can be omitted, but it is a good practice to use them in
         // case you switch the cyw43_arch type later.
         cyw43_arch_lwip_begin();
-        int err = dns_gethostbyname(NTP_SERVER, &state->ntp_server_address, ntp_dns_found, state);
+        int err = dns_gethostbyname(NTP_SERVER, &req->server_address, do_send_ntp_request, req);
         cyw43_arch_lwip_end();
 
-        state->dns_request_sent = true;
         if (err == ERR_OK) {
-            ntp_request(state); // Cached result
+            // Cached result
+            do_send_ntp_request(NTP_SERVER, &req->server_address, req);
         } else if (err != ERR_INPROGRESS) { // ERR_INPROGRESS means expect a callback
             puts("DNS request failed");
-            ntp_result(state, -1, NULL);
+            req->pcb = NULL;
+            // Now calling `req_close` is safe because it does not call `udp_remove` on NULL
+            ntp_req_close(req);
         }
+        state->next_sync_time = make_timeout_time_ms(NTP_INTERVAL_MS);
     }
 }

@@ -40,7 +40,7 @@ static void register_mdns(void) {
 
 /// Connect to Wi-Fi
 bool wifi_connect(void) {
-    int n_configs = sizeof(wifi_config) / sizeof(WIFI_CONFIG_T);
+    int n_configs = sizeof(wifi_config) / sizeof(struct wifi_config_entry);
     for (int i = 0; i < n_configs; ++i) {
         printf("Attempting Wi-Fi %s\n", wifi_config[i].ssid);
         int result = cyw43_arch_wifi_connect_timeout_ms(

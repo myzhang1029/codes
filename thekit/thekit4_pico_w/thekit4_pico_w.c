@@ -33,8 +33,8 @@
 
 bool has_cyw43 = false;
 bool time_in_sync = false;
-NTP_T ntp_state;
-HTTP_SERVER_T http_state = {NULL, NULL, 0, NULL, 0};
+struct ntp_client ntp_state;
+struct http_server http_state;
 
 static void init() {
     stdio_init_all();
@@ -51,7 +51,7 @@ static void init() {
     // Depends on cyw43
     cyw43_arch_enable_sta_mode();
     wifi_connect();
-    if (!ntp_init(&ntp_state))
+    if (!ntp_client_init(&ntp_state))
         puts("WARNING: Cannot init NTP client");
     // Start HTTP server
     if (!http_server_open(&http_state))
@@ -82,23 +82,21 @@ int main() {
         if (has_cyw43 && wifi_state != CYW43_LINK_JOIN) {
             printf("Wi-Fi link status is %d, reconnecting\n", wifi_state);
             wifi_connect();
-            // Re-open clients to fix dead PCBs
-            ntp_close(&ntp_state);
-            if (!ntp_init(&ntp_state))
-                puts("WARNING: Cannot reinit NTP client");
         }
-        ntp_check_run(&ntp_state);
+        ntp_client_check_run(&ntp_state);
         tasks_check_run();
-#if PICO_CYW43_ARCH_POLL
-        if (has_cyw43)
-            cyw43_arch_poll();
-#endif
         if (!alarm_first_register_done) {
             // It waits for NTP to be up
             puts("Alarm awaiting RTC");
             alarm_first_register_done = light_register_next_alarm();
         }
-        sleep_ms(20);
+#if PICO_CYW43_ARCH_POLL
+        if (has_cyw43)
+            cyw43_arch_poll();
+        sleep_ms(1);
+#else
+        sleep_ms(100);
+#endif
     }
     http_server_close(&http_state);
     if (has_cyw43)

@@ -1,5 +1,5 @@
 /*
- *  dimmer.h
+ *  thekit4_pico_w.h
  *  Copyright (C) 2022 Zhang Maiyun <me@myzhangll.xyz>
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -16,45 +16,56 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _DIMMER_H
-#define _DIMMER_H
+#ifndef _THEKIT4_PICO_W_H
+#define _THEKIT4_PICO_W_H
+
+#include <stdint.h>
 
 #include "lwip/ip_addr.h"
 
 #define WIFI_NETIF (cyw43_state.netif[CYW43_ITF_STA])
 
-typedef struct NTP_T_ {
-    ip_addr_t ntp_server_address;
-    bool dns_request_sent;
-    struct udp_pcb *ntp_pcb;
+#undef uint32_t
+typedef u32_t uint32_t;
+
+struct ntp_client {
     absolute_time_t next_sync_time;
-    alarm_id_t ntp_resend_alarm;
-} NTP_T;
+    struct ntp_client_current_request {
+        bool in_progress;
+        ip_addr_t server_address;
+        struct udp_pcb *pcb;
+        alarm_id_t resend_alarm;
+    } req;
+};
 
-typedef struct HTTP_SERVER_T_ {
+/// HTTP server. The entire structure exists throughout the program
+/// but `conn` is re-initialized each time a request is received.
+struct http_server {
     struct tcp_pcb *server_pcb;
-    struct tcp_pcb *client_pcb;
-    enum {
-        HTTP_OTHER = 0,
-        HTTP_ACCEPTED,
-        HTTP_RECEIVING
-    } conn_state;
-    // len = allocated_len + 1
-    char *received;
-    size_t allocated_len;
-} HTTP_SERVER_T;
+    struct http_server_conn {
+        struct tcp_pcb *client_pcb;
+        enum {
+            HTTP_OTHER = 0,
+            HTTP_ACCEPTED,
+            HTTP_RECEIVING
+        } state;
+        // len = allocated_len + 1
+        char *received;
+        size_t allocated_len;
+    } conn;
+};
 
-typedef struct LIGHT_SCHED_ENTRY_T_ {
+struct light_sched_entry {
     int8_t hour;
     int8_t min;
     bool on;
-} LIGHT_SCHED_ENTRY_T;
+};
 
-typedef struct WIFI_CONFIG_T_ {
+struct wifi_config_entry {
     const char *ssid;
     const char *password;
     uint32_t auth;
-} WIFI_CONFIG_T;
+};
 
 extern bool has_cyw43;
 extern bool time_in_sync;
@@ -69,12 +80,11 @@ bool light_register_next_alarm(void);
 bool wifi_connect(void);
 void print_ip(void);
 
-bool ntp_init(NTP_T *state);
-void ntp_close(NTP_T *state);
-void ntp_check_run(NTP_T *state);
+bool ntp_client_init(struct ntp_client *state);
+void ntp_client_check_run(struct ntp_client *state);
 
-bool http_server_open(HTTP_SERVER_T *state);
-void http_server_close(HTTP_SERVER_T *arg);
+bool http_server_open(struct http_server *state);
+void http_server_close(struct http_server *arg);
 
 void tasks_init(void);
 bool tasks_check_run(void);

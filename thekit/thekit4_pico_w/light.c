@@ -105,6 +105,7 @@ static int intensity_to_dcycle(float intensity) {
 /// Takes a percentage perceived intensity and dim the light
 void light_dim(float intensity) {
     current_pwm_level = intensity_to_dcycle(intensity);
+    printf("Dimming to %d", (int)current_pwm_level);
     pwm_set_gpio_level(LIGHT_PIN, current_pwm_level);
 }
 
@@ -172,7 +173,7 @@ bool light_register_next_alarm(void) {
         return false;
     datetime_t current;
     rtc_get_datetime(&current);
-    int n_alarms = sizeof(light_sched) / sizeof(LIGHT_SCHED_ENTRY_T);
+    int n_alarms = sizeof(light_sched) / sizeof(struct light_sched_entry);
     // Find the next alarm
     for (int i = 0; i < n_alarms; ++i) {
         if (light_sched[i].hour > current.hour) {

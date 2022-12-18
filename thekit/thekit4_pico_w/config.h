@@ -22,7 +22,7 @@ static const uint16_t WRAP = 1000;
 
 // Light-based alarms
 // Sort chronologically
-static const LIGHT_SCHED_ENTRY_T light_sched[] = {
+static const struct light_sched_entry light_sched[] = {
     {7, 30, true},
     {8, 30, false},
     {21, 30, true},
@@ -57,6 +57,5 @@ static const char NTP_SERVER[] = "pool.ntp.org";
 static const uint16_t NTP_PORT = 123;
 // One hour between syncs
 static const uint32_t NTP_INTERVAL_MS = 3600 * 1000;
-static const uint32_t NTP_RESEND_TIME_MS = 10 * 1000;
 // Crude TZ conversion
 static const int TZ_DIFF_SEC = -8 * 3600;
