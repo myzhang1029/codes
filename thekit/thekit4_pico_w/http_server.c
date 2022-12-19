@@ -48,7 +48,6 @@
 #define HTTP_PORT 80
 
 static const char resp_common[] = "\r\nContent-Type: application/json\r\n"
-                                  "Connection: close\r\n"
                                   "Content-Length: ";
 
 static const char resp_200_pre[] = "HTTP/1.0 200 OK";
@@ -61,10 +60,12 @@ static const char resp_404_post[] = "22\r\n\r\n"
 static const char resp_405_pre[] = "HTTP/1.0 405 METHOD NOT ALLOWED";
 static const char resp_405_post[] = "31\r\n\r\n"
                                     "{\"error\": \"method not allowed\"}";
+static const char resp_500_pre[] = "HTTP/1.0 500 INTERNAL SERVER ERROR";
+static const char resp_500_post[] = "24\r\n\r\n"
+                                    "{\"error\": \"internal server error\"}";
 static const char resp_dashboard[] =
     "HTTP/1.0 200 OK\r\n"
     "Content-Type: text/html\r\n"
-    "Connection: close\r\n"
     "Content-Length: 4039\r\n\r\n"
 #include "dashboard.h"
     ;
@@ -91,7 +92,6 @@ static err_t http_conn_close(void *arg) {
         free(conn->received);
         conn->received = NULL;
     }
-    conn->allocated_len = 0;
     return err;
 }
 
@@ -122,45 +122,30 @@ static err_t http_conn_write(struct http_server_conn *conn, const char *buf,
 
 // `true` means that we can stop reading
 static bool http_req_check_parse(struct http_server_conn *conn) {
-    char *found, *buf = conn->received;
-    found = strchr(buf, '\r');
-    if (found)
-        *found = 0;
-    else {
-        found = strchr(buf, '\n');
-        if (found)
-            *found = 0;
-        else
-            // Not complete yet
-            return false;
-    }
     cyw43_arch_lwip_check();
-    char *path = strchr(buf, ' ');
-    if (path == NULL)
+    uint16_t offset_newline = pbuf_memfind(conn->received, "\r\n", 2, 0);
+    if (offset_newline == 0xffff)
+        // Have not received a complete request line yet
+        return false;
+    uint16_t offset_first_space = pbuf_memfind(conn->received, " ", 1, 0);
+    if (offset_first_space == 0xffff || offset_first_space > offset_newline)
         // Invalid request
         goto finish;
-    /* Extract method (GET, POST, etc.) */
-    const char *method = buf;
-    size_t method_length = path - buf;
-    /* Extract version (HTTP/1.1, etc.) to help end `path` */
-    char *version = strrchr(buf, ' ');
-    /* Set the space to NUL */
-    *path = 0;
-    /* Jump to the char after space */
-    path += 1;
-    if (version != NULL && version != path) {
-        *version = 0;
-        /* We don't use version anymore though */
-        version += 1;
-    }
-    /* Only process GET because I discard the entire body */
-    if (strncmp(method, "GET", method_length) != 0) {
+    uint16_t offset_path = offset_first_space + 1;
+    // Extract method (GET, POST, etc.)
+    // Only process GET because I discard the entire body.
+    // Note the extra space after GET
+    if (pbuf_memcmp(conn->received, 0, "GET ", 4) != 0) {
         http_conn_write(conn, resp_405_pre, sizeof(resp_405_pre) - 1, 0);
         http_conn_write(conn, resp_common, sizeof(resp_common) - 1, 0);
         http_conn_write(conn, resp_405_post, sizeof(resp_405_post) - 1, 0);
         goto finish;
     }
-    if (strcmp(path, "/") == 0) {
+    // We don't use or care about HTTP version anymore
+    // Note the space at the end of this path
+    if (pbuf_memcmp(conn->received, offset_path, "/ ", 2) == 0 
+        // unlikely
+        || pbuf_memcmp(conn->received, offset_path, "/\r", 2) == 0) {
         http_conn_write(conn, resp_dashboard, 512, 0);
         http_conn_write(conn, resp_dashboard + 512, 512, 0);
         http_conn_write(conn, resp_dashboard + 1024, 512, 0);
@@ -172,15 +157,25 @@ static bool http_req_check_parse(struct http_server_conn *conn) {
         http_conn_write(conn, resp_dashboard + 4096, sizeof(resp_dashboard) - 4096 - 1, 0);
         goto finish;
     }
-    if (strncmp(path, "/3light_dim", 11) == 0) {
-        char *pos = strstr(path, "level=");
-        if (pos == NULL) {
+    if (pbuf_memcmp(conn->received, offset_path, "/3light_dim", 11) == 0) {
+        uint16_t offset_level = pbuf_memfind(conn->received, "level=", 6, offset_path);
+        if (offset_level == 0xffff) {
             http_conn_write(conn, resp_400_pre, sizeof(resp_400_pre) - 1, 0);
             http_conn_write(conn, resp_common, sizeof(resp_common) - 1, 0);
             http_conn_write(conn, resp_400_post, sizeof(resp_400_post) - 1, 0);
             goto finish;
         }
-        float intensity = atof(pos + 6);
+        // Max should be 100.000000 and NUL
+        char number[12];
+        if (pbuf_copy_partial(conn->received, number, 11, offset_level + 6) == 0) {
+            puts("Cannot copy pbuf to string");
+            http_conn_write(conn, resp_500_pre, sizeof(resp_500_pre) - 1, 0);
+            http_conn_write(conn, resp_common, sizeof(resp_common) - 1, 0);
+            http_conn_write(conn, resp_500_post, sizeof(resp_500_post) - 1, 0);
+            goto finish;
+        }
+        number[11] = 0;
+        float intensity = atof(number);
         // Max length + nn\r\n\r\n + \0
         char response[37] = {0};
         size_t length;
@@ -204,9 +199,8 @@ finish:
     // We only need one recv/send cycle, so we simply
     // close the connection here.
     tcp_output(conn->client_pcb);
-    free(conn->received);
+    pbuf_free(conn->received);
     conn->received = NULL;
-    conn->allocated_len = 0;
     http_conn_close(conn);
     return true;
 }
@@ -226,28 +220,12 @@ static err_t http_conn_recv_cb(void *arg, struct tcp_pcb *tpcb, struct pbuf *p,
     // mode, if this method is called when cyw43_arch_lwip_begin IS needed
     cyw43_arch_lwip_check();
     if (conn->state == HTTP_ACCEPTED) {
-        // First chunk, alloc buffer
-        conn->received = malloc(p->tot_len + 1);
-        if (!conn->received)
-            return http_conn_fail(arg, ERR_MEM, "malloc");
-        conn->allocated_len = p->tot_len;
-        pbuf_copy_partial(p, conn->received, conn->allocated_len, 0);
-        // Make sure it is still a C string
-        conn->received[conn->allocated_len] = 0;
+        // First chunk
+        conn->received = p;
     }
     else if (conn->state == HTTP_RECEIVING) {
         // Not first chunk
-        conn->received =
-            realloc(conn->received, conn->allocated_len + p->tot_len + 1);
-        if (!conn->received)
-            return http_conn_fail(arg, ERR_MEM, "realloc");
-        // Copy into our buffer, beginning from the last chunk
-        pbuf_copy_partial(p, conn->received + conn->allocated_len, p->tot_len,
-                          0);
-        // Now increase the counter
-        conn->allocated_len += p->tot_len;
-        // Make sure it is still a C string
-        conn->received[conn->allocated_len] = 0;
+        pbuf_cat(conn->received, p);
     }
     else {
         // Might be DONE or something else
@@ -286,7 +264,6 @@ bool http_server_open(struct http_server *state) {
     state->conn.client_pcb = NULL;
     state->conn.state = HTTP_OTHER;
     state->conn.received = NULL;
-    state->conn.allocated_len = 0;
 
     printf("Starting server on port %u\n", HTTP_PORT);
 

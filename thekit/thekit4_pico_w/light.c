@@ -85,19 +85,19 @@ void light_init(void) {
     pwm_set_enabled(light_slice_num, true);
 }
 
-static int intensity_to_dcycle(float intensity) {
+static uint16_t intensity_to_dcycle(float intensity) {
     float real_intensity = exp(intensity * log(101.) / 100.) - 1.;
     float voltage = real_intensity * (19.2 - 7.845) / 100. + 7.845;
     if (7.845 < voltage && voltage <= 9.275)
-        return (int)((-7.664 + voltage) * 2819.70);
+        return (uint16_t)((-7.664 + voltage) * 0.281970 * WRAP);
     if (9.275 < voltage && voltage <= 13.75)
-        return (int)((6.959 + voltage) * 265.20);
+        return (uint16_t)((6.959 + voltage) * 0.026520 * WRAP);
     if (13.75 < voltage && voltage <= 16.88)
-        return (int)((-2.529 + voltage) * 494.85);
+        return (uint16_t)((-2.529 + voltage) * 0.049485 * WRAP);
     if (16.88 < voltage)
     {
-        int r = (int)((26.90 + voltage) * 216.92);
-        return r > 10000 ? 10000 : r;
+        uint16_t r = (uint16_t)((26.90 + voltage) * 0.021692 * WRAP);
+        return r > WRAP ? WRAP : r;
     }
     return 0;
 }
@@ -105,7 +105,7 @@ static int intensity_to_dcycle(float intensity) {
 /// Takes a percentage perceived intensity and dim the light
 void light_dim(float intensity) {
     current_pwm_level = intensity_to_dcycle(intensity);
-    printf("Dimming to %d", (int)current_pwm_level);
+    printf("Dimming to %d\n", (int)current_pwm_level);
     pwm_set_gpio_level(LIGHT_PIN, current_pwm_level);
 }
 

@@ -49,9 +49,7 @@ struct http_server {
             HTTP_ACCEPTED,
             HTTP_RECEIVING
         } state;
-        // len = allocated_len + 1
-        char *received;
-        size_t allocated_len;
+        struct pbuf *received;
     } conn;
 };
 

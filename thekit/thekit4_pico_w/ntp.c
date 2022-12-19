@@ -80,7 +80,6 @@ static void ntp_update_rtc(time_t *result) {
 
 static int64_t ntp_timeout_alarm_cb(alarm_id_t id, void *user_data)
 {
-    // TODO: UDP resend
     struct ntp_client_current_request *req = (struct ntp_client_current_request *)user_data;
     puts("NTP request timed out");
     ntp_req_close(req);
@@ -114,7 +113,7 @@ static void do_send_ntp_request(const char *_hostname, const ip_addr_t *ipaddr, 
     struct ntp_client_current_request *req = (struct ntp_client_current_request *)arg;
     if (ipaddr) {
         req->server_address = *ipaddr;
-        printf("NTP address %s\n", ip4addr_ntoa(ipaddr));
+        printf("NTP address %s\n", ipaddr_ntoa(ipaddr));
     }
     else {
         puts("NTP DNS request failed");
