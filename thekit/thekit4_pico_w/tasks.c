@@ -111,12 +111,14 @@ static void do_send_http(const char *name, const ip_addr_t *ipaddr, void *cb_arg
     // `do_send_http` may be called by non-callback when DNS return cached results
     cyw43_arch_lwip_begin();
     struct tcp_pcb *conn = tcp_new_ip_type(IP_GET_TYPE(ipaddr));
+    cyw43_arch_lwip_end();
     // To be closed by connect_cb
     req_data->conn = conn;
     if (conn == NULL) {
         puts("Cannot create TCP PCB");
         goto fail;
     }
+    cyw43_arch_lwip_begin();
     tcp_arg(conn, req_data);
     err = tcp_connect(conn, ipaddr, req_data->port, tcp_connect_cb);
     cyw43_arch_lwip_end();
