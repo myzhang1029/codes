@@ -171,6 +171,9 @@
 "        function playSent() {" \
 "            xhrGlue(\"/playP\");" \
 "        }" \
+"        function getInfo() {" \
+"            xhrGlue(\"/get_info\");" \
+"        }" \
 "</script>" \
 "" \
 "</body>" \

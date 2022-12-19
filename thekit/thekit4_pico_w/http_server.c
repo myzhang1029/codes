@@ -66,7 +66,7 @@ static const char resp_500_post[] = "24\r\n\r\n"
 static const char resp_dashboard[] =
     "HTTP/1.0 200 OK\r\n"
     "Content-Type: text/html\r\n"
-    "Content-Length: 4039\r\n\r\n"
+    "Content-Length: 4109\r\n\r\n"
 #include "dashboard.h"
     ;
 
@@ -157,6 +157,27 @@ static bool http_req_check_parse(struct http_server_conn *conn) {
         http_conn_write(conn, resp_dashboard + 4096, sizeof(resp_dashboard) - 4096 - 1, 0);
         goto finish;
     }
+    // Note the space at the end of this path
+    if (pbuf_memcmp(conn->received, offset_path, "/get_info ", 10) == 0 
+        // unlikely
+        || pbuf_memcmp(conn->received, offset_path, "/get_info\r", 2) == 0) {
+        // Max length + nn\r\n\r\n + \0
+        char response[48] = {0};
+        size_t length;
+        float temperature = temperature_measure();
+        extern uint16_t current_pwm_level;
+        /* Generate response */
+        length = snprintf(response, 48,
+                     "41\r\n\r\n{\"temperature\": %.3f, \"pwm\": %u}",
+                     temperature, (unsigned)current_pwm_level);
+        snprintf(response, 48, "%u\r\n\r\n{\"temperature\": %.3f, \"pwm\": %u}",
+                 (unsigned)length - 6, temperature, (unsigned)current_pwm_level);
+        http_conn_write(conn, resp_200_pre, sizeof(resp_200_pre) - 1, 0);
+        http_conn_write(conn, resp_common, sizeof(resp_common) - 1, 0);
+        // This one needs to be copied
+        http_conn_write(conn, response, length, 1);
+        goto finish;
+    }
     if (pbuf_memcmp(conn->received, offset_path, "/3light_dim", 11) == 0) {
         uint16_t offset_level = pbuf_memfind(conn->received, "level=", 6, offset_path);
         if (offset_level == 0xffff) {
@@ -182,8 +203,8 @@ static bool http_req_check_parse(struct http_server_conn *conn) {
         light_dim(intensity);
         /* Generate response */
         length = snprintf(response, 37,
-                     "30\r\n\r\n{\"dim\": true, \"value\": %3.2f}", intensity);
-        snprintf(response, 37, "%u\r\n\r\n{\"dim\": true, \"value\": %3.2f}",
+                     "30\r\n\r\n{\"dim\": true, \"value\": %.2f}", intensity);
+        snprintf(response, 37, "%u\r\n\r\n{\"dim\": true, \"value\": %.2f}",
                  (unsigned)length - 6, intensity);
         http_conn_write(conn, resp_200_pre, sizeof(resp_200_pre) - 1, 0);
         http_conn_write(conn, resp_common, sizeof(resp_common) - 1, 0);
