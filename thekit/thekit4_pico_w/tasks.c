@@ -174,39 +174,21 @@ static bool send_http_request_dns(const char *hostname, const char *path, uint16
 }
 
 static bool send_ddns(void) {
-    char *uri = NULL;
-    char *addr = strdup(ipaddr_ntoa(&WIFI_NETIF.ip_addr));
-    if (addr == NULL) {
-        puts("strdup failed");
-        return false;
-    }
-    size_t size = snprintf(NULL, 0, DDNS_URI, DDNS_HOSTNAME, DDNS_KEY, addr) + 1;
-    uri = malloc(size);
-    if (uri == NULL) {
-        puts("malloc failed");
-        return false;
-    }
-    snprintf(uri, size, DDNS_URI, DDNS_HOSTNAME, DDNS_KEY, addr);
-    free(addr);
+    char uri[DDNS_URI_BUFSIZE];
+    char addr[IPADDR_STRLEN_MAX];
+    assert(ipaddr_ntoa_r(&WIFI_NETIF.ip_addr, addr, IPADDR_STRLEN_MAX));
+    snprintf(uri, DDNS_URI_BUFSIZE, DDNS_URI, DDNS_HOSTNAME, DDNS_KEY, addr);
     puts("Sending DDNS");
     bool result = send_http_request_dns(DDNS_HOST, uri, HTTP_DEFAULT_PORT, true);
-    free(uri);
     return result;
 }
 
 static bool send_temperature(void) {
     float temperature = temperature_measure();
-    char *uri = NULL;
-    size_t size = snprintf(NULL, 0, WOLFRAM_URI, WOLFRAM_DATABIN_ID, temperature) + 1;
-    uri = malloc(size);
-    if (uri == NULL) {
-        puts("malloc failed");
-        return false;
-    }
-    snprintf(uri, size, WOLFRAM_URI, WOLFRAM_DATABIN_ID, temperature);
+    char uri[WOLFRAM_URI_BUFSIZE];
+    snprintf(uri, WOLFRAM_URI_BUFSIZE, WOLFRAM_URI, WOLFRAM_DATABIN_ID, temperature);
     puts("Sending temperature");
     bool result = send_http_request_dns(WOLFRAM_HOST, uri, HTTP_DEFAULT_PORT, true);
-    free(uri);
     return result;
 }
 

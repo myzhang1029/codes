@@ -1,6 +1,8 @@
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
 
+#include "lwip/ip_addr.h"
+
 #include "thekit4_pico_w.h"
 
 // Define WOLFRAM_DATABIN_ID, DDNS_HOSTNAME, DDNS_KEY, wifi_config, HOSTNAME
@@ -48,14 +50,16 @@ static const float BETA = 3977; // Kelvin \pm 0.75%
 // 5 minutes
 static const int32_t TASKS_INTERVAL_MS = (5 * 60 * 1000);
 static const char WOLFRAM_HOST[] = "datadrop.wolframcloud.com";
-static const char WOLFRAM_URI[] = "/api/v1.0/Add?bin=%s&temperature=%2.4f";
+static const char WOLFRAM_URI[] = "/api/v1.0/Add?bin=%s&temperature=%.4f";
+static const size_t WOLFRAM_URI_BUFSIZE = sizeof(WOLFRAM_URI) + sizeof(WOLFRAM_HOST) + sizeof(WOLFRAM_DATABIN_ID) - 6 + 8;
 static const char DDNS_HOST[] = "dyn.dns.he.net";
 static const char DDNS_URI[] = "/nic/update?hostname=%s&password=%s&myip=%s";
+static const size_t DDNS_URI_BUFSIZE = sizeof(DDNS_URI) + sizeof(DDNS_HOST) + sizeof(DDNS_KEY) + IPADDR_STRLEN_MAX - 6 + 8;
 
 // Time-related
 static const char NTP_SERVER[] = "pool.ntp.org";
 static const uint16_t NTP_PORT = 123;
-// One hour between syncs
-static const uint32_t NTP_INTERVAL_MS = 3600 * 1000;
+// 10 minutes between syncs
+static const uint32_t NTP_INTERVAL_MS = 600 * 1000;
 // Crude TZ conversion
 static const int TZ_DIFF_SEC = -8 * 3600;
