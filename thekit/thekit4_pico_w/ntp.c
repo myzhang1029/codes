@@ -44,7 +44,9 @@ static void ntp_req_close(struct ntp_client_current_request *req) {
     if (!req)
         return;
     if (req->pcb) {
+        cyw43_arch_lwip_begin();
         udp_remove(req->pcb);
+        cyw43_arch_lwip_end();
         req->pcb = NULL;
     }
     if (req->resend_alarm > 0) {
@@ -89,6 +91,7 @@ static int64_t ntp_timeout_alarm_cb(alarm_id_t id, void *user_data)
 // NTP data received
 static void ntp_recv_cb(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port) {
     struct ntp_client_current_request *req = (struct ntp_client_current_request *)arg;
+    cyw43_arch_lwip_check();
     uint8_t mode = pbuf_get_at(p, 0) & 0x7;
     uint8_t stratum = pbuf_get_at(p, 1);
 
@@ -151,8 +154,10 @@ void ntp_client_check_run(struct ntp_client *state) {
     if (absolute_time_diff_us(get_absolute_time(), state->next_sync_time) < 0 && !req->in_progress) {
         // Initialize a NTP sync
         req->in_progress = true;
+        cyw43_arch_lwip_begin();
         req->pcb = udp_new_ip_type(IPADDR_TYPE_ANY);
         if (!req->pcb) {
+            cyw43_arch_lwip_end();
             puts("Failed to create pcb");
             req->in_progress = false;
             return;
@@ -162,11 +167,6 @@ void ntp_client_check_run(struct ntp_client *state) {
         // Set alarm to close the connection in case UDP requests are lost
         req->resend_alarm = add_alarm_in_ms(UDP_TIMEOUT_TIME_MS, ntp_timeout_alarm_cb, req, true);
 
-        // cyw43_arch_lwip_begin/end should be used around calls into lwIP to ensure correct locking.
-        // You can omit them if you are in a callback from lwIP. Note that when using pico_cyw_arch_poll
-        // these calls are a no-op and can be omitted, but it is a good practice to use them in
-        // case you switch the cyw43_arch type later.
-        cyw43_arch_lwip_begin();
         int err = dns_gethostbyname(NTP_SERVER, &req->server_address, do_send_ntp_request, req);
         cyw43_arch_lwip_end();
 

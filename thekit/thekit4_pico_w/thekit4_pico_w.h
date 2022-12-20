@@ -76,7 +76,6 @@ void light_dim(float intensity);
 bool light_register_next_alarm(void);
 
 bool wifi_connect(void);
-void print_ip(void);
 
 bool ntp_client_init(struct ntp_client *state);
 void ntp_client_check_run(struct ntp_client *state);

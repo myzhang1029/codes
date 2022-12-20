@@ -25,8 +25,10 @@
 #include "hardware/watchdog.h"
 #endif
 
-#include "lwip/netif.h"
 #include "mdns_fix.h"
+#include "lwip/dns.h"
+#include "lwip/ip_addr.h"
+#include "lwip/netif.h"
 #include "lwip/apps/mdns.h"
 
 extern cyw43_t cyw43_state;
@@ -36,6 +38,21 @@ static void register_mdns(void) {
     mdns_resp_init();
     mdns_resp_add_netif(&WIFI_NETIF, HOSTNAME);
     cyw43_arch_lwip_end();
+}
+
+static void print_ip(void) {
+    printf("IP Address: %s\n", ipaddr_ntoa(&WIFI_NETIF.ip_addr));
+}
+
+static void print_and_check_dns(void) {
+    const ip_addr_t *pdns = dns_getserver(0);
+    printf("DNS Server: %s\n", ipaddr_ntoa(pdns));
+    if (FORCE_DEFAULT_DNS || ip_addr_eq(pdns, &ip_addr_any)) {
+        ip_addr_t default_dns;
+        printf("Reconfiguing DNS server to %s\n", DEFAULT_DNS);
+        ipaddr_aton(DEFAULT_DNS, &default_dns);
+        dns_setserver(0, &default_dns);
+    }
 }
 
 /// Connect to Wi-Fi
@@ -52,18 +69,14 @@ bool wifi_connect(void) {
 #if ENABLE_WATCHDOG
         watchdog_update();
 #endif
-        if (result == 0)
-            goto succeed;
+        if (result == 0) {
+            print_ip();
+            print_and_check_dns();
+            register_mdns();
+            return true;
+        }
         printf("Failed with status %d\n", result);
     }
     puts("WARNING: Cannot connect to Wi-Fi");
     return false;
-succeed:
-    printf("Online\n");
-    register_mdns();
-    return 0;
-}
-
-void print_ip(void) {
-    printf("IP Address: %s\n", ipaddr_ntoa(&WIFI_NETIF.ip_addr));
 }

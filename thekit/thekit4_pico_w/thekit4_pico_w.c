@@ -65,7 +65,6 @@ static void init() {
 
     puts("Successfully initialized everything");
 
-    print_ip();
     printf("Temperature: %f\n", temperature_measure());
 }
 

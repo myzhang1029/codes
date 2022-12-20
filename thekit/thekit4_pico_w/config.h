@@ -9,9 +9,8 @@
 #include "private_config.h"
 
 #ifndef ENABLE_WATCHDOG
-#define ENABLE_WATCHDOG 0
+#define ENABLE_WATCHDOG 1
 #endif
-#define PICO_DEBUG_MALLOC 1
 
 // Light-related
 // Definitions
@@ -63,3 +62,7 @@ static const uint16_t NTP_PORT = 123;
 static const uint32_t NTP_INTERVAL_MS = 600 * 1000;
 // Crude TZ conversion
 static const int TZ_DIFF_SEC = -8 * 3600;
+
+// Networking-related
+static const char DEFAULT_DNS[] = "1.1.1.1";
+static const bool FORCE_DEFAULT_DNS = true;

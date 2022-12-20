@@ -75,6 +75,7 @@ static err_t http_conn_close(void *arg) {
     err_t err = ERR_OK;
     puts("Closing server connection");
     if (conn->client_pcb) {
+        cyw43_arch_lwip_begin();
         tcp_arg(conn->client_pcb, NULL);
         tcp_sent(conn->client_pcb, NULL);
         tcp_recv(conn->client_pcb, NULL);
@@ -85,6 +86,7 @@ static err_t http_conn_close(void *arg) {
             tcp_abort(conn->client_pcb);
             err = ERR_ABRT;
         }
+        cyw43_arch_lwip_end();
         conn->client_pcb = NULL;
     }
     conn->state = HTTP_OTHER;
@@ -108,9 +110,6 @@ static void http_conn_err_cb(void *arg, err_t err) {
 static err_t http_conn_write(struct http_server_conn *conn, const char *buf,
                                size_t size, uint8_t copy) {
     struct tcp_pcb *tpcb = conn->client_pcb;
-    // this method is callback from lwIP, so cyw43_arch_lwip_begin is not
-    // required, however you can use this method to cause an assertion in debug
-    // mode, if this method is called when cyw43_arch_lwip_begin IS needed
     cyw43_arch_lwip_check();
     assert(size < tcp_sndbuf(tpcb));
     err_t err = tcp_write(tpcb, buf, size, copy);
@@ -262,6 +261,7 @@ static err_t http_server_accept_cb(void *arg, struct tcp_pcb *client_pcb,
                                 err_t err) {
     struct http_server *state = (struct http_server *)arg;
 
+    cyw43_arch_lwip_check();
     if (err != ERR_OK || client_pcb == NULL) {
         http_conn_fail(arg, err, "accept");
         return ERR_VAL;
@@ -288,20 +288,24 @@ bool http_server_open(struct http_server *state) {
 
     printf("Starting server on port %u\n", HTTP_PORT);
 
+    cyw43_arch_lwip_begin();
     struct tcp_pcb *pcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
     if (!pcb) {
+        cyw43_arch_lwip_end();
         puts("Failed to create pcb");
         return false;
     }
 
     err_t err = tcp_bind(pcb, NULL, HTTP_PORT);
     if (err) {
+        cyw43_arch_lwip_end();
         puts("Failed to bind to port");
         return false;
     }
 
     state->server_pcb = tcp_listen_with_backlog(pcb, 1);
     if (!state->server_pcb) {
+        cyw43_arch_lwip_end();
         puts("Failed to listen");
         http_server_close(state);
         return false;
@@ -310,6 +314,7 @@ bool http_server_open(struct http_server *state) {
     // Specify the payload for the callbacks
     tcp_arg(state->server_pcb, state);
     tcp_accept(state->server_pcb, http_server_accept_cb);
+    cyw43_arch_lwip_end();
 
     return true;
 }
@@ -319,8 +324,10 @@ void http_server_close(struct http_server *state) {
         return;
     http_conn_close(&state->conn);
     if (state->server_pcb) {
+        cyw43_arch_lwip_begin();
         tcp_arg(state->server_pcb, NULL);
         tcp_close(state->server_pcb);
+        cyw43_arch_lwip_end();
         state->server_pcb = NULL;
     }
 }
