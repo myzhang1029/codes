@@ -21,5 +21,6 @@ a Linux Kernel Module ([thekit3_pwm.c](thekit3_pwm.c)) for Raspberry Pi and a co
 
 ## Fourth Gen
 The fourth generation is even more power-efficient because it is a Raspberry Pi Pico W
-program with all the previous features. I had to create it because the SD card on the Pi
-failed. I coded most of the server routines from scratch based on LwIP.
+program with all the previous features ([thekit4_pico_w](thekit4_pico_w)). I had to
+create it because the SD card on the Pi failed. I coded most of the server routines from
+scratch based on LwIP.
