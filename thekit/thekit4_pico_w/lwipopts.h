@@ -17,7 +17,8 @@
 #define MEM_SIZE                    4000
 #define MEMP_NUM_TCP_SEG            32
 #define MEMP_NUM_ARP_QUEUE          10
-#define PBUF_POOL_SIZE              24
+#define MEMP_NUM_SYS_TIMEOUT        12
+#define PBUF_POOL_SIZE              12
 #define LWIP_ARP                    1
 #define LWIP_ETHERNET               1
 #define LWIP_ICMP                   1
@@ -35,6 +36,7 @@
 #define MEMP_STATS                  0
 #define LINK_STATS                  0
 // #define ETH_PAD_SIZE                2
+#define LWIP_AUTOIP                 0
 #define LWIP_CHKSUM_ALGORITHM       3
 #define LWIP_DHCP                   1
 #define LWIP_IPV4                   1

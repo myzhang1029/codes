@@ -51,6 +51,15 @@ static const int32_t TASKS_INTERVAL_MS = (5 * 60 * 1000);
 static const char WOLFRAM_HOST[] = "datadrop.wolframcloud.com";
 static const char WOLFRAM_URI[] = "/api/v1.0/Add?bin=%s&temperature=%.4f";
 static const size_t WOLFRAM_URI_BUFSIZE = sizeof(WOLFRAM_URI) + sizeof(WOLFRAM_HOST) + sizeof(WOLFRAM_DATABIN_ID) - 6 + 8;
+/* Access data as:
+ * ```mma
+ * data := TimeSeries[
+ *   MapAt[ToExpression, #, 2] & /@
+ *    Normal[TimeSeries[Databin["ID"]]["temperature"]]
+ * ]
+ * ```
+ * because we are uploading the data as strings
+ */
 static const char DDNS_HOST[] = "dyn.dns.he.net";
 static const char DDNS_URI[] = "/nic/update?hostname=%s&password=%s&myip=%s";
 static const size_t DDNS_URI_BUFSIZE = sizeof(DDNS_URI) + sizeof(DDNS_HOST) + sizeof(DDNS_KEY) + IPADDR_STRLEN_MAX - 6 + 8;

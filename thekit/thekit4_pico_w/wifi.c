@@ -25,7 +25,6 @@
 #include "hardware/watchdog.h"
 #endif
 
-#include "mdns_fix.h"
 #include "lwip/dns.h"
 #include "lwip/ip_addr.h"
 #include "lwip/netif.h"

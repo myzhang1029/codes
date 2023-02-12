@@ -1,4 +1,4 @@
-add_executable(thekit4_pico_w thekit4_pico_w.c temperature.c light.c mdns_fix.c ntp.c tasks.c http_server.c wifi.c)
+add_executable(thekit4_pico_w thekit4_pico_w.c temperature.c light.c ntp.c tasks.c http_server.c wifi.c)
 
 target_link_libraries(thekit4_pico_w
     pico_stdlib
