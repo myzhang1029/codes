@@ -88,7 +88,7 @@ fn mktmp(tmp_dir: &TempDir, suffix: &str) -> std::path::PathBuf {
 /// Create and fill a temporary file
 fn prepare_tmp_file<P: AsRef<std::path::Path>>(
     file_path: P,
-    arg_eofstr: Option<&String>,
+    arg_eofstr: Option<&str>,
 ) -> io::Result<()> {
     // Create and truncate that so-named file
     let mut tmp_file = OpenOptions::new()
@@ -98,18 +98,18 @@ fn prepare_tmp_file<P: AsRef<std::path::Path>>(
         .open(file_path)?;
 
     // Fill the file with stdin
-    match arg_eofstr {
-        Some(eofstr) => read_fill_text(&mut tmp_file, eofstr),
-        None => read_fill_bin(&mut tmp_file),
-    }?;
+    if let Some(eofstr) = arg_eofstr {
+        read_fill_text(&mut tmp_file, eofstr)?;
+    } else {
+        read_fill_bin(&mut tmp_file)?;
+    }
     // Make sure the file is written to before we invoke the command
-    tmp_file.sync_all()?;
-    Ok(())
+    tmp_file.flush()
 }
 
 /// Fail the execution with an error message and return a status
 fn fail<E: std::fmt::Display>(reason: E, msg: &str, code: i32) -> ! {
-    eprintln!("{}: {}", msg, reason);
+    eprintln!("{msg}: {reason}");
     std::process::exit(code)
 }
 
@@ -130,22 +130,20 @@ fn main() {
         .to_str()
         .unwrap_or_else(|| fail(file_path.display(), "Cannot process this path", 1));
     // Create temporary file
-    prepare_tmp_file(&file_path, args.eofstr.as_ref())
+    prepare_tmp_file(&file_path, args.eofstr.as_deref())
         .unwrap_or_else(|msg| fail(msg, "Cannot capture stdin", 2));
 
-    let prog_args = match args.replstr {
+    let prog_args = if let Some(ref replstr) = args.replstr {
         // Transform arguments by (replstr => path)
-        Some(replstr) => args
-            .arguments
+        args.arguments
             .iter()
-            .map(|itm| itm.replace(&replstr, path_as_str))
-            .collect(),
+            .map(|itm| itm.replace(replstr, path_as_str))
+            .collect()
+    } else {
         // If no explicit replstr specified, append it to the end
-        None => {
-            let mut new = args.arguments.to_owned();
-            new.push(path_as_str.to_string());
-            new
-        }
+        let mut new = args.arguments.clone();
+        new.push(path_as_str.to_string());
+        new
     };
 
     // Run the command

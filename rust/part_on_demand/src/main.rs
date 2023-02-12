@@ -20,7 +20,7 @@ extern crate ureq;
 extern crate zstd;
 
 use std::env::args;
-use std::io::{self, BufReader, Read};
+use std::io;
 use std::path::Path;
 use tar::Archive;
 use zstd::stream::read::Decoder;
@@ -28,20 +28,20 @@ use zstd::stream::read::Decoder;
 const URI: &str = "https://objectstorage.ca-toronto-1.oraclecloud.com/n/yzoe51nha7tk/b/bucket-gsod/o/gsod-20210901.tar.zst";
 
 /// Get the archive
-fn get_file() -> Result<BufReader<impl io::Read + std::marker::Send>, ureq::Error> {
+fn get_file() -> Result<impl io::Read, Box<ureq::Error>> {
     let resp = ureq::get(URI).call()?;
     match resp.status() {
         200_u16 => {
-            let bufreader = BufReader::new(resp.into_reader());
+            let bufreader = resp.into_reader();
             Ok(bufreader)
         }
         // <= 400 && != 200
-        other => Err(ureq::Error::Status(other, resp)),
+        other => Err(ureq::Error::Status(other, resp).into()),
     }
 }
 
 /// Unpack a single file from the tar archive
-fn unpack_from_tar<'a, R: Read>(
+fn unpack_from_tar<'a, R: io::Read>(
     archive: &'a mut Archive<R>,
     path_for: &Path,
 ) -> io::Result<tar::Entry<'a, R>> {
@@ -69,11 +69,10 @@ fn main() {
     let look_for = args().nth(1).expect("Usage: prog path");
 
     // GET the file
-    let bufreader = get_file().expect("Cannot issue request");
+    let reader = get_file().expect("Cannot issue request");
 
     // Zstandard uncompress
-    let zstd_decoder =
-        Decoder::with_buffer(bufreader).expect("Cannot create Zstandard decompresser");
+    let zstd_decoder = Decoder::new(reader).expect("Cannot create Zstandard decompresser");
 
     // Tar uncompress
     let mut archive = Archive::new(zstd_decoder);
