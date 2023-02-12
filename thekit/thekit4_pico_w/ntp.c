@@ -61,9 +61,6 @@ static void ntp_update_rtc(time_t *result) {
     if (result) {
         time_t lresult = *result + TZ_DIFF_SEC;
         struct tm *lt = gmtime(&lresult);
-        printf("Got NTP response: %02d/%02d/%04d %02d:%02d:%02d\n",
-               lt->tm_mday, lt->tm_mon + 1, lt->tm_year + 1900,
-               lt->tm_hour, lt->tm_min, lt->tm_sec);
         datetime_t dt = {
             .year  = lt->tm_year + 1900,
             .month = lt->tm_mon + 1,
@@ -73,6 +70,8 @@ static void ntp_update_rtc(time_t *result) {
             .min = lt->tm_min,
             .sec = lt->tm_sec
         };
+        printf("Got NTP response: %04d-%02d-%02d %02d:%02d:%02d\n",
+               dt.year, dt.month, dt.day, dt.hour, dt.min, dt.sec);
         if (rtc_set_datetime(&dt)) {
             time_in_sync = true;
             puts("RTC set");
