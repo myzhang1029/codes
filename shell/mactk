@@ -109,6 +109,9 @@ _resolve_hostname()
 # Get MAC vendor
 get_mac_vendor()
 {
+    # This API does not require padding
+    API="https://api.maclookup.app/v2/macs/$1/company/name"
+
     if [ -z "$1" ]
     then
         return
@@ -116,14 +119,14 @@ get_mac_vendor()
 
     if _has curl
     then
-        curl -sL http://api.macvendors.com/"$1"
+        curl -sL "$API"
     elif _has wget
     then
-        wget -qO- http://api.macvendors.com/"$1"
+        wget -qO- "$API"
     fi
     ret=$?
     # Conform to rate limit
-    sleep 0.8 2> /dev/null || true
+    sleep 0.5 2> /dev/null || true
     return "${ret}"
 }
 
