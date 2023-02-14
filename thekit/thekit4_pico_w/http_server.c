@@ -239,8 +239,10 @@ static err_t http_conn_recv_cb(void *arg, struct tcp_pcb *tpcb, struct pbuf *p,
     // required, however you can use this method to cause an assertion in debug
     // mode, if this method is called when cyw43_arch_lwip_begin IS needed
     cyw43_arch_lwip_check();
+    tcp_recved(tpcb, p->tot_len);
     if (conn->state == HTTP_ACCEPTED) {
         // First chunk
+        assert(!conn->received);
         conn->received = p;
     }
     else if (conn->state == HTTP_RECEIVING) {
@@ -250,8 +252,6 @@ static err_t http_conn_recv_cb(void *arg, struct tcp_pcb *tpcb, struct pbuf *p,
     else {
         // Might be DONE or something else
     }
-    tcp_recved(tpcb, p->tot_len);
-    pbuf_free(p);
     if (http_req_check_parse(conn))
         conn->state = HTTP_OTHER;
     return ERR_OK;
