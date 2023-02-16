@@ -35,16 +35,12 @@ uint32_t last_irq_timestamp = 0;
 static void light_on(void) {
     current_pwm_level = WRAP;
     pwm_set_gpio_level(LIGHT_PIN, current_pwm_level);
-    puts("Turning on");
-    light_register_next_alarm();
 }
 
 // For rtc alarm
 static void light_off(void) {
     current_pwm_level = 0;
     pwm_set_gpio_level(LIGHT_PIN, current_pwm_level);
-    puts("Turning off");
-    light_register_next_alarm();
 }
 
 // For gpio irq
@@ -55,13 +51,6 @@ static void light_toggle(uint gpio, uint32_t events) {
     uint32_t irq_timestamp = time_us_32();
     if (irq_timestamp - last_irq_timestamp < 4000)
         return;
-#if 0
-    busy_wait_us(1000);
-    if (events & GPIO_IRQ_EDGE_RISE && gpio_get(gpio)
-            || events & GPIO_IRQ_EDGE_RISE && !gpio_get(gpio))
-        // Event not sustained
-        return;
-#endif
     last_irq_timestamp = irq_timestamp;
     current_pwm_level = current_pwm_level ? 0 : WRAP;
     pwm_set_gpio_level(LIGHT_PIN, current_pwm_level);
@@ -167,10 +156,7 @@ static void next_day(datetime_t *dt) {
     }
 }
 
-/// Returns `false` if NTC is not successful
-bool light_register_next_alarm(void) {
-    if (!time_in_sync)
-        return false;
+void light_register_next_alarm(void) {
     datetime_t current;
     rtc_get_datetime(&current);
     int n_alarms = sizeof(light_sched) / sizeof(struct light_sched_entry);
@@ -178,20 +164,16 @@ bool light_register_next_alarm(void) {
     for (int i = 0; i < n_alarms; ++i) {
         if (light_sched[i].hour > current.hour) {
             do_register_alarm(&current, i);
-            return true;
+            return;
         }
         if (light_sched[i].hour == current.hour
                 && light_sched[i].min > current.min) {
             do_register_alarm(&current, i);
-            return true;
+            return;
         }
         // Go to the next one
     }
     // We past the last one. Register the first alarm after incrementing `day`
     next_day(&current);
-    char buf[256];
-    datetime_to_str(buf, 256, &current);
-    puts(buf);
     do_register_alarm(&current, 0);
-    return true;
 }

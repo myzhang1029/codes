@@ -73,7 +73,7 @@ float temperature_measure(void);
 
 void light_init(void);
 void light_dim(float intensity);
-bool light_register_next_alarm(void);
+void light_register_next_alarm(void);
 
 bool wifi_connect(void);
 

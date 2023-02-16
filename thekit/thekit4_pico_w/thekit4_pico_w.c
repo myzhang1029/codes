@@ -69,8 +69,6 @@ static void init() {
 }
 
 int main() {
-    bool alarm_first_register_done = false;
-
     init();
 
     while (1) {
@@ -84,11 +82,6 @@ int main() {
         }
         ntp_client_check_run(&ntp_state);
         tasks_check_run();
-        if (!alarm_first_register_done) {
-            // It waits for NTP to be up
-            puts("Alarm awaiting RTC");
-            alarm_first_register_done = light_register_next_alarm();
-        }
 #if PICO_CYW43_ARCH_POLL
         if (has_cyw43)
             cyw43_arch_poll();

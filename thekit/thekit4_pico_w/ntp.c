@@ -73,6 +73,7 @@ static void ntp_update_rtc(time_t *result) {
         printf("Got NTP response: %04d-%02d-%02d %02d:%02d:%02d\n",
                dt.year, dt.month, dt.day, dt.hour, dt.min, dt.sec);
         if (rtc_set_datetime(&dt)) {
+            light_register_next_alarm();
             time_in_sync = true;
             puts("RTC set");
         }
