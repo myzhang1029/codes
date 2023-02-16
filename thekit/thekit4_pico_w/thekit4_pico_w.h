@@ -73,7 +73,9 @@ float temperature_measure(void);
 
 void light_init(void);
 void light_dim(float intensity);
-void light_register_next_alarm(void);
+// Takes the current time to avoid wasting cycles waiting for RTC to be
+// synchronised. Might modify it.
+void light_register_next_alarm(datetime_t *current);
 
 bool wifi_connect(void);
 

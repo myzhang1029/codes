@@ -156,24 +156,22 @@ static void next_day(datetime_t *dt) {
     }
 }
 
-void light_register_next_alarm(void) {
-    datetime_t current;
-    rtc_get_datetime(&current);
+void light_register_next_alarm(datetime_t *current) {
     int n_alarms = sizeof(light_sched) / sizeof(struct light_sched_entry);
     // Find the next alarm
     for (int i = 0; i < n_alarms; ++i) {
-        if (light_sched[i].hour > current.hour) {
-            do_register_alarm(&current, i);
+        if (light_sched[i].hour > current->hour) {
+            do_register_alarm(current, i);
             return;
         }
-        if (light_sched[i].hour == current.hour
-                && light_sched[i].min > current.min) {
-            do_register_alarm(&current, i);
+        if (light_sched[i].hour == current->hour
+                && light_sched[i].min > current->min) {
+            do_register_alarm(current, i);
             return;
         }
         // Go to the next one
     }
     // We past the last one. Register the first alarm after incrementing `day`
-    next_day(&current);
-    do_register_alarm(&current, 0);
+    next_day(current);
+    do_register_alarm(current, 0);
 }
