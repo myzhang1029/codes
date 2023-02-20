@@ -14,8 +14,8 @@
 
 // Light-related
 // Definitions
-static const uint LIGHT_PIN = 2;
-static const uint BUTTON1_PIN = 16;
+static const uint LIGHT_PIN = 3;
+static const uint BUTTON1_PIN = 18;
 // Magic. TODO: Try to reach 1MHz at PWM?
 static const float clockdiv = 1.;
 // Max duty
@@ -42,7 +42,7 @@ static const float R0 = 1e4; // Ohm \pm 1%
 // Temperature corresponding to R0
 static const float T0 = 25.0 + 273.15; // Kelvin
 // divider resistance
-static const float R = 1e4;     // Ohm \pm 1%
+static const float R = 1.10e4;     // Ohm \pm 1%
 static const float BETA = 3977; // Kelvin \pm 0.75%
 
 // Tasks-related

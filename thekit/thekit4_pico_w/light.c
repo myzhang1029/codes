@@ -49,7 +49,7 @@ static void light_toggle(uint gpio, uint32_t events) {
         return;
     // Debounce
     uint32_t irq_timestamp = time_us_32();
-    if (irq_timestamp - last_irq_timestamp < 4000)
+    if (irq_timestamp - last_irq_timestamp < 8000)
         return;
     last_irq_timestamp = irq_timestamp;
     current_pwm_level = current_pwm_level ? 0 : WRAP;
