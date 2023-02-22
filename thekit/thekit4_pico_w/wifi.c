@@ -59,11 +59,14 @@ bool wifi_connect(void) {
     int n_configs = sizeof(wifi_config) / sizeof(struct wifi_config_entry);
     for (int i = 0; i < n_configs; ++i) {
         printf("Attempting Wi-Fi %s\n", wifi_config[i].ssid);
+#if ENABLE_WATCHDOG
+        watchdog_update();
+#endif
         int result = cyw43_arch_wifi_connect_timeout_ms(
             wifi_config[i].ssid,
             wifi_config[i].password,
             wifi_config[i].auth,
-            30000
+            5000
         );
 #if ENABLE_WATCHDOG
         watchdog_update();

@@ -80,8 +80,17 @@ int main() {
             printf("Wi-Fi link status is %d, reconnecting\n", wifi_state);
             wifi_connect();
         }
+#if ENABLE_WATCHDOG
+        watchdog_update();
+#endif
         ntp_client_check_run(&ntp_state);
+#if ENABLE_WATCHDOG
+        watchdog_update();
+#endif
         tasks_check_run();
+#if ENABLE_WATCHDOG
+        watchdog_update();
+#endif
 #if PICO_CYW43_ARCH_POLL
         if (has_cyw43)
             cyw43_arch_poll();
