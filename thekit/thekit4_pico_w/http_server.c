@@ -36,6 +36,7 @@
 #include "config.h"
 #include "thekit4_pico_w.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -163,8 +164,16 @@ static bool http_req_check_parse(struct http_server_conn *conn) {
         // Max length + nn\r\n\r\n + \0
         char response[48] = {0};
         size_t length;
+#if ENABLE_TEMPERATURE_SENSOR
         float temperature = temperature_measure();
+#else
+        float temperature = nan("unavailable");
+#endif
+#if ENABLE_LIGHT
         extern uint16_t current_pwm_level;
+#else
+        uint16_t current_pwm_level = 0;
+#endif
         /* Generate response */
         length = snprintf(response, 48,
                      "41\r\n\r\n{\"temperature\": %.3f, \"pwm\": %u}",
@@ -177,6 +186,7 @@ static bool http_req_check_parse(struct http_server_conn *conn) {
         http_conn_write(conn, response, length, 1);
         goto finish;
     }
+#if ENABLE_LIGHT
     if (pbuf_memcmp(conn->received, offset_path, "/3light_dim", 11) == 0) {
         uint16_t offset_level = pbuf_memfind(conn->received, "level=", 6, offset_path);
         if (offset_level == 0xffff) {
@@ -211,6 +221,7 @@ static bool http_req_check_parse(struct http_server_conn *conn) {
         http_conn_write(conn, response, length, 1);
         goto finish;
     }
+#endif
     http_conn_write(conn, resp_404_pre, sizeof(resp_404_pre) - 1, 0);
     http_conn_write(conn, resp_common, sizeof(resp_common) - 1, 0);
     http_conn_write(conn, resp_404_post, sizeof(resp_404_post) - 1, 0);

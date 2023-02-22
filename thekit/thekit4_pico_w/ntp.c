@@ -33,6 +33,8 @@
 #include "lwip/pbuf.h"
 #include "lwip/udp.h"
 
+#if ENABLE_NTP
+
 static const uint16_t NTP_MSG_LEN = 48;
 // Seconds between 1 Jan 1900 and 1 Jan 1970
 static const uint32_t NTP_DELTA = 2208988800;
@@ -183,3 +185,5 @@ void ntp_client_check_run(struct ntp_client *state) {
         state->next_sync_time = make_timeout_time_ms(NTP_INTERVAL_MS);
     }
 }
+
+#endif

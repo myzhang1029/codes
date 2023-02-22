@@ -173,6 +173,7 @@ static bool send_http_request_dns(const char *hostname, const char *path, uint16
     return true;
 }
 
+#if ENABLE_DDNS
 static bool send_ddns(void) {
     char uri[DDNS_URI_BUFSIZE];
     char addr[IPADDR_STRLEN_MAX];
@@ -182,7 +183,9 @@ static bool send_ddns(void) {
     bool result = send_http_request_dns(DDNS_HOST, uri, HTTP_DEFAULT_PORT, true);
     return result;
 }
+#endif
 
+#if ENABLE_TEMPERATURE_SENSOR
 static bool send_temperature(void) {
     float temperature = temperature_measure();
     char uri[WOLFRAM_URI_BUFSIZE];
@@ -191,6 +194,7 @@ static bool send_temperature(void) {
     bool result = send_http_request_dns(WOLFRAM_HOST, uri, HTTP_DEFAULT_PORT, true);
     return result;
 }
+#endif
 
 void tasks_init(void) {
     dns_init();
@@ -200,8 +204,12 @@ void tasks_init(void) {
 bool tasks_check_run(void) {
     if (absolute_time_diff_us(get_absolute_time(), next_task_time) < 0) {
         bool result = true;
+#if ENABLE_DDNS
         result &= send_ddns();
+#endif
+#if ENABLE_TEMPERATURE_SENSOR
         result &= send_temperature();
+#endif
         if (!result)
             puts("Tasks failed");
         next_task_time = make_timeout_time_ms(TASKS_INTERVAL_MS);

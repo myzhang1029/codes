@@ -26,6 +26,8 @@
 #include "hardware/pwm.h"
 #include "hardware/rtc.h"
 
+#if ENABLE_LIGHT
+
 /// Initialize everything we need
 uint16_t current_pwm_level = 0;
 
@@ -175,3 +177,5 @@ void light_register_next_alarm(datetime_t *current) {
     next_day(current);
     do_register_alarm(current, 0);
 }
+
+#endif

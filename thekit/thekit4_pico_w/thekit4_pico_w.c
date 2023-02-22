@@ -40,8 +40,12 @@ static void init() {
     stdio_init_all();
 
     rtc_init();
+#if ENABLE_LIGHT
     light_init();
+#endif
+#if ENABLE_TEMPERATURE_SENSOR
     temperature_init();
+#endif
 
     if (cyw43_arch_init() != 0) {
         puts("WARNING: Cannot init CYW43");
@@ -51,8 +55,10 @@ static void init() {
     // Depends on cyw43
     cyw43_arch_enable_sta_mode();
     wifi_connect();
+#if ENABLE_NTP
     if (!ntp_client_init(&ntp_state))
         puts("WARNING: Cannot init NTP client");
+#endif
     // Start HTTP server
     if (!http_server_open(&http_state))
         puts("WARNING: Cannot open HTTP server");
@@ -65,7 +71,9 @@ static void init() {
 
     puts("Successfully initialized everything");
 
+#if ENABLE_TEMPERATURE_SENSOR
     printf("Temperature: %f\n", temperature_measure());
+#endif
 }
 
 int main() {
@@ -83,7 +91,9 @@ int main() {
 #if ENABLE_WATCHDOG
         watchdog_update();
 #endif
+#if ENABLE_NTP
         ntp_client_check_run(&ntp_state);
+#endif
 #if ENABLE_WATCHDOG
         watchdog_update();
 #endif

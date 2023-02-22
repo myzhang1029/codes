@@ -24,6 +24,8 @@
 #include "pico/stdlib.h"
 #include "hardware/adc.h"
 
+#if ENABLE_TEMPERATURE_SENSOR
+
 void temperature_init(void) {
     // ADC
     adc_init();
@@ -45,3 +47,5 @@ float temperature_measure(void) {
     float T = BETA / (log(NTC / R0) + BETA / T0);
     return T - 273.15;
 }
+
+#endif
