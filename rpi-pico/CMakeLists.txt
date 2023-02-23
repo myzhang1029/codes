@@ -20,8 +20,6 @@ add_compile_options(-Ofast
     -Wno-format          # int != int32_t as far as the compiler is concerned because gcc has int32_t as long int
 )
 
-add_subdirectory(../thekit/thekit2_pico thekit2_pico)
 add_subdirectory(differential_watt_meter)
 add_subdirectory(discharger)
-add_subdirectory(../thekit/thekit4_pico_w thekit4_pico_w)
 add_subdirectory(2022_lwip_httpc_bug_reprex)
