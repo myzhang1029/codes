@@ -23,3 +23,4 @@ add_compile_options(-Ofast
 add_subdirectory(differential_watt_meter)
 add_subdirectory(discharger)
 add_subdirectory(2022_lwip_httpc_bug_reprex)
+add_subdirectory(wwvb_simul)
