@@ -59,7 +59,7 @@ _is_ip()
     _is_ipv6 "$1" || _is_ipv4 "$1"
 }
 
-# Resolve hostname to IP (either v4 or v6)
+# Resolve hostname ($1) to a single IP (either v4 or v6)
 _resolve_hostname()
 {
     if [ -z "$1" ]
@@ -106,7 +106,7 @@ _resolve_hostname()
     fi
 }
 
-# Get MAC vendor
+# Get MAC ($1) vendor
 get_mac_vendor()
 {
     # This API does not require padding
@@ -130,7 +130,7 @@ get_mac_vendor()
     return "${ret}"
 }
 
-# Get MAC address from IP or hostname
+# Get MAC address from IP or hostname ($1)
 get_mac()
 {
     if [ -z "$1" ]
@@ -150,11 +150,11 @@ get_mac()
     if _has ip
     then
         # `ip` command does not support hostnames
-        if ! _is_ip "$1"
+        if _is_ip "$1"
         then
-            target="$(_resolve_hostname "$1")"
-        else
             target="$1"
+        else
+            target="$(_resolve_hostname "$1")"
         fi
         # This command returns matches on any interfaces
         result="$(ip neigh show "${target}" | \
@@ -181,7 +181,8 @@ get_mac()
     fi
 
     # arping is slower, don't use unless necessary (i.e. we have to discover that device)
-    # arping does not work for IPv6, but ndisc6 would require us to specify an interface
+    # arping does not work for IPv6,
+    # but ndisc6 requires us to specify an interface so we don't use it
     if [ -z "${result}" ] && _has arping && ! _is_ipv6 "$1"
     then
         result="$(arping -C1 -c3 "$1" | grep -io "${MAC_REGEX}" | tail -n1)"
@@ -228,16 +229,19 @@ _get_mac2()
     ip2="$(_resolve_hostname "$2")"
     if [ "${ip2}" = "${ip}" ] || [ -z "${ip2}" ]
     then
+        # Good, the hostname still points to the same IP
         printf "%s\t%s\t%s\n" "${ip}" "$2" "${mac1}"
         return 0
     else
         mac2="$(get_mac "${ip2}")"
         if [ "${mac1}" = "${mac2}" ] || [ -z "${mac2}" ]
         then
+            # The IP just changed, but the device is still the same
             printf "%s\t%s\t%s\n" "${ip}" "$2" "${mac1}"
             return 0
         elif [ -z "${mac1}" ]
         then
+            # The hostname changed ownership, so give the new one
             printf "%s\t%s\t%s\n" "${ip}" "$2" "${mac2}"
             return 0
         else
@@ -251,8 +255,8 @@ _get_mac2()
     fi
 }
 
-# Takes an input of format (avahi-resolve -a) $IP <SPACE> $HOSTNAME
-# and add a third or fourth column of the MAC addresses
+# Take an input of format (avahi-resolve -a) $IP <SPACE> $HOSTNAME
+# from stdin, and add a third or fourth column of the MAC addresses
 resolve_all()
 {
     # Read the input line by line
@@ -262,20 +266,11 @@ resolve_all()
     done
 }
 
-# Scan IP addresses for mDNS or NetBIOS hosts
+# Scan IP addresses for mDNS or NetBIOS hosts ($@)
 # Do not use CIDR, use individual addresses
 # avahi-resolve supports IPv6, but nbtscan doesn't
 scan_ips()
 {
-    # TODO: Implement discovery with dns-sd?
-    if _has avahi-resolve
-    then
-        avahi_out="$(avahi-resolve -a "$@" | resolve_all)"
-        in_avahi="$(printf "%s\n" "${avahi_out}" | \
-            awk '{print "|" $1 "-" $3 ";"}')"
-        printf "%s\n" "${avahi_out}"
-    fi
-
     if _has nbtscan
     then
         tmp_file="$(mktemp)"
@@ -283,29 +278,34 @@ scan_ips()
         nbtscan -qf "${tmp_file}" | \
             while read -r ip hn _ _ mac
             do
-                # Don't add .local at this step to ease resolution.
-                # macOS also does not respond to NetBIOS name queries over mDNS
-                if [ "${hn}" = "<unknown>" ]
-                then
-                    # Skip it - we can't really do anything
-                    continue
-                fi
-
                 if [ -z "${mac}" ]
                 then
                     mac="$(get_mac "${ip}")"
                 fi
-
-                # Prefer mDNS hostnames over NBNS names
-                # because e.g. Macs have both, but the mDNS one is juicier
-                # so here an NBNS name also has its (ip, mac) in the mDNS list
-                # and we ignore the NBNS one.
-                if [ -z "${in_avahi}" ] || [ -n "${in_avahi##*"|${ip}-${mac};"*}" ]
+                if [ "${hn}" = "<unknown>" ]
                 then
+                    printf "%s\t%s\t%s\n" "${ip}" "${hn}" "${mac}"
+                else
                     printf "%s\t%s.local\t%s\n" "${ip}" "${hn}" "${mac}"
                 fi
             done
         rm "${tmp_file}"
+    fi
+    # Not elif
+    if _has avahi-resolve
+    then
+        avahi-resolve -a "$@" | resolve_all
+    elif _has dig
+    then
+        # Slower because it is not concurrent
+        for ip in "$@"
+        do
+            # dig output errors to stdout. fix that
+            hn="$(dig @224.0.0.251 -p 5353 -x "${ip}" +short)" || continue
+            # If there is a trailing dot, remove it
+            hn="${hn%.}"
+            _get_mac2 "${ip}" "${hn}"
+        done
     fi
 }
 
