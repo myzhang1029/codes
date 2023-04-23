@@ -27,15 +27,14 @@ import stat
 import tempfile
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from pathlib import Path
-from typing import (TYPE_CHECKING, Any, Dict, Iterable, List, Set, Tuple,
-                    Union, cast, overload)
+from typing import TYPE_CHECKING, Any, Iterable, Union, cast, overload
 
 if TYPE_CHECKING:
     from os import PathLike
 
 # Type for a host record
-JsonRecordType = Dict[str, List[str]]
-RecordType = Dict[str, Set[Union[IPv4Address, IPv6Address, str]]]
+JsonRecordType = dict[str, list[str]]
+RecordType = dict[str, set[Union[IPv4Address, IPv6Address, str]]]
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -45,7 +44,7 @@ class JSONEncoder(json.JSONEncoder):
         super().__init__(**kwargs)
         self.sort = sort
 
-    def default(self, o: Any) -> Union[List[Any], str, Any]:
+    def default(self, o: Any) -> Union[list[Any], str, Any]:
         """JSON-serialize an object."""
         if isinstance(o, set):
             if self.sort:
@@ -108,17 +107,35 @@ def hostname_fuzz(one: str, two: str) -> bool:
 
 def canonicalize_mac(mac: str) -> str:
     """Convert MAC addresses to colon-separated lowercase."""
+    # Error message
+    ERROR = f"'{mac}' does not appear to be a MAC address"
     # Keep alphanumeric characters
-    alnums = ''.join(ch.lower() for ch in mac if ch.isalnum())
+    alnums = ''.join(ch for ch in mac if ch.isalnum())
     # Sanity check
     if len(alnums) != 12:
-        raise ValueError(f"'{mac}' does not appear to be a MAC address")
+        # Fall back to detecting the separator and filling in zeros
+        seps = [x for x in mac if not x.isalnum()]
+        nseps = len(set(seps))
+        # If there are mixed separators, it is not possible to
+        # reliably know the length of the segments
+        if nseps != 1:
+            raise ValueError(ERROR)
+        # Detect the length of the segments
+        nseg = len(seps) + 1
+        seglen = 12 // nseg
+        if seglen * nseg != 12:
+            raise ValueError(ERROR)
+        sep = seps[0]
+        # Fill missing characters in each segment with zeros
+        alnums = ''.join(seg.zfill(seglen) for seg in mac.split(sep))
+        if len(alnums) != 12:
+            raise ValueError(ERROR)
     try:
         _ = int(alnums, 16)
     except ValueError:
-        raise ValueError(f"'{mac}' does not appear to be a MAC address")
+        raise ValueError(ERROR)
     return ''.join(
-        ch + ("" if idx & 1 == 0 or idx == 11 else ":")
+        ch.lower() + ("" if idx & 1 == 0 or idx == 11 else ":")
         for idx, ch in enumerate(alnums)
     )
 
@@ -127,13 +144,13 @@ class MacDatabase:
     """The database for storing MAC, IP, and hostname relationships.
 
     Data structure:
-        - macs: Set[str]
+        - macs: set[str]
           A list of media access control addresses associated with this host.
-        - ips: Set[Union[IPv4Address, IPv6Address]]
+        - ips: set[Union[IPv4Address, IPv6Address]]
           A list of IP addresses associated with this host.
-        - hostnames: Set[str]
+        - hostnames: set[str]
           A list of hostnames used on this host.
-        - comments: Set[str]
+        - comments: set[str]
           A list of comments.
 
     Serialization structure:
@@ -152,9 +169,9 @@ class MacDatabase:
         if self._db_path.exists():
             self.open()
         else:
-            self._db: List[RecordType] = []
+            self._db: list[RecordType] = []
         # Cache for reverse lookup
-        self._mac_cache: Dict[str, Tuple[int, ...]] = {}
+        self._mac_cache: dict[str, tuple[int, ...]] = {}
 
     def __len__(self) -> int:
         """Get the length of the database."""
@@ -167,12 +184,12 @@ class MacDatabase:
     def __getitem__(
         self,
         index: Union[slice, str, Iterable[Union[int, slice, str]]]
-    ) -> List[RecordType]: ...
+    ) -> list[RecordType]: ...
 
     def __getitem__(
             self,
             index: Union[int, slice, str, Iterable[Union[int, slice, str]]]
-    ) -> Union[RecordType, List[RecordType]]:
+    ) -> Union[RecordType, list[RecordType]]:
         """Get items from the database by index, slice, MAC, or hostnames."""
         if isinstance(index, (int, slice)):
             return self._db[index]
@@ -228,7 +245,7 @@ class MacDatabase:
         if {"ips", "macs", "hostnames", "comments"} != set(record):
             raise ValueError("Invalid record")
         new_record: RecordType = {}
-        ips = cast(List[str], record["ips"])
+        ips = cast(list[str], record["ips"])
         new_record["ips"] = {jsonip_to_ip(ip) for ip in ips}
         new_record["macs"] = set(record["macs"])
         new_record["hostnames"] = set(record["hostnames"])
@@ -280,15 +297,15 @@ class MacDatabase:
     def find_indices_by_hostname(
             self,
             hostname: str,
-            fuzz: bool = True) -> Tuple[int, ...]:
+            fuzz: bool = True) -> tuple[int, ...]:
         """Look up hosts with `hostname`.
 
         If `fuzz` is `True`, hosts that only the "-n" suffixes are different
         are treat as a match.
         """
-        results: List[int] = []
+        results: list[int] = []
         for index, entry in enumerate(self._db):
-            for entry_hn in cast(Set[str], entry["hostnames"]):
+            for entry_hn in cast(set[str], entry["hostnames"]):
                 if hostname.lower() == entry_hn.lower() or (
                         fuzz and hostname_fuzz(hostname, entry_hn)):
                     results.append(index)
@@ -297,23 +314,23 @@ class MacDatabase:
     def find_indices_by_ipaddr(
         self,
         ipaddr: Union[IPv4Address, IPv6Address, str]
-    ) -> Tuple[int, ...]:
+    ) -> tuple[int, ...]:
         """Look up hosts that have `ipaddr` in its IP addresses."""
         # Convert to `IPvXAddress` if we have a `str`
         if isinstance(ipaddr, str):
             ipaddr = ip_address(ipaddr)
-        results: List[int] = []
+        results: list[int] = []
         for index, entry in enumerate(self._db):
             if ipaddr in entry["ips"]:
                 results.append(index)
         return tuple(results)
 
-    def find_indices_by_mac(self, mac: str) -> Tuple[int, ...]:
+    def find_indices_by_mac(self, mac: str) -> tuple[int, ...]:
         """Look up hosts with `mac`."""
         mac = canonicalize_mac(mac)
         if mac not in self._mac_cache:
             self._mac_cache[mac] = tuple(n for n, e in enumerate(
-                self._db) if mac in cast(Set[str], e["macs"]))
+                self._db) if mac in cast(set[str], e["macs"]))
         return self._mac_cache[mac]
 
     def add(
@@ -389,7 +406,7 @@ class MacDatabase:
         for mac in fields[2:]:
             self.add(ipaddr, hostname, canonicalize_mac(mac), comment)
 
-    def get_db(self) -> List[RecordType]:
+    def get_db(self) -> list[RecordType]:
         """Get the underlying database."""
         return self._db
 
@@ -440,10 +457,10 @@ def test_canonicalize_mac() -> None:
         ("ff:aa:86-69-40-53", "ff:aa:86:69:40:53"),
         ("8B:A4:88:F7:2D:BC", "8b:a4:88:f7:2d:bc"),
         ("3BF20D-a9dfc7", "3b:f2:0d:a9:df:c7"),
-        #("3-F3-e7-e9-39-73", "03:f3:e7:e9:39:73"),
+        ("3-F3-e7-e9-39-73", "03:f3:e7:e9:39:73"),
         ("F7A02DAD14E0", "f7:a0:2d:ad:14:e0"),
         ("7B58.2cbb.12f9", "7b:58:2c:bb:12:f9"),
-        #("6:51:64:e:b2:8e", "06:51:64:0e:b2:8e"),
+        ("6:51:64:e:b2:8e", "06:51:64:0e:b2:8e"),
     ]
     for n, (question, correct) in enumerate(test_cases):
         assert canonicalize_mac(question) == correct, \
