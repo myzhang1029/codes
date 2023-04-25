@@ -74,7 +74,7 @@ class Host:
             raise NoMACError(f"No MAC address for {self}")
         for addr in self.ip:
             for hostname in hostnames:
-                messages.append((addr, self.mac, hostname, self.comments))
+                messages.append((addr, hostname, self.mac, self.comments))
         return messages
 
     def with_source(self: HostSelf, source: str) -> HostSelf:
@@ -332,9 +332,9 @@ while True:
                     # Filter out bogus
                     if line[0].is_unspecified:
                         break
-                    if line[1] == "00:00:00:00:00:00":
+                    if line[2] == "00:00:00:00:00:00":
                         break
-                    if line[1] == "ff:ff:ff:ff:ff:ff":
+                    if line[2] == "ff:ff:ff:ff:ff:ff":
                         break
                     if line[0] in ip_network("169.254.0.0/16"):
                         break
@@ -344,7 +344,7 @@ while True:
                     print(
                         *(f"{i[0]}\t{i[1]}\t{i[2]} # {' '.join(i[3])}" for i in items), sep="\n")
                     for line in items:
-                        db.add(line[0], line[2], line[1], line[3])
+                        db.add(line[0], line[1], line[2], line[3])
             except NoMACError as err:
                 print(err, file=sys.stderr)
         db.save()

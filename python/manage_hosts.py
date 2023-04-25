@@ -261,6 +261,7 @@ class MacDatabase:
         with open(self._db_path, encoding="utf-8") as database:
             data = json.load(database)
         self._db = [self._deserialize_and_check(host) for host in data]
+        self._mac_cache = {}
 
     def save(
             self,
