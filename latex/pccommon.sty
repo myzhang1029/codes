@@ -1,5 +1,9 @@
 % Package for the common premable commands for
 % Zhang Maiyun's Pearson College UWC documents
+%
+% Obtain updates at
+% https://github.com/myzhang1029/codes/blob/main/latex/pccommon.sty
+%
 % Based on csc_common.tex
 % Options: bibstyle=stylename,paper=papergeom,cjkos=os
 % License: CC BY-SA 4.0
@@ -12,7 +16,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2022/11/14 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2023/10/03 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pc@bibstyle{mla}
@@ -60,20 +64,58 @@
 \RequirePackage[level]{fmtcount}
 \RequirePackage{xcolor} % color names
 \RequirePackage{csquotes}
-\ifxetex{}
-  \RequirePackage{fontspec} % about Chinese fonts
-  \RequirePackage[slantfont, boldfont]{xeCJK}
-  \RequirePackage{polyglossia}
-  \setdefaultlanguage[variant=american]{english}
-\else
-  \RequirePackage[american]{babel}
-  \ifluatex{}
-    \RequirePackage{fontspec} % about Chinese fonts
+
+%% Multilingual typesetting
+\RequirePackage{fontspec}
+% use main= so that subsequent stuff don't confuse babel
+\RequirePackage[french,main=english]{babel}
+
+% CJK configuration
+% Note that this template is meant for a English-default document
+% with possible CJK characters.
+% These are only available in LuaLaTeX
+\ifluatex{}
     \RequirePackage{luatexja-fontspec}
-  \else
-    \RequirePackage[utf8]{inputenc}
-  \fi
+    \babelprovide[import,intraspace=0 .15 0,onchar=ids fonts]{chinese}
+    \babelprovide[onchar=ids fonts]{french}
+    \babelcharproperty{`“}{linebreak}{op}
+    \babelcharproperty{`”}{linebreak}{cl}
+\else
+    \babelprovide[import,intraspace=0 .15 0]{chinese}
 \fi
+
+% To set up CJK fonts
+\ifthenelse{\isundefined\pc@cjkos}{}{
+    \ifthenelse{\equal\pc@cjkos{macnew}}{
+        % >= EL Capitan
+        \babelfont[chinese]{rm}[UprightFont=* Light,BoldFont=* Bold,ItalicFont=Kaiti SC,BoldItalicFont=Kaiti SC Bold]{Songti SC}
+        \babelfont[chinese]{sf}{PingFang SC}
+        \babelfont[chinese]{tt}{STFangsong}
+    }{\ifthenelse{\equal\pc@cjkos{macold}}{
+        % <= Yosemite
+        \babelfont[chinese]{rm}[BoldFont=STHeiti,ItalicFont=STKaiti]{STSong}
+        \babelfont[chinese]{sf}[BoldFont=STHeiti]{STXihei}
+        \babelfont[chinese]{tt}{STFangsong}
+    }{\ifthenelse{\equal\pc@cjkos{winnew}}{
+        % >= Vista
+        \babelfont[chinese]{rm}[BoldFont=SimHei,ItalicFont=KaiTi]{SimSun}
+        \babelfont[chinese]{sf}[BoldFont={* Bold}]{Microsoft YaHei}
+        \babelfont[chinese]{tt}{FangSong}
+    }{\ifthenelse{\equal\pc@cjkos{winold}}{
+        % <= XP
+        \babelfont[chinese]{rm}[BoldFont=SimHei,ItalicFont=KaiTi_GB2312]{SimSun}
+        \babelfont[chinese]{sf}{SimHei}
+        \babelfont[chinese]{tt}{FangSong_GB2312}
+    }{\ifthenelse{\equal\pc@cjkos{linux}}{
+        % Fonts for Ubuntu
+        \babelfont[chinese]{rm}[BoldFont=WenQuanYi Zen Hei,ItalicFont=AR PL UKai CN]{AR PL UMing CN}
+        \babelfont[chinese]{sf}{WenQuanYi Zen Hei}
+        \babelfont[chinese]{tt}{AR PL UMing CN}
+    }{
+        \errmessage{Incorrect OS specification for CJK fonts: `\pc@cjkos'}
+    }}}}}
+}
+
 \RequirePackage[style=\pc@bibstyle,backend=biber]{biblatex}
 \RequirePackage{tikz} % drawing support
 \usetikzlibrary{calc} % tikz point calculations
@@ -102,45 +144,6 @@
 \renewcommand{\headrulewidth}{0pt} % customise the layout...
 \lhead{}\chead{}\rhead{}
 \lfoot{}\cfoot{\thepage}\rfoot{}
-
-% To set up CJK fonts
-\ifthenelse{\isundefined\pc@cjkos}{}{
-    % From ctex/fontset/ctex-fontset-*.def
-    \ifluatex{}
-      \let\setCJKmainfont\setmainjfont{}
-      \let\setCJKsansfont\setsansjfont{}
-      \let\setCJKmonofont\setmonojfont{}
-    \else\RequireXeTeX{}
-    \fi
-    \ifthenelse{\equal\pc@cjkos{macnew}}{
-        % >= EL Capitan
-        \setCJKmainfont[UprightFont=* Light,BoldFont=* Bold,ItalicFont=Kaiti SC,BoldItalicFont=Kaiti SC Bold]{Songti SC}
-        \setCJKsansfont{PingFang SC}
-        \setCJKmonofont{STFangsong}
-    }{\ifthenelse{\equal\pc@cjkos{macold}}{
-        % <= Yosemite
-        \setCJKmainfont[BoldFont=STHeiti,ItalicFont=STKaiti]{STSong}
-        \setCJKsansfont[BoldFont=STHeiti]{STXihei}
-        \setCJKmonofont{STFangsong}
-    }{\ifthenelse{\equal\pc@cjkos{winnew}}{
-        % >= Vista
-        \setCJKmainfont[BoldFont=SimHei,ItalicFont=KaiTi]{SimSun}
-        \setCJKsansfont[BoldFont={* Bold}]{Microsoft YaHei}
-        \setCJKmonofont{FangSong}
-    }{\ifthenelse{\equal\pc@cjkos{winold}}{
-        % <= XP
-        \setCJKmainfont[BoldFont=SimHei,ItalicFont=KaiTi_GB2312]{SimSun}
-        \setCJKsansfont{SimHei}
-        \setCJKmonofont{FangSong_GB2312}
-    }{\ifthenelse{\equal\pc@cjkos{linux}}{
-        % Fonts for Ubuntu
-        \setCJKmainfont[BoldFont=WenQuanYi Zen Hei,ItalicFont=AR PL UKai CN]{AR PL UMing CN}
-        \setCJKsansfont{WenQuanYi Zen Hei}
-        \setCJKmonofont{AR PL UMing CN}
-    }{
-        \errmessage{Incorrect OS specification for CJK fonts: `\pc@cjkos'}
-    }}}}}
-}
 
 % Convenient centered three part table
 \newenvironment{ctpt}{\center\threeparttable}{\endthreeparttable\endcenter}
