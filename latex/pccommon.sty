@@ -1,5 +1,10 @@
 % Package for the common premable commands for
 % Zhang Maiyun's Pearson College UWC documents
+% Copyright (c) 2020-2023 Zhang Maiyun
+%
+% Try to keep future versions compatible with older ones.
+% Files written for the older versions should produce approximately
+% the same output with the newer versions.
 %
 % Obtain updates at
 % https://github.com/myzhang1029/codes/blob/main/latex/pccommon.sty
@@ -16,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2023/10/03 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2023/10/06 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pc@bibstyle{mla}
@@ -57,6 +62,8 @@
 \RequirePackage{amssymb}
 \RequirePackage{amsthm}
 \RequirePackage{mathtools}
+\RequirePackage{soul} % for much better underline, etc.
+\RequirePackage{plimsoll} % for the Standard State symbol \stst
 \RequirePackage[version=4]{mhchem} % typeset chemical formulas
 \RequirePackage{siunitx} % typeset SI units
 \sisetup{separate-uncertainty=true}
@@ -116,14 +123,18 @@
     }}}}}
 }
 
+% Do this after languange stuff
 \RequirePackage[style=\pc@bibstyle,backend=biber]{biblatex}
+
+%% Stuff about drawing with TikZ and PGF
 \RequirePackage{tikz} % drawing support
 \usetikzlibrary{calc} % tikz point calculations
 \RequirePackage{pgfplots} % plotting in tikz
 \RequirePackage{pgfplotstable}
 \pgfplotsset{compat=1.17, compat/show suggested version=false}
 \usepgfplotslibrary{units}
-\usepackage[american, europeanresistors, american voltages, straightvoltages, fetbodydiode]{circuitikz}
+\RequirePackage[american, europeanresistors, american voltages, straightvoltages, fetbodydiode]{circuitikz} % draw circuits
+\RequirePackage{chemfig} % draw chemical structures
 
 %%% ToC (table of contents) APPEARANCE
 \RequirePackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
