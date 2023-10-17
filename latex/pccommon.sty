@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2023/10/06 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2023/10/16 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pc@bibstyle{mla}
@@ -62,6 +62,7 @@
 \RequirePackage{amssymb}
 \RequirePackage{amsthm}
 \RequirePackage{mathtools}
+\RequirePackage{derivative} % for \pdv, \odv, \odif, etc.
 \RequirePackage{soul} % for much better underline, etc.
 \RequirePackage{plimsoll} % for the Standard State symbol \stst
 \RequirePackage[version=4]{mhchem} % typeset chemical formulas
@@ -163,6 +164,7 @@
 \newcommand*\circled[1]{\tikz[baseline= (char.base)]{
   \node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
 
+%% Math stuff
 % Theorems https://www.overleaf.com/learn/latex/Theorems_and_proofs
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]
@@ -171,6 +173,18 @@
 \newtheorem*{remark}{Remark}
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[section]
+
+% More operators to my taste
+\DeclareMathOperator{\cis}{cis}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\sgn}{sgn}
+\newcommand*\dd{\mathrm{d}} % For old documents. Use \odif from the `derivative' package instead.
+\newcommand*\ii{\ensuremath{i}}
+\newcommand*\abs[1]{\left\lvert#1\right\rvert}
+\newcommand*\norm[1]{\left\lVert#1\right\rVert}
+\newcommand*\permu[2]{#1\text{P}#2}
+\newcommand*\combi[2]{#1\text{C}#2}
 
 % Centered title from https://stackoverflow.com/a/3142372
 \newcommand{\mkctitle}{
