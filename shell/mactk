@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #  mactk - MAC toolkit: various commands for network social-engineering
-#  Copyright (C) 2022 Zhang Maiyun <me@myzhangll.xyz>
+#  Copyright (C) 2022 Zhang Maiyun <me@maiyun.me>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -224,7 +224,7 @@ _get_mac2()
 {
     # Get MAC from the IP
     mac1="$(get_mac "$1")"
-    
+
     # Double check if that hostname still point to the same IP
     ip2="$(_resolve_hostname "$2")"
     if [ "${ip2}" = "${ip}" ] || [ -z "${ip2}" ]

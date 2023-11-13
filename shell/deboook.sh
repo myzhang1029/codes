@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #  debook - Convert double-sided book style PDFs to single paged PDFs
-#  Copyright (C) 2021-2022 Zhang Maiyun <me@myzhangll.xyz>
+#  Copyright (C) 2021-2022 Zhang Maiyun <me@maiyun.me>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ usage()
     echo "  -q: Prevent additional information from being printed."
     echo "  -h: Print this help."
     echo
-    echo "Report bugs to Zhang Maiyun<me@myzhangll.xyz>."
+    echo "Report bugs to Zhang Maiyun<me@maiyun.me>."
     if [ "$2" != "" ]
     then
         echo

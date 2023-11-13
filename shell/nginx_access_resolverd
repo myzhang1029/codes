@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #  nginx_access_resolverd - Resolve IPs in Nginx access.log to MACs by asking the router through SSH
-#  Copyright (C) 2022 Zhang Maiyun <me@myzhangll.xyz>
+#  Copyright (C) 2022 Zhang Maiyun <me@maiyun.me>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -51,10 +51,10 @@ extract_mac() {
 # Resolve IPs to MACs with a background SSH process
 resolve_ip() {
     # Give command info FD3
-    echo "arping -c 2 -I eth1 '$1'" >&3 
+    echo "arping -c 2 -I eth1 '$1'" >&3
     # Read from the SSH process through FD4
     while read -r -t2 -u4; do echo "$REPLY"; done | extract_mac | sort | uniq | tr '\n' ' '
-} 
+}
 
 # Produce an output for the log
 resolve_ip_ctx() {

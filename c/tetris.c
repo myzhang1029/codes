@@ -1,11 +1,11 @@
 /*
- * Tetris by Zhang Maiyun<me@myzhangll.xyz>
+ * Tetris by Zhang Maiyun<me@maiyun.me>
  * Screen at least 27rows@15columns
  * Version: Compileable-Runable-Useless v0.1.0
  */
 /*
  *  tetris.c
- *  Copyright (C) 2017-present Zhang Maiyun <me@myzhangll.xyz>
+ *  Copyright (C) 2017-present Zhang Maiyun <me@maiyun.me>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

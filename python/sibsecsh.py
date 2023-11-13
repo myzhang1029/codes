@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 #  sibsecsh
-#  Copyright (C) 2019-2020 Zhang Maiyun <me@myzhangll.xyz>
+#  Copyright (C) 2019-2020 Zhang Maiyun <me@maiyun.me>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by

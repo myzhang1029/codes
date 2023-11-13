@@ -3,7 +3,7 @@
 #
 #  12306.py
 #
-#  Copyright (C) 2021 Zhang Maiyun <me@myzhangll.xyz>
+#  Copyright (C) 2021 Zhang Maiyun <me@maiyun.me
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -138,7 +138,7 @@ function checkBed(pos, num) {
 
 def 问座位():
     """Ask for a properlly formatted seat sequence.
-    
+
     The type of the return value reflects the type of tickets (i.e. bed or seat).
     """
     座位选择 = 求输入("坐哪里 [ABCDFabcdf | 上n中n下n, 同大/小写为同排]？")
