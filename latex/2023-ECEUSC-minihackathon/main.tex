@@ -1,0 +1,132 @@
+\documentclass[12pt]{article}
+\usepackage{/Users/zmy/Git/codes/latex/pccommon}
+
+\title{Mini Hackathon Entry}
+\author{Maiyun Zhang}
+
+% No indent
+\setlength{\parindent}{0pt}
+
+\begin{document}
+\maketitle
+
+Attempted Questions~1 to~5.
+
+\section*{Question 1}
+
+\begin{itemize}
+    \item Zero skip: one possible path with nine jumps.
+    \item One skip: eight possible paths with eight jumps.
+    \item Two skips: seven jumps in total and two of them are skip jumps, so \(\binom{7}{2} = 21\).
+    \item Three skips: six jumps in total and three of them are skip jumps, so \(\binom{6}{3} = 20\).
+\end{itemize}
+
+Total: \(1 + 8 + 21 + 20 = 50\) possible paths.
+
+\section*{Question 2}
+The question explicitly mentions that the rabbit is ``her neighbor's rabbit'' and is dead, but ``the neighbor'' says that the rabbit ``not harmed'' and ``doing well.'' Therefore, I postulate that the neighbor's pet is and has always been a dead rabbit, presumably a specimen. The neighbor is probably a necromancer or a taxidermist.
+
+Otherwise, if the narrative might be unreliable, it may be possible that the neighbor is polite.
+
+\section*{Question 3}
+Projected distance from the top of the cylinder: \(\sqrt{9^2 - 8^2} = \sqrt{17}\).
+
+Angle difference between them: \(2\arcsin \frac{\sqrt{17}}{2 \times 5}\).
+
+Projected arc length: \(5 \times 2\arcsin \frac{\sqrt{17}}{10}\).
+
+Vertical distance: \(8 + 2 = 10\).
+
+Shortest path: \(\sqrt{10^2 + (10\arcsin \frac{\sqrt{17}}{10})^2} = 10 \sqrt{1 + \arcsin^2 \frac{\sqrt{17}}{10}}\).
+
+\clearpage
+\section*{Question 4}
+A rather na\"ive approach in Python (sad face):
+\begin{enumerate}
+    \item Start with the biggest square.
+    \item Keep track of the margin between the space and the squares.
+    \item If the next biggest square is smaller than the margin, then fit it there and update the margin accordingly.
+    \item If the next biggest square is bigger than the margin, then fit it in the corner and update the margin accordingly.
+    \item Repeat until all squares are fitted.
+\end{enumerate}
+
+\begin{verbatim}
+def fitsquares(sides: list[int]) -> int:
+    sides = sorted(sides, reverse=True)
+    resultnow = 0
+    margin = 0
+    for nextbiggest in sides:
+        if margin < nextbiggest:
+            # New margin: assume the next biggest is codiagonal with resultnow
+            margin = 2 * resultnow
+            resultnow += nextbiggest
+        else:
+            margin -= nextbiggest
+    return resultnow
+\end{verbatim}
+
+Some test cases:
+\begin{verbatim}
+>>> fitsquares([1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+4
+>>> fitsquares([3, 4, 1])
+7
+>>> fitsquares([3, 1, 1, 1])
+4
+\end{verbatim}
+
+\clearpage
+\section*{Question 5}
+Numbers that are even and divisible by 5 are multiples of 10. I am using the closed form of the Fibonacci sequence.
+Wolfram Languange:
+\begin{verbatim}
+Total@Table[
+  If[Mod[FullSimplify[
+    (-(1/2 (1 - Sqrt[5]))^n + (1/2 (1 + Sqrt[5]))^n)/Sqrt[5]],
+    10] == 0, 1, 0], {n, 1, 49}]
+\end{verbatim}
+Result is 3.
+
+C Code:
+\begin{verbatim}
+#include <math.h>
+#include <stdio.h>
+#include <inttypes.h>
+
+static inline double ipow(double base, int exp) {
+    double result = 1.0;
+    while (1) {
+        if (exp & 1) result *= base;
+        exp >>= 1;
+        if (!exp) break;
+        base *= base;
+    }
+    return result;
+}
+
+uint32_t count(void) {
+    uint32_t count = 0;
+    // const double half1andsqrt5 = (1.0 + sqrt(5.0)) / 2.0;
+    const double half1andsqrt5 = 1.61803400516510009765625;
+    // const double half1minusqrt5 = (1.0 - sqrt(5.0)) / 2.0;
+    const double half1minusqrt5 = -0.61803400516510009765625;
+    const double sqrt5 = 2.2360680103302001953125;
+
+    for (uint32_t i = 1; i < UINT32_MAX; ++i) {
+        double fib = (ipow(half1andsqrt5, i) - ipow(half1minusqrt5, i)) / sqrt5;
+        if (fib > UINT32_MAX) break;
+        count += ((uint32_t)fib % 10 == 0);
+    }
+    return count;
+}
+
+int main(void) {
+    printf("%" PRIu32 "\n", count());
+    return 0;
+}
+\end{verbatim}
+Result is 3, it is really fast although we are pushing the limit of \texttt{double} precision. The last fibonnaci number that it gave was actually incorrect.
+
+\clearpage
+\section*{Question 6}
+\end{document}
