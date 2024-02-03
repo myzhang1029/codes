@@ -1,6 +1,6 @@
 % Package for the common premable commands for
 % Zhang Maiyun's Pearson College UWC documents
-% Copyright (c) 2020-2023 Zhang Maiyun
+% Copyright (c) 2020-2024 Zhang Maiyun
 %
 % Try to keep future versions compatible with older ones.
 % Files written for the older versions should produce approximately
@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2023/10/16 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2024/02/04 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pc@bibstyle{mla}
@@ -83,16 +83,18 @@
 % with possible CJK characters.
 % These are only available in LuaLaTeX
 \ifluatex{}
-    \RequirePackage{luatexja-fontspec}
     \babelprovide[import,intraspace=0 .15 0,onchar=ids fonts]{chinese}
     \babelprovide[onchar=ids fonts]{french}
     \babelcharproperty{`“}{linebreak}{op}
     \babelcharproperty{`”}{linebreak}{cl}
+    % https://tex.stackexchange.com/a/708645
+    \let\bblorg@mapselect\bbl@mapselect
+    \def\bbl@mapselect{\ifmmode\else\bblorg@mapselect\fi}
 \else
     \babelprovide[import,intraspace=0 .15 0]{chinese}
 \fi
 
-% To set up CJK fonts
+% Set up CJK fonts
 \ifthenelse{\isundefined\pc@cjkos}{}{
     \ifthenelse{\equal\pc@cjkos{macnew}}{
         % >= EL Capitan
