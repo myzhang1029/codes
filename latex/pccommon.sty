@@ -78,6 +78,11 @@
 % use main= so that subsequent stuff don't confuse babel
 \RequirePackage[french,main=english]{babel}
 
+% Compatibility with old LaTeX
+\providecommand{\IfPackageAtLeastTF}[4]{%
+  \@ifpackagelater{#1}{#2}{#3}{#4}%
+}
+
 % CJK configuration
 % Note that this template is meant for a English-default document
 % with possible CJK characters.
@@ -88,8 +93,10 @@
     \babelcharproperty{`“}{linebreak}{op}
     \babelcharproperty{`”}{linebreak}{cl}
     % https://tex.stackexchange.com/a/708645
+    % Full info is latex3/babel#281
+    \IfPackageAtLeastTF{babel}{2024/02/07}{}{%
     \let\bblorg@mapselect\bbl@mapselect
-    \def\bbl@mapselect{\ifmmode\else\bblorg@mapselect\fi}
+    \def\bbl@mapselect{\ifmmode\else\bblorg@mapselect\fi}}
 \else
     \babelprovide[import,intraspace=0 .15 0]{chinese}
 \fi

@@ -36,7 +36,7 @@ dBV[dbv_] := First@SolveValues[
 ]
 
 (* Fourier analysis tools *)
-IDFT[(\[Omega]_)?(NumberQ[#] || QuantityQ[#] &), times_, vals_] :=
+IDFT[(\[Omega]_)?(NumericQ[#] || QuantityQ[#] &), times_, vals_] :=
  Mean[vals E^(-I \[Omega] times)]
 VFT2dB[x_] := 20 Log10@Abs[x]
 
