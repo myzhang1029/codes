@@ -1,0 +1,1911 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='WolframDesktop 13.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       161,          7]
+NotebookDataLength[     80275,       1903]
+NotebookOptionsPosition[     74705,       1806]
+NotebookOutlinePosition[     75143,       1823]
+CellTagsIndexPosition[     75100,       1820]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Extract Thermodynamics Data from NIST Web Book", "Title",
+ CellChangeTimes->{{3.870257107385661*^9, 
+  3.8702571238337927`*^9}},ExpressionUUID->"51450e73-c7d6-429d-8152-\
+dd7d33ccb4a6"],
+
+Cell["\<\
+This Notebook presents a set of functions to retrieve gas phase \
+thermodynamics data (Shomate equation) from the NIST web book. Its API \
+endpoint is not open for public use and thus is not guaranteed to be stable.\
+\>", "Text",
+ CellChangeTimes->{{3.8702573081564417`*^9, 3.8702573741299677`*^9}, {
+  3.870257460932839*^9, 3.870257462342523*^9}, {3.870257824769874*^9, 
+  3.870257832125618*^9}},ExpressionUUID->"8bb44d2b-857e-4b29-9c18-\
+6054dcadefeb"],
+
+Cell["Example chemical:", "CodeText",
+ CellChangeTimes->{{3.870257127235283*^9, 
+  3.8702571336866837`*^9}},ExpressionUUID->"f716c5d0-6eb5-4b88-889a-\
+d58a8550e98e"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"test", "=", 
+  RowBox[{"Molecule", "[", "\"\<oxygen\>\"", "]"}]}]], "Input",
+ CellChangeTimes->{{3.8702541456041203`*^9, 3.870254153831253*^9}},
+ CellLabel->"In[29]:=",ExpressionUUID->"46c35f1b-00a8-4e53-92c4-c1735e18345a"],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{
+   TagBox["Molecule",
+    "SummaryHead"], "[", 
+   DynamicModuleBox[{Typeset`open$$ = False, Typeset`embedState$$ = "Ready"}, 
+    
+    TemplateBox[{
+      PaneSelectorBox[{False -> GridBox[{{
+            PaneBox[
+             ButtonBox[
+              DynamicBox[
+               FEPrivate`FrontEndResource["FEBitmaps", "SummaryBoxOpener"]], 
+              ButtonFunction :> (Typeset`open$$ = True), Appearance -> None, 
+              BaseStyle -> {}, Evaluator -> Automatic, Method -> 
+              "Preemptive"], Alignment -> {Center, Center}, ImageSize -> 
+             Dynamic[{
+               Automatic, 
+                3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                 Magnification])}]], 
+            GraphicsBox[{{
+               AbsoluteThickness[1.3], {
+                StyleBox[{
+                  
+                  LineBox[{{{-0.30913237901987706`, -0.1091956299396003}, {
+                   0.2491323790198771, 
+                   0.21311867839373294`}}, {{-0.2491323790198771, \
+-0.21311867839373294`}, {0.30913237901987706`, 0.1091956299396003}}}]}, {
+                  RGBColor[0.800498, 0.201504, 0.192061]}, StripOnInput -> 
+                 False]}}, {
+               TagBox[
+                TooltipBox[{{
+                   RGBColor[0.801, 0.202, 0.192], 
+                   
+                   FilledCurveBox[{{{1, 4, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}}, {{1, 4, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}}}, {CompressedData["
+1:eJxTTMoPSmViYGBQAmIQnRkr/bVA5eH+qo1c687oXdgP43tHFudOPXt6//It
+azO4rj3Yf/+sQ5Ch9Yn9scf+3LO1fLB/3YFartxlR/fLb1n0/aHF/f3PmKYf
+nyV4eP+Ua8k+okvu7mdYorzM8PjB/QI/3DlFt9yG89l2pZd45N+C87/t84+s
+9rq5X0Q8akN60qH9bJ9PmG10vbHf4u+xI5dnHN7/0q7l0SOH6/uPGAncMzx/
+ZL9jMO9/8apr+/l+vExlbDi2/1D4pT7Pj1f3188xSDRZfWK/S8x0ueqMq/s/
+OJTHpF87tb/lXuUzYZWr+39mz6/+430WzpdIf3aHge0CnK/6pHne2ayL+6Me
+n7ormnN1f8nHJUUMqy7t3yly+5zQn6v7+brteGYdvrw/Ra52r1jPtf0rVG4s
+Nb57Zb/fJKPLghHX93faeO5K23R1v4CiPLdQwo39u8+1/TF2vrb/4/z7fKIZ
+N/c/TTnfzXDl2n47Hu5PD1tu7f+n+04nXeb6fomw0obqbbfh/C7LyhXrGO/C
++e7celHrNO/tr+3rF0s/c21/6PEOj2q9+/ur/S+9TNO5tn/TwULpJZIP9lcK
+iO5N6wG6U1rkfEHNg/1mDRNXMWy6sv/Q26USS/Y/2L96UdB/47mX95cdME+6
+zvRwv8RJuYVpHZfg8S1w6rfFrOSL+9HTAwCIdCwF
+                    "], CompressedData["
+1:eJxTTMoPSmViYGCQAWIQ7c+16EOByYP9y/cX6jCZXdgP44fMtKlguHdxf96E
+5S8ffru/X3Oy1C0Gncv7+Tvyfj0Uur+fda95G4PClf0b6k25H+nd2//oWYgR
+g8jV/VHPfkx6KHB3/5WfdxMZ+q7ul9+y6PvDHbfh/Oo7Giero27B+XJP990U
+sbq5/9FWi4CzQlf3a+yz+Lo+/Mb+f7rvdNJlruxXmX9ilWfp9f3Cq9aFMahd
+3l+9+DibMMv1/TLuM3+lnbgI53PxHtk0k/kCnP8pLLY969TZ/VUr7hnWmlzf
+byPJGZV37fR+3VtVXV5Tr++P3JD+yED71P4H3OKPxb9d38/342UqY8OJ/Rb3
+f8asa76x/8GHpo4rJsf3N+hs/Spid3O/2Ss+/zmex/afqCzoq/5xc3/P41mi
+KXFH93t5vW5bd/LW/qYdRd/OvTiyn2uW1KR1G2/D+UpTQkU9ft+B8wvOp4g9
+Eru33+Z/gLPe6aP7nwTH6Vez3N/vbmt441f/8f0JV3x+i3y6vz+wWjD3eMhJ
+eHwET/w+/ZTHmf3o8QUAfzz9Aw==
+                    "]}]}}, "1"], Annotation[#, 1, "Tooltip"]& ], 
+               TagBox[
+                TooltipBox[{{
+                   RGBColor[0.801, 0.202, 0.192], 
+                   
+                   FilledCurveBox[{{{1, 4, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}}, {{1, 4, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}}}, {CompressedData["
+1:eJxTTMoPSmViYGBQAmIQ3Xqv8pmwylV7trmvFqctOm8P40cEu3maSl6y5zAI
+/f/gwFV7vpn3w9IfXbafw7NdqOrXNftl8gerTupctTd/yntT2OSGfVedyRyj
+8mv2hw75tDw4cdP+n+47nXSZ6/ZuCzOOP9hxG84PuO8Rs/bvHTg/4VZCeZXS
+PfuSL5fUz5y7Zh+w7PlMF/X79kmNc2SnGV+zN9MVK+cUe2A/59l3gfQZV+25
+Fl98kVf5wP4bM7fv//1X7E8pvFe4tveB/b6N6edTV12275zHE2nL9NC+Lf5I
+4Jkpl+wzY6W/Fqg8tGf0MjjEGHURzj9laOz27/N5OH+j+Y9DKVpn7f/dKvqZ
+z/DQXkh2m9T/1afs/Q69aijc8cD+wcum56crTthX7p3ZmV/wwH7NNv8tM1yP
+2bcw7/9XyPXA/kVbbrfR7CP2bhUTjz7muW/fmvSJbUblYfvUnxcOPmC5Z29g
+lvjiX/ghe4nepfeEX9yx/79YeZnh8YP2ds7WAVXbbsP5Z+LNNdyzb8H5/H1N
+Ze7ON+0ZHj+4ZJh+yJ7xknpHld0Ne5bEaB2j5YftP4menbnW8ro9x/2rrUbP
+j9hbJ3cYiZRcs+/7f2fVv9nH7C/vTZm/9u1V+yW7ohhnHD1hnyXhyOOeftX+
+dO6hvUbvT8Hj+042R99pi7P26OkBAPs+FU8=
+                    "], CompressedData["
+1:eJxTTMoPSmViYGCQAWIQvaMl570wy3X7tQ0yy39PPm8P4wedbeP/73zG/gUH
+53Phsuv2q26e8v63/KS9u6DTNeGoG/YfWyd8/rf/uP0yyeqjwnY37S2Mwmb/
+v37U/s+m7bYiMbfsQ3hcbP4/PmJv/pT3pvCW23D+7T3t7FVCd+F8iy0fvz0w
+umdvMaUvPvXWUXu92+W3XUXv2/9frLzM8Phxe6Nfz1XXfL9vf3X1oqD/m0/a
+v6v6klJo8sD+cOFZLqP8M3D+86fls878OA/nt4QE7jklddE+70eGv43MA/uE
+4t+XTohcstfcb+q2+vp9+4vqZ/rSX12yL+ud+fZu2X37b8zcvv/3X7aX27Wt
+2P3lPfu+9n27p6Zesb+W8/vWA7179o+6Km4Y3r5i3yfv4FRVctfeos/o69mA
+q/Y8/kc93Rffsd+z+FjLjO6r9j7/p9q5774N55uwRu9eW3gLzn920nuXcNhN
++4SG8HsZUlfti1yDFlZl3LCPSnw+mcniiv23I8lXH1Rdtw91KvecE3oZHh8h
+5ixbZt2+aI8eXwCGEe4B
+                    "]}]}}, "2"], Annotation[#, 2, "Tooltip"]& ]}}, {
+             DisplayFunction -> Identity, Frame -> True, FrameStyle -> 
+              Directive[
+                Opacity[0.5], 
+                Thickness[Tiny], 
+                GrayLevel[0.7]], FrameTicks -> None, ImageSize -> Dynamic[{
+                 UpTo[
+                 8.1 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                   Magnification])], 
+                 UpTo[
+                 4.1 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                   Magnification])]}]}], 
+            GridBox[{{
+               RowBox[{
+                 TagBox["\"Formula: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox[
+                  TemplateBox[{
+                    SubscriptBox["\"O\"", "2"]}, "RowDefault"], 
+                  "SummaryItem"]}]}, {
+               TagBox[
+                TemplateBox[{
+                  RowBox[{
+                    TagBox["\"Atoms: \"", "SummaryItemAnnotation"], 
+                    "\[InvisibleSpace]", 
+                    TagBox["2", "SummaryItem"]}], "\"  \"", 
+                  RowBox[{
+                    TagBox["\"Bonds: \"", "SummaryItemAnnotation"], 
+                    "\[InvisibleSpace]", 
+                    TagBox["1", "SummaryItem"]}]}, "RowDefault"], 
+                "SummaryItem"]}}, 
+             GridBoxAlignment -> {
+              "Columns" -> {{Left}}, "Rows" -> {{Automatic}}}, AutoDelete -> 
+             False, GridBoxItemSize -> {
+              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}, 
+             GridBoxSpacings -> {"Columns" -> {{2}}, "Rows" -> {{Automatic}}},
+              BaseStyle -> {
+              ShowStringCharacters -> False, NumberMarks -> False, 
+               PrintPrecision -> 3, ShowSyntaxStyles -> False}]}}, 
+          GridBoxAlignment -> {"Columns" -> {{Left}}, "Rows" -> {{Top}}}, 
+          AutoDelete -> False, 
+          GridBoxItemSize -> {
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}, 
+          BaselinePosition -> {1, 1}], True -> GridBox[{{
+            PaneBox[
+             ButtonBox[
+              DynamicBox[
+               FEPrivate`FrontEndResource["FEBitmaps", "SummaryBoxCloser"]], 
+              ButtonFunction :> (Typeset`open$$ = False), Appearance -> None, 
+              BaseStyle -> {}, Evaluator -> Automatic, Method -> 
+              "Preemptive"], Alignment -> {Center, Center}, ImageSize -> 
+             Dynamic[{
+               Automatic, 
+                3.5 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                 Magnification])}]], 
+            GraphicsBox[{{
+               AbsoluteThickness[1.3], {
+                StyleBox[{
+                  
+                  LineBox[{{{-0.30913237901987706`, -0.1091956299396003}, {
+                   0.2491323790198771, 
+                   0.21311867839373294`}}, {{-0.2491323790198771, \
+-0.21311867839373294`}, {0.30913237901987706`, 0.1091956299396003}}}]}, {
+                  RGBColor[0.800498, 0.201504, 0.192061]}, StripOnInput -> 
+                 False]}}, {
+               TagBox[
+                TooltipBox[{{
+                   RGBColor[0.801, 0.202, 0.192], 
+                   
+                   FilledCurveBox[{{{1, 4, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}}, {{1, 4, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}}}, {CompressedData["
+1:eJxTTMoPSmViYGBQAmIQnRkr/bVA5eH+qo1c687oXdgP43tHFudOPXt6//It
+azO4rj3Yf/+sQ5Ch9Yn9scf+3LO1fLB/3YFartxlR/fLb1n0/aHF/f3PmKYf
+nyV4eP+Ua8k+okvu7mdYorzM8PjB/QI/3DlFt9yG89l2pZd45N+C87/t84+s
+9rq5X0Q8akN60qH9bJ9PmG10vbHf4u+xI5dnHN7/0q7l0SOH6/uPGAncMzx/
+ZL9jMO9/8apr+/l+vExlbDi2/1D4pT7Pj1f3188xSDRZfWK/S8x0ueqMq/s/
+OJTHpF87tb/lXuUzYZWr+39mz6/+430WzpdIf3aHge0CnK/6pHne2ayL+6Me
+n7ormnN1f8nHJUUMqy7t3yly+5zQn6v7+brteGYdvrw/Ra52r1jPtf0rVG4s
+Nb57Zb/fJKPLghHX93faeO5K23R1v4CiPLdQwo39u8+1/TF2vrb/4/z7fKIZ
+N/c/TTnfzXDl2n47Hu5PD1tu7f+n+04nXeb6fomw0obqbbfh/C7LyhXrGO/C
++e7celHrNO/tr+3rF0s/c21/6PEOj2q9+/ur/S+9TNO5tn/TwULpJZIP9lcK
+iO5N6wG6U1rkfEHNg/1mDRNXMWy6sv/Q26USS/Y/2L96UdB/47mX95cdME+6
+zvRwv8RJuYVpHZfg8S1w6rfFrOSL+9HTAwCIdCwF
+                    "], CompressedData["
+1:eJxTTMoPSmViYGCQAWIQ7c+16EOByYP9y/cX6jCZXdgP44fMtKlguHdxf96E
+5S8ffru/X3Oy1C0Gncv7+Tvyfj0Uur+fda95G4PClf0b6k25H+nd2//oWYgR
+g8jV/VHPfkx6KHB3/5WfdxMZ+q7ul9+y6PvDHbfh/Oo7Giero27B+XJP990U
+sbq5/9FWi4CzQlf3a+yz+Lo+/Mb+f7rvdNJlruxXmX9ilWfp9f3Cq9aFMahd
+3l+9+DibMMv1/TLuM3+lnbgI53PxHtk0k/kCnP8pLLY969TZ/VUr7hnWmlzf
+byPJGZV37fR+3VtVXV5Tr++P3JD+yED71P4H3OKPxb9d38/342UqY8OJ/Rb3
+f8asa76x/8GHpo4rJsf3N+hs/Spid3O/2Ss+/zmex/afqCzoq/5xc3/P41mi
+KXFH93t5vW5bd/LW/qYdRd/OvTiyn2uW1KR1G2/D+UpTQkU9ft+B8wvOp4g9
+Eru33+Z/gLPe6aP7nwTH6Vez3N/vbmt441f/8f0JV3x+i3y6vz+wWjD3eMhJ
+eHwET/w+/ZTHmf3o8QUAfzz9Aw==
+                    "]}]}}, "1"], Annotation[#, 1, "Tooltip"]& ], 
+               TagBox[
+                TooltipBox[{{
+                   RGBColor[0.801, 0.202, 0.192], 
+                   
+                   FilledCurveBox[{{{1, 4, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}}, {{1, 4, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 3}, {1, 3, 
+                    3}, {1, 3, 3}}}, {CompressedData["
+1:eJxTTMoPSmViYGBQAmIQ3Xqv8pmwylV7trmvFqctOm8P40cEu3maSl6y5zAI
+/f/gwFV7vpn3w9IfXbafw7NdqOrXNftl8gerTupctTd/yntT2OSGfVedyRyj
+8mv2hw75tDw4cdP+n+47nXSZ6/ZuCzOOP9hxG84PuO8Rs/bvHTg/4VZCeZXS
+PfuSL5fUz5y7Zh+w7PlMF/X79kmNc2SnGV+zN9MVK+cUe2A/59l3gfQZV+25
+Fl98kVf5wP4bM7fv//1X7E8pvFe4tveB/b6N6edTV12275zHE2nL9NC+Lf5I
+4Jkpl+wzY6W/Fqg8tGf0MjjEGHURzj9laOz27/N5OH+j+Y9DKVpn7f/dKvqZ
+z/DQXkh2m9T/1afs/Q69aijc8cD+wcum56crTthX7p3ZmV/wwH7NNv8tM1yP
+2bcw7/9XyPXA/kVbbrfR7CP2bhUTjz7muW/fmvSJbUblYfvUnxcOPmC5Z29g
+lvjiX/ghe4nepfeEX9yx/79YeZnh8YP2ds7WAVXbbsP5Z+LNNdyzb8H5/H1N
+Ze7ON+0ZHj+4ZJh+yJ7xknpHld0Ne5bEaB2j5YftP4menbnW8ro9x/2rrUbP
+j9hbJ3cYiZRcs+/7f2fVv9nH7C/vTZm/9u1V+yW7ohhnHD1hnyXhyOOeftX+
+dO6hvUbvT8Hj+042R99pi7P26OkBAPs+FU8=
+                    "], CompressedData["
+1:eJxTTMoPSmViYGCQAWIQvaMl570wy3X7tQ0yy39PPm8P4wedbeP/73zG/gUH
+53Phsuv2q26e8v63/KS9u6DTNeGoG/YfWyd8/rf/uP0yyeqjwnY37S2Mwmb/
+v37U/s+m7bYiMbfsQ3hcbP4/PmJv/pT3pvCW23D+7T3t7FVCd+F8iy0fvz0w
+umdvMaUvPvXWUXu92+W3XUXv2/9frLzM8Phxe6Nfz1XXfL9vf3X1oqD/m0/a
+v6v6klJo8sD+cOFZLqP8M3D+86fls878OA/nt4QE7jklddE+70eGv43MA/uE
+4t+XTohcstfcb+q2+vp9+4vqZ/rSX12yL+ud+fZu2X37b8zcvv/3X7aX27Wt
+2P3lPfu+9n27p6Zesb+W8/vWA7179o+6Km4Y3r5i3yfv4FRVctfeos/o69mA
+q/Y8/kc93Rffsd+z+FjLjO6r9j7/p9q5774N55uwRu9eW3gLzn920nuXcNhN
++4SG8HsZUlfti1yDFlZl3LCPSnw+mcniiv23I8lXH1Rdtw91KvecE3oZHh8h
+5ixbZt2+aI8eXwCGEe4B
+                    "]}]}}, "2"], Annotation[#, 2, "Tooltip"]& ]}}, {
+             DisplayFunction -> Identity, Frame -> True, FrameStyle -> 
+              Directive[
+                Opacity[0.5], 
+                Thickness[Tiny], 
+                GrayLevel[0.7]], FrameTicks -> None, ImageSize -> Dynamic[{
+                 UpTo[
+                 8.1 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                   Magnification])], 
+                 UpTo[
+                 4.1 (CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[
+                   Magnification])]}]}], 
+            GridBox[{{
+               RowBox[{
+                 TagBox["\"Formula: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox[
+                  TemplateBox[{
+                    SubscriptBox["\"O\"", "2"]}, "RowDefault"], 
+                  "SummaryItem"]}]}, {
+               TagBox[
+                TemplateBox[{
+                  RowBox[{
+                    TagBox["\"Atoms: \"", "SummaryItemAnnotation"], 
+                    "\[InvisibleSpace]", 
+                    TagBox["2", "SummaryItem"]}], "\"  \"", 
+                  RowBox[{
+                    TagBox["\"Bonds: \"", "SummaryItemAnnotation"], 
+                    "\[InvisibleSpace]", 
+                    TagBox["1", "SummaryItem"]}]}, "RowDefault"], 
+                "SummaryItem"]}, {
+               RowBox[{
+                 TagBox["\"SMILES: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox[
+                  PaneBox[
+                  "\"O=O\"", ImageSize -> {{1, 300}, Automatic}, 
+                   BaselinePosition -> Baseline, ContentPadding -> False, 
+                   FrameMargins -> 0, StripOnInput -> True], 
+                  "SummaryItem"]}]}, {
+               RowBox[{
+                 TagBox["\"InChIKey: \"", "SummaryItemAnnotation"], 
+                 "\[InvisibleSpace]", 
+                 TagBox["\"MYMOFIZGZYHOMD-UHFFFAOYSA-N\"", "SummaryItem"]}]}},
+              GridBoxAlignment -> {
+              "Columns" -> {{Left}}, "Rows" -> {{Automatic}}}, AutoDelete -> 
+             False, GridBoxItemSize -> {
+              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}, 
+             GridBoxSpacings -> {"Columns" -> {{2}}, "Rows" -> {{Automatic}}},
+              BaseStyle -> {
+              ShowStringCharacters -> False, NumberMarks -> False, 
+               PrintPrecision -> 3, ShowSyntaxStyles -> False}]}}, 
+          GridBoxAlignment -> {"Columns" -> {{Left}}, "Rows" -> {{Top}}}, 
+          AutoDelete -> False, 
+          GridBoxItemSize -> {
+           "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}, 
+          BaselinePosition -> {1, 1}]}, 
+       Dynamic[Typeset`open$$], ImageSize -> Automatic]},
+     "SummaryPanel"],
+    DynamicModuleValues:>{}], "]"}],
+  Molecule[{"O", "O"}, {
+    Bond[{1, 2}, "Double"]}, {}],
+  Editable->False,
+  SelectWithContents->True,
+  Selectable->False]], "Output",
+ CellChangeTimes->{{3.870254149405925*^9, 3.8702541541663647`*^9}, 
+   3.870262654681306*^9, 3.8702646584520206`*^9, 3.8703679553373737`*^9, 
+   3.9174854531463346`*^9},
+ CellLabel->"Out[29]=",ExpressionUUID->"decda596-7f04-4134-ad97-20955175f817"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"testInChIKey", " ", "=", " ", 
+  RowBox[{
+   RowBox[{"test", "[", "\"\<InChIKey\>\"", "]"}], "[", 
+   RowBox[{"[", "2", "]"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.8702541561436663`*^9, 3.870254162260785*^9}, {
+  3.8702542327848673`*^9, 3.870254270218192*^9}, {3.870257138409004*^9, 
+  3.8702571418692703`*^9}},
+ CellLabel->"In[30]:=",ExpressionUUID->"3a5aba0b-242f-44cf-9bad-ccf9ad92b18c"],
+
+Cell[BoxData["\<\"MYMOFIZGZYHOMD-UHFFFAOYSA-N\"\>"], "Output",
+ CellChangeTimes->{
+  3.870254162609501*^9, {3.870254235123032*^9, 3.8702542704676723`*^9}, 
+   3.870257145311719*^9, 3.870262654949687*^9, 3.87026465871034*^9, 
+   3.8703679555082607`*^9, 3.917485453523645*^9},
+ CellLabel->"Out[30]=",ExpressionUUID->"d908ef1d-5e2c-40ad-b6bd-2dbc1059a397"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The Parser", "Section",
+ CellChangeTimes->{{3.870258168658965*^9, 
+  3.8702581767500362`*^9}},ExpressionUUID->"1f610cc6-86e6-41c0-85b2-\
+d2bd42f285a7"],
+
+Cell["\<\
+Out of all the possible ways to query the database, InChIKey is the most \
+unambiguous and efficient.\
+\>", "Text",
+ CellChangeTimes->{{3.870257263540485*^9, 3.870257306238782*^9}, 
+   3.870257347698062*^9, {3.870257392427409*^9, 
+   3.87025739847549*^9}},ExpressionUUID->"3b2debc2-c43b-41e5-ad69-\
+83afe7ca798d"],
+
+Cell["Helper to construct the GET URL:", "CodeText",
+ CellChangeTimes->{{3.870257245605459*^9, 
+  3.870257259586055*^9}},ExpressionUUID->"f6ec6139-834a-4a49-80e2-\
+7598b358b76d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"GenTGPage", "[", "inchikey_String", "]"}], " ", ":=", " ", 
+  RowBox[{"URLBuild", "[", "\n", "\t", 
+   RowBox[{"\"\<https://webbook.nist.gov/cgi/cbook.cgi\>\"", ",", " ", 
+    RowBox[{"{", "\n", "\t", 
+     RowBox[{
+      RowBox[{"\"\<InChI\>\"", " ", "->", " ", "inchikey"}], ",", "\n", "\t", 
+      
+      RowBox[{"\"\<Units\>\"", " ", "->", " ", "\"\<SI\>\""}], ",", "\n", 
+      "\t", 
+      RowBox[{"\"\<cTG\>\"", " ", "->", " ", "\"\<on\>\""}]}], "\n", "}"}]}], 
+   "]"}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.870254352201024*^9, 3.870254414200424*^9}, {
+  3.870254463707692*^9, 3.870254487896118*^9}, {3.870255097513111*^9, 
+  3.870255122288159*^9}, {3.870255251801547*^9, 3.870255257208665*^9}},
+ CellLabel->"In[20]:=",ExpressionUUID->"09c34015-5286-42fb-9e8e-2efb2c3685ba"],
+
+Cell[TextData[{
+ "Then, we parse the page with ",
+ StyleBox["Import", "Code"],
+ ", keeping only the data tables. This function will return the \
+thermodynamics data as a matrix of the 8 coefficients by their corresponding \
+condition."
+}], "Text",
+ CellChangeTimes->{{3.870257385423312*^9, 
+  3.8702575046933403`*^9}},ExpressionUUID->"1a9cef45-274b-4989-8e0e-\
+b20b22688d38"],
+
+Cell["Retrieve and parse the data page:", "CodeText",
+ CellChangeTimes->{{3.870257512531827*^9, 
+  3.870257523642967*^9}},ExpressionUUID->"6ec8a7ed-72e1-40bb-98cf-\
+b5e3e3180b14"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"ParseTGPage", "[", "url_", "]"}], " ", ":=", " ", 
+  RowBox[{"First", "@", 
+   RowBox[{"Cases", "[", 
+    RowBox[{
+     RowBox[{"Once", "@", 
+      RowBox[{"Import", "[", 
+       RowBox[{"url", ",", " ", "\"\<Data\>\""}], "]"}]}], ",", " ", 
+     RowBox[{
+      RowBox[{"{", "\n", "\t", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{"\"\<Temperature (K)\>\"", ",", " ", "conds___"}], "}"}], 
+        ",", "\n", "\t", 
+        RowBox[{"{", 
+         RowBox[{"\"\<A\>\"", ",", " ", "Avalues___"}], "}"}], ",", "\n", 
+        "\t", 
+        RowBox[{"{", 
+         RowBox[{"\"\<B\>\"", ",", " ", "Bvalues___"}], "}"}], ",", "\n", 
+        "\t", 
+        RowBox[{"{", 
+         RowBox[{"\"\<C\>\"", ",", " ", "Cvalues___"}], "}"}], ",", "\n", 
+        "\t", 
+        RowBox[{"{", 
+         RowBox[{"\"\<D\>\"", ",", " ", "Dvalues___"}], "}"}], ",", "\n", 
+        "\t", 
+        RowBox[{"{", 
+         RowBox[{"\"\<E\>\"", ",", " ", "Evalues___"}], "}"}], ",", "\n", 
+        "\t", 
+        RowBox[{"{", 
+         RowBox[{"\"\<F\>\"", ",", " ", "Fvalues___"}], "}"}], ",", "\n", 
+        "\t", 
+        RowBox[{"{", 
+         RowBox[{"\"\<G\>\"", ",", " ", "Gvalues___"}], "}"}], ",", "\n", 
+        "\t", 
+        RowBox[{"{", 
+         RowBox[{"\"\<H\>\"", ",", " ", "Hvalues___"}], "}"}], ",", "\n", 
+        "\t ", "___"}], "\n", "}"}], " ", "->", " ", 
+      RowBox[{"{", "\n", "\t", 
+       RowBox[{
+        RowBox[{"{", "conds", "}"}], ",", " ", 
+        RowBox[{"{", "Avalues", "}"}], ",", " ", 
+        RowBox[{"{", "Bvalues", "}"}], ",", "\n", "\t", 
+        RowBox[{"{", "Cvalues", "}"}], ",", " ", 
+        RowBox[{"{", "Dvalues", "}"}], ",", " ", 
+        RowBox[{"{", "Evalues", "}"}], ",", "\n", "\t", 
+        RowBox[{"{", "Fvalues", "}"}], ",", " ", 
+        RowBox[{"{", "Gvalues", "}"}], ",", " ", 
+        RowBox[{"{", "Hvalues", "}"}]}], "\n", "}"}]}], ",", " ", "2"}], 
+    "]"}]}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.870255166068445*^9, 3.870255216825296*^9}, {
+  3.870255260694047*^9, 3.870255305220332*^9}, {3.8702553400132933`*^9, 
+  3.870255343063374*^9}, {3.870255418815776*^9, 3.87025550895849*^9}, {
+  3.8702555895875387`*^9, 3.8702556364118357`*^9}, {3.870256368888238*^9, 
+  3.870256381380817*^9}, {3.870256468308608*^9, 3.8702564758948107`*^9}, {
+  3.870262646451421*^9, 3.87026264745182*^9}},
+ CellLabel->"In[21]:=",ExpressionUUID->"1e4d3404-4ebc-498f-a18e-817d8a486b1e"],
+
+Cell["Example:", "CodeText",
+ CellChangeTimes->{{3.870257528952347*^9, 
+  3.870257530754991*^9}},ExpressionUUID->"317f3065-7eba-4dd2-8827-\
+dd4baf65e2cd"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(", 
+   RowBox[{"parsed", " ", "=", " ", 
+    RowBox[{"ParseTGPage", "@", 
+     RowBox[{"GenTGPage", "[", "testInChIKey", "]"}]}]}], ")"}], " ", "//", 
+  " ", "MatrixForm"}]], "Input",
+ CellChangeTimes->{{3.8702555117797737`*^9, 3.8702555232052393`*^9}, {
+  3.870257056742455*^9, 3.870257058017791*^9}, {3.8702575322932663`*^9, 
+  3.870257545375296*^9}},
+ CellLabel->"In[31]:=",ExpressionUUID->"9c24e436-9b2e-44ad-8dcd-deef3ea1e056"],
+
+Cell[BoxData[
+ TagBox[
+  RowBox[{"(", "\[NoBreak]", GridBox[{
+     {"\<\"100. - 700.\"\>", "\<\"700. - 2000.\"\>", "\<\"2000. - \
+6000.\"\>"},
+     {"31.32234`", "30.03235`", "20.91111`"},
+     {
+      RowBox[{"-", "20.23531`"}], "8.772972`", "10.72071`"},
+     {"57.86644`", 
+      RowBox[{"-", "3.988133`"}], 
+      RowBox[{"-", "2.020498`"}]},
+     {
+      RowBox[{"-", "36.50624`"}], "0.788313`", "0.146449`"},
+     {
+      RowBox[{"-", "0.007374`"}], 
+      RowBox[{"-", "0.741599`"}], "9.245722`"},
+     {
+      RowBox[{"-", "8.903471`"}], 
+      RowBox[{"-", "11.32468`"}], "5.337651`"},
+     {"246.7945`", "236.1663`", "237.6185`"},
+     {"0.`", "0.`", "0.`"}
+    },
+    GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Baseline}}},
+    GridBoxSpacings->{"Columns" -> {
+        Offset[0.27999999999999997`], {
+         Offset[0.7]}, 
+        Offset[0.27999999999999997`]}, "Rows" -> {
+        Offset[0.2], {
+         Offset[0.4]}, 
+        Offset[0.2]}}], "\[NoBreak]", ")"}],
+  Function[BoxForm`e$, 
+   MatrixForm[BoxForm`e$]]]], "Output",
+ CellChangeTimes->{3.870255524118784*^9, 3.870255640784113*^9, 
+  3.870256393896943*^9, 3.870256478548485*^9, 3.8702570590685577`*^9, 
+  3.870257548777699*^9, 3.870262661538615*^9, 3.8702646616852493`*^9, 
+  3.870367957676465*^9, 3.917485459453804*^9},
+ CellLabel->
+  "Out[31]//MatrixForm=",ExpressionUUID->"3923c4ce-8f9e-4b7f-9880-\
+d6cc60b3873b"]
+}, Open  ]],
+
+Cell[TextData[{
+ "To make things scientifically rigorous, we should make use of the ",
+ StyleBox["Quantity", "Code"],
+ " framework and convert all the numbers to quantities. We will leave the \
+first row unchanged and deal with it later."
+}], "Text",
+ CellChangeTimes->{{3.8702582135040207`*^9, 3.870258246585495*^9}, {
+  3.870258667524948*^9, 
+  3.870258679390087*^9}},ExpressionUUID->"049d1dd6-98e7-45dd-9ab1-\
+7f371482ccd8"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"units", " ", "=", " ", 
+  RowBox[{"{", 
+   RowBox[{"1", ",", " ", 
+    TemplateBox[{"1", 
+      RowBox[{
+       "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+        "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+      "joule per kelvin mole", 
+      FractionBox["\"Joules\"", 
+       RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+     "Quantity"], ",", " ", 
+    TemplateBox[{"1", 
+      RowBox[{"\"mJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+        SuperscriptBox["\"K\"", "2"], "\[InvisibleSpace]", "\"mol\"", 
+        "\[InvisibleSpace]", "\")\""}], "millijoule per kelvin squared mole", 
+      
+      FractionBox["\"Millijoules\"", 
+       RowBox[{
+         SuperscriptBox["\"Kelvins\"", "2"], " ", "\"Moles\""}]]},
+     "Quantity"], ",", " ", 
+    TemplateBox[{"1", 
+      RowBox[{
+       "\"\[Mu]J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+        SuperscriptBox["\"K\"", "3"], "\[InvisibleSpace]", "\"mol\"", 
+        "\[InvisibleSpace]", "\")\""}], "microjoule per kelvin cubed mole", 
+      FractionBox["\"Microjoules\"", 
+       RowBox[{
+         SuperscriptBox["\"Kelvins\"", "3"], " ", "\"Moles\""}]]},
+     "Quantity"], ",", " ", 
+    TemplateBox[{"1", 
+      RowBox[{"\"nJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+        SuperscriptBox["\"K\"", "4"], "\[InvisibleSpace]", "\"mol\"", 
+        "\[InvisibleSpace]", "\")\""}], 
+      "nanojoule per kelvin to the fourth mole", 
+      FractionBox["\"Nanojoules\"", 
+       RowBox[{
+         SuperscriptBox["\"Kelvins\"", "4"], " ", "\"Moles\""}]]},
+     "Quantity"], ",", " ", 
+    TemplateBox[{"1", 
+      RowBox[{
+       "\"K\"", "\[ThinSpace]", "\"MJ\"", "\[InvisibleSpace]", "\"/\"", 
+        "\[InvisibleSpace]", "\"mol\""}], "kelvin megajoules per mole", 
+      FractionBox[
+       RowBox[{"\"Kelvins\"", " ", "\"Megajoules\""}], "\"Moles\""]},
+     "Quantity"], ",", " ", 
+    TemplateBox[{"1", 
+      RowBox[{
+       "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+        "\"mol\""}], "kilojoules per mole", 
+      FractionBox["\"Kilojoules\"", "\"Moles\""]},
+     "Quantity"], ",", " ", 
+    TemplateBox[{"1", 
+      RowBox[{
+       "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+        "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+      "joule per kelvin mole", 
+      FractionBox["\"Joules\"", 
+       RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+     "Quantity"], ",", " ", 
+    TemplateBox[{"1", 
+      RowBox[{
+       "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+        "\"mol\""}], "kilojoule per mole", 
+      FractionBox["\"Kilojoules\"", "\"Moles\""]},
+     "Quantity"]}], "}"}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.8702582730427017`*^9, 3.8702583845378723`*^9}, {
+  3.8702584362071133`*^9, 3.870258447483252*^9}, {3.870258653103499*^9, 
+  3.8702586540416813`*^9}, {3.870258790116229*^9, 3.8702588021103773`*^9}, {
+  3.870258884802566*^9, 3.870258904034376*^9}},
+ CellLabel->"In[22]:=",ExpressionUUID->"3c803c8e-3710-4cbd-af8a-fe8c3a8982c1"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"1", ",", 
+   TemplateBox[{"1", 
+     RowBox[{
+      "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+       "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+     "joule per kelvin mole", 
+     FractionBox["\"Joules\"", 
+      RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+    "Quantity"], ",", 
+   TemplateBox[{"1", 
+     RowBox[{"\"mJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+       SuperscriptBox["\"K\"", "2"], "\[InvisibleSpace]", "\"mol\"", 
+       "\[InvisibleSpace]", "\")\""}], "millijoule per kelvin squared mole", 
+     FractionBox["\"Millijoules\"", 
+      RowBox[{
+        SuperscriptBox["\"Kelvins\"", "2"], " ", "\"Moles\""}]]},
+    "Quantity"], ",", 
+   TemplateBox[{"1", 
+     RowBox[{"\"\[Mu]J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+       SuperscriptBox["\"K\"", "3"], "\[InvisibleSpace]", "\"mol\"", 
+       "\[InvisibleSpace]", "\")\""}], "microjoule per kelvin cubed mole", 
+     FractionBox["\"Microjoules\"", 
+      RowBox[{
+        SuperscriptBox["\"Kelvins\"", "3"], " ", "\"Moles\""}]]},
+    "Quantity"], ",", 
+   TemplateBox[{"1", 
+     RowBox[{"\"nJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+       SuperscriptBox["\"K\"", "4"], "\[InvisibleSpace]", "\"mol\"", 
+       "\[InvisibleSpace]", "\")\""}], 
+     "nanojoule per kelvin to the fourth mole", 
+     FractionBox["\"Nanojoules\"", 
+      RowBox[{
+        SuperscriptBox["\"Kelvins\"", "4"], " ", "\"Moles\""}]]},
+    "Quantity"], ",", 
+   TemplateBox[{"1", 
+     RowBox[{
+      "\"K\"", "\[ThinSpace]", "\"MJ\"", "\[InvisibleSpace]", "\"/\"", 
+       "\[InvisibleSpace]", "\"mol\""}], "kelvin megajoule per mole", 
+     FractionBox[
+      RowBox[{"\"Kelvins\"", " ", "\"Megajoules\""}], "\"Moles\""]},
+    "Quantity"], ",", 
+   TemplateBox[{"1", 
+     RowBox[{
+      "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+       "\"mol\""}], "kilojoule per mole", 
+     FractionBox["\"Kilojoules\"", "\"Moles\""]},
+    "Quantity"], ",", 
+   TemplateBox[{"1", 
+     RowBox[{
+      "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+       "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+     "joule per kelvin mole", 
+     FractionBox["\"Joules\"", 
+      RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+    "Quantity"], ",", 
+   TemplateBox[{"1", 
+     RowBox[{
+      "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+       "\"mol\""}], "kilojoule per mole", 
+     FractionBox["\"Kilojoules\"", "\"Moles\""]},
+    "Quantity"]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.8702584502515173`*^9, 3.8702586663683147`*^9, 3.8702588067785273`*^9, {
+   3.870258892036477*^9, 3.8702589043215923`*^9}, 3.870262661736408*^9, {
+   3.870264658181355*^9, 3.8702646620174637`*^9}, {3.8703679551565228`*^9, 
+   3.8703679578778753`*^9}, 3.917485451680134*^9},
+ CellLabel->"Out[22]=",ExpressionUUID->"fbd8e2a6-4b1d-447e-8807-ffe2408c35ec"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"parsedUnit", " ", "=", " ", 
+  RowBox[{"parsed", " ", "*", " ", "units"}]}]], "Input",
+ CellChangeTimes->{{3.870258681476013*^9, 3.870258699868647*^9}, {
+  3.8702588089643593`*^9, 3.8702588799323893`*^9}, {3.870258920611553*^9, 
+  3.870258924339555*^9}},
+ CellLabel->"In[32]:=",ExpressionUUID->"3b9a8195-1721-4308-b564-c346ca9979f9"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"\<\"100. - 700.\"\>", ",", "\<\"700. - 2000.\"\>", 
+     ",", "\<\"2000. - 6000.\"\>"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{"31.32234`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"30.03235`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"20.91111`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{
+       RowBox[{"-", "20.23531`"}], 
+       RowBox[{"\"mJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "2"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "millijoules per kelvin squared mole", 
+       FractionBox["\"Millijoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "2"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"8.772972`", 
+       RowBox[{"\"mJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "2"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "millijoules per kelvin squared mole", 
+       FractionBox["\"Millijoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "2"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"10.72071`", 
+       RowBox[{"\"mJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "2"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "millijoules per kelvin squared mole", 
+       FractionBox["\"Millijoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "2"], " ", "\"Moles\""}]]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{"57.86644`", 
+       RowBox[{
+        "\"\[Mu]J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "3"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], "microjoules per kelvin cubed mole", 
+       
+       FractionBox["\"Microjoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "3"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{
+       RowBox[{"-", "3.988133`"}], 
+       RowBox[{
+        "\"\[Mu]J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "3"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], "microjoules per kelvin cubed mole", 
+       
+       FractionBox["\"Microjoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "3"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{
+       RowBox[{"-", "2.020498`"}], 
+       RowBox[{
+        "\"\[Mu]J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "3"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], "microjoules per kelvin cubed mole", 
+       
+       FractionBox["\"Microjoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "3"], " ", "\"Moles\""}]]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{
+       RowBox[{"-", "36.50624`"}], 
+       RowBox[{"\"nJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "4"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "nanojoules per kelvin to the fourth mole", 
+       FractionBox["\"Nanojoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "4"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"0.788313`", 
+       RowBox[{"\"nJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "4"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "nanojoules per kelvin to the fourth mole", 
+       FractionBox["\"Nanojoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "4"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"0.146449`", 
+       RowBox[{"\"nJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "4"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "nanojoules per kelvin to the fourth mole", 
+       FractionBox["\"Nanojoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "4"], " ", "\"Moles\""}]]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{
+       RowBox[{"-", "0.007374`"}], 
+       RowBox[{
+        "\"K\"", "\[ThinSpace]", "\"MJ\"", "\[InvisibleSpace]", "\"/\"", 
+         "\[InvisibleSpace]", "\"mol\""}], "kelvin megajoules per mole", 
+       FractionBox[
+        RowBox[{"\"Kelvins\"", " ", "\"Megajoules\""}], "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{
+       RowBox[{"-", "0.741599`"}], 
+       RowBox[{
+        "\"K\"", "\[ThinSpace]", "\"MJ\"", "\[InvisibleSpace]", "\"/\"", 
+         "\[InvisibleSpace]", "\"mol\""}], "kelvin megajoules per mole", 
+       FractionBox[
+        RowBox[{"\"Kelvins\"", " ", "\"Megajoules\""}], "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{"9.245722`", 
+       RowBox[{
+        "\"K\"", "\[ThinSpace]", "\"MJ\"", "\[InvisibleSpace]", "\"/\"", 
+         "\[InvisibleSpace]", "\"mol\""}], "kelvin megajoules per mole", 
+       FractionBox[
+        RowBox[{"\"Kelvins\"", " ", "\"Megajoules\""}], "\"Moles\""]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{
+       RowBox[{"-", "8.903471`"}], 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{
+       RowBox[{"-", "11.32468`"}], 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{"5.337651`", 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{"246.7945`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"236.1663`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"237.6185`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{"0.`", 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{"0.`", 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{"0.`", 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"]}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.870258684689621*^9, {3.8702588108608837`*^9, 3.870258924718521*^9}, 
+   3.870262661810458*^9, 3.870264662109521*^9, 3.8703679579515057`*^9, 
+   3.917485462339279*^9},
+ CellLabel->"Out[32]=",ExpressionUUID->"432e31eb-66af-414d-8f6e-01a4e952fe86"]
+}, Open  ]],
+
+Cell["\<\
+Note that the first row is a string of the range of temperatures separated by \
+a dash. Let\[CloseCurlyQuote]s convert that to a numeric type.\
+\>", "Text",
+ CellChangeTimes->{{3.870257557302487*^9, 
+  3.870257630940979*^9}},ExpressionUUID->"e39fe59d-6b73-437f-bacf-\
+d51fdc5d4f65"],
+
+Cell["Range parser:", "CodeText",
+ CellChangeTimes->{{3.870257633939142*^9, 
+  3.8702576360970984`*^9}},ExpressionUUID->"b96f54d6-53e2-4abb-897b-\
+183095ce7ee7"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"StringRangeToNumberRange", "[", "stringRange_String", "]"}], " ", ":=", 
+  RowBox[{
+   RowBox[{"Interpreter", "[", "\n", "\t", 
+    RowBox[{"Restricted", "[", 
+     RowBox[{"\"\<StructuredQuantity\>\"", ",", " ", "\"\<Kelvin\>\""}], 
+     "]"}], "\n", "]"}], " ", "/@", 
+   RowBox[{"StringSplit", "[", 
+    RowBox[{"stringRange", ",", "\"\< - \>\""}], "]"}]}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{
+  3.870256458531995*^9, {3.870256491386881*^9, 3.8702565235445223`*^9}, {
+   3.8702586222643433`*^9, 3.870258637263485*^9}},
+ CellLabel->"In[23]:=",ExpressionUUID->"4a5bc719-f033-4e36-a893-b5e4f7d4f4e8"],
+
+Cell["Example:", "CodeText",
+ CellChangeTimes->{{3.8702576401786423`*^9, 
+  3.870257641365575*^9}},ExpressionUUID->"3b48d45c-4450-46ed-a46e-\
+5ca4f7f37ff4"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"MapAt", "[", 
+  RowBox[{"StringRangeToNumberRange", ",", " ", "parsedUnit", ",", " ", 
+   RowBox[{"{", 
+    RowBox[{"1", ",", " ", "All"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.8702566551014977`*^9, 3.870256735866407*^9}, 
+   3.870257000617043*^9, {3.870257075684148*^9, 3.870257077613864*^9}, {
+   3.870258928614393*^9, 3.870258928947537*^9}},
+ CellLabel->"In[33]:=",ExpressionUUID->"e0c402fe-b3f7-4e08-ab35-18ed4765f21a"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       TemplateBox[{"100.`", "\"K\"", "kelvins", "\"Kelvins\""},
+        "Quantity"], ",", 
+       TemplateBox[{"700.`", "\"K\"", "kelvins", "\"Kelvins\""},
+        "Quantity"]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       TemplateBox[{"700.`", "\"K\"", "kelvins", "\"Kelvins\""},
+        "Quantity"], ",", 
+       TemplateBox[{"2000.`", "\"K\"", "kelvins", "\"Kelvins\""},
+        "Quantity"]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       TemplateBox[{"2000.`", "\"K\"", "kelvins", "\"Kelvins\""},
+        "Quantity"], ",", 
+       TemplateBox[{"6000.`", "\"K\"", "kelvins", "\"Kelvins\""},
+        "Quantity"]}], "}"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{"31.32234`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"30.03235`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"20.91111`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{
+       RowBox[{"-", "20.23531`"}], 
+       RowBox[{"\"mJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "2"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "millijoules per kelvin squared mole", 
+       FractionBox["\"Millijoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "2"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"8.772972`", 
+       RowBox[{"\"mJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "2"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "millijoules per kelvin squared mole", 
+       FractionBox["\"Millijoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "2"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"10.72071`", 
+       RowBox[{"\"mJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "2"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "millijoules per kelvin squared mole", 
+       FractionBox["\"Millijoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "2"], " ", "\"Moles\""}]]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{"57.86644`", 
+       RowBox[{
+        "\"\[Mu]J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "3"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], "microjoules per kelvin cubed mole", 
+       
+       FractionBox["\"Microjoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "3"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{
+       RowBox[{"-", "3.988133`"}], 
+       RowBox[{
+        "\"\[Mu]J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "3"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], "microjoules per kelvin cubed mole", 
+       
+       FractionBox["\"Microjoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "3"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{
+       RowBox[{"-", "2.020498`"}], 
+       RowBox[{
+        "\"\[Mu]J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "3"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], "microjoules per kelvin cubed mole", 
+       
+       FractionBox["\"Microjoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "3"], " ", "\"Moles\""}]]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{
+       RowBox[{"-", "36.50624`"}], 
+       RowBox[{"\"nJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "4"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "nanojoules per kelvin to the fourth mole", 
+       FractionBox["\"Nanojoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "4"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"0.788313`", 
+       RowBox[{"\"nJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "4"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "nanojoules per kelvin to the fourth mole", 
+       FractionBox["\"Nanojoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "4"], " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"0.146449`", 
+       RowBox[{"\"nJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", 
+         SuperscriptBox["\"K\"", "4"], "\[InvisibleSpace]", "\"mol\"", 
+         "\[InvisibleSpace]", "\")\""}], 
+       "nanojoules per kelvin to the fourth mole", 
+       FractionBox["\"Nanojoules\"", 
+        RowBox[{
+          SuperscriptBox["\"Kelvins\"", "4"], " ", "\"Moles\""}]]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{
+       RowBox[{"-", "0.007374`"}], 
+       RowBox[{
+        "\"K\"", "\[ThinSpace]", "\"MJ\"", "\[InvisibleSpace]", "\"/\"", 
+         "\[InvisibleSpace]", "\"mol\""}], "kelvin megajoules per mole", 
+       FractionBox[
+        RowBox[{"\"Kelvins\"", " ", "\"Megajoules\""}], "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{
+       RowBox[{"-", "0.741599`"}], 
+       RowBox[{
+        "\"K\"", "\[ThinSpace]", "\"MJ\"", "\[InvisibleSpace]", "\"/\"", 
+         "\[InvisibleSpace]", "\"mol\""}], "kelvin megajoules per mole", 
+       FractionBox[
+        RowBox[{"\"Kelvins\"", " ", "\"Megajoules\""}], "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{"9.245722`", 
+       RowBox[{
+        "\"K\"", "\[ThinSpace]", "\"MJ\"", "\[InvisibleSpace]", "\"/\"", 
+         "\[InvisibleSpace]", "\"mol\""}], "kelvin megajoules per mole", 
+       FractionBox[
+        RowBox[{"\"Kelvins\"", " ", "\"Megajoules\""}], "\"Moles\""]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{
+       RowBox[{"-", "8.903471`"}], 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{
+       RowBox[{"-", "11.32468`"}], 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{"5.337651`", 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{"246.7945`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"236.1663`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"], ",", 
+     TemplateBox[{"237.6185`", 
+       RowBox[{
+        "\"J\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+         "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+       "joules per kelvin mole", 
+       FractionBox["\"Joules\"", 
+        RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+      "Quantity"]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{"0.`", 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{"0.`", 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"], ",", 
+     TemplateBox[{"0.`", 
+       RowBox[{
+        "\"kJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", 
+         "\"mol\""}], "kilojoules per mole", 
+       FractionBox["\"Kilojoules\"", "\"Moles\""]},
+      "Quantity"]}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{{3.870256721542329*^9, 3.8702567361145267`*^9}, 
+   3.8702570779324017`*^9, 3.8702586426848392`*^9, 3.870258929333646*^9, 
+   3.870262661916798*^9, 3.870264662223159*^9, 3.8703679580410213`*^9, 
+   3.917485465488949*^9},
+ CellLabel->"Out[33]=",ExpressionUUID->"09be4b22-942e-428a-819e-1c64b89fa0d6"]
+}, Open  ]],
+
+Cell[TextData[{
+ "Finally, it is more convenient if we convert the matrix to a piecewise \
+function. First, we map ",
+ StyleBox["StringRangeToNumberRange", "Code"],
+ " over each of the first row, then we transpose the matrix and format it for \
+",
+ StyleBox["Piecewise", "Code"],
+ " to handle."
+}], "Text",
+ CellChangeTimes->{{3.870257648151198*^9, 
+  3.870257763375477*^9}},ExpressionUUID->"9981a8a4-059b-4d94-8548-\
+dd188f8a2e98"],
+
+Cell["Convert data matrix to piecewise function:", "CodeText",
+ CellChangeTimes->{{3.8702577712483397`*^9, 
+  3.8702577837865543`*^9}},ExpressionUUID->"aef3eafa-d168-4277-932b-\
+57144858d246"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"ListToPiecewise", "[", 
+   RowBox[{"data_List", ",", " ", "temperature_"}], "]"}], ":=", 
+  RowBox[{"Piecewise", "[", "\n", "\t", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"Rest", "[", "#", "]"}], ",", " ", 
+       RowBox[{"Between", "[", 
+        RowBox[{"temperature", ",", " ", 
+         RowBox[{"First", "[", "#", "]"}]}], "]"}]}], "}"}], "&"}], " ", "/@",
+     " ", 
+    RowBox[{"Transpose", "@", 
+     RowBox[{"MapAt", "[", "\n", "\t\t", 
+      RowBox[{"StringRangeToNumberRange", ",", "\n", "\t\t", 
+       RowBox[{"data", " ", "*", " ", "units"}], ",", "\n", "\t\t", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", " ", "All"}], "}"}]}], "\n", "\t", "]"}]}]}], "\n", 
+   "]"}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.870256818667492*^9, 3.87025689931544*^9}, {
+  3.870256938420526*^9, 3.870257043418125*^9}, {3.870257194562595*^9, 
+  3.8702572102235928`*^9}, {3.8702589397917*^9, 3.8702589448495417`*^9}},
+ CellLabel->"In[24]:=",ExpressionUUID->"c382efbd-61dc-482a-ae13-5b531b3845dd"],
+
+Cell["Example:", "CodeText",
+ CellChangeTimes->{{3.87025778818643*^9, 
+  3.8702577907381477`*^9}},ExpressionUUID->"44568d4b-aef6-49f3-bec2-\
+84dc296bd327"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"ListToPiecewise", "[", 
+  RowBox[{"parsed", ",", " ", "t"}], "]"}]], "Input",
+ CellChangeTimes->{{3.870257048046858*^9, 3.870257063099512*^9}, {
+  3.8702572142575493`*^9, 3.870257214878978*^9}},
+ CellLabel->"In[64]:=",ExpressionUUID->"70774fa5-4f35-4b1a-a137-7c1fe0be2ea7"],
+
+Cell[BoxData[
+ TagBox[GridBox[{
+    {"\[Piecewise]", GridBox[{
+       {
+        RowBox[{"{", 
+         RowBox[{
+          TemplateBox[{"31.32234`", 
+            
+            RowBox[{"\"J\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", "\"K\"", "\[ThinSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], "joules per kelvin mole", 
+            FractionBox["\"Joules\"", 
+             RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{
+            RowBox[{"-", "20.23531`"}], 
+            
+            RowBox[{"\"mJ\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", 
+              SuperscriptBox["\"K\"", "2"], "\[InvisibleSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], 
+            "millijoules per kelvin squared mole", 
+            FractionBox["\"Millijoules\"", 
+             RowBox[{
+               SuperscriptBox["\"Kelvins\"", "2"], " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{"57.86644`", 
+            
+            RowBox[{"\"\[Mu]J\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", 
+              SuperscriptBox["\"K\"", "3"], "\[InvisibleSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], 
+            "microjoules per kelvin cubed mole", 
+            FractionBox["\"Microjoules\"", 
+             RowBox[{
+               SuperscriptBox["\"Kelvins\"", "3"], " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{
+            RowBox[{"-", "36.50624`"}], 
+            
+            RowBox[{"\"nJ\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", 
+              SuperscriptBox["\"K\"", "4"], "\[InvisibleSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], 
+            "nanojoules per kelvin to the fourth mole", 
+            FractionBox["\"Nanojoules\"", 
+             RowBox[{
+               SuperscriptBox["\"Kelvins\"", "4"], " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{
+            RowBox[{"-", "0.007374`"}], 
+            
+            RowBox[{"\"K\"", "\[ThinSpace]", "\"MJ\"", "\[InvisibleSpace]", 
+              "\"/\"", "\[InvisibleSpace]", "\"mol\""}], 
+            "kelvin megajoules per mole", 
+            FractionBox[
+             RowBox[{"\"Kelvins\"", " ", "\"Megajoules\""}], "\"Moles\""]},
+           "Quantity"], ",", 
+          TemplateBox[{
+            RowBox[{"-", "8.903471`"}], 
+            
+            RowBox[{"\"kJ\"", "\[InvisibleSpace]", "\"/\"", 
+              "\[InvisibleSpace]", "\"mol\""}], "kilojoules per mole", 
+            FractionBox["\"Kilojoules\"", "\"Moles\""]},
+           "Quantity"], ",", 
+          TemplateBox[{"246.7945`", 
+            
+            RowBox[{"\"J\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", "\"K\"", "\[ThinSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], "joules per kelvin mole", 
+            FractionBox["\"Joules\"", 
+             RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{"0.`", 
+            
+            RowBox[{"\"kJ\"", "\[InvisibleSpace]", "\"/\"", 
+              "\[InvisibleSpace]", "\"mol\""}], "kilojoules per mole", 
+            FractionBox["\"Kilojoules\"", "\"Moles\""]},
+           "Quantity"]}], "}"}], 
+        RowBox[{
+         RowBox[{
+          
+          TemplateBox[{
+           "99.99999999999999`", "\"K\"", "kelvins", "\"Kelvins\""},
+           "Quantity"], "\[LessEqual]", "t"}], "&&", 
+         RowBox[{"t", "\[LessEqual]", 
+          
+          TemplateBox[{
+           "700.0000000000001`", "\"K\"", "kelvins", "\"Kelvins\""},
+           "Quantity"]}]}]},
+       {
+        RowBox[{"{", 
+         RowBox[{
+          TemplateBox[{"30.03235`", 
+            
+            RowBox[{"\"J\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", "\"K\"", "\[ThinSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], "joules per kelvin mole", 
+            FractionBox["\"Joules\"", 
+             RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{"8.772972`", 
+            
+            RowBox[{"\"mJ\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", 
+              SuperscriptBox["\"K\"", "2"], "\[InvisibleSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], 
+            "millijoules per kelvin squared mole", 
+            FractionBox["\"Millijoules\"", 
+             RowBox[{
+               SuperscriptBox["\"Kelvins\"", "2"], " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{
+            RowBox[{"-", "3.988133`"}], 
+            
+            RowBox[{"\"\[Mu]J\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", 
+              SuperscriptBox["\"K\"", "3"], "\[InvisibleSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], 
+            "microjoules per kelvin cubed mole", 
+            FractionBox["\"Microjoules\"", 
+             RowBox[{
+               SuperscriptBox["\"Kelvins\"", "3"], " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{"0.788313`", 
+            
+            RowBox[{"\"nJ\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", 
+              SuperscriptBox["\"K\"", "4"], "\[InvisibleSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], 
+            "nanojoules per kelvin to the fourth mole", 
+            FractionBox["\"Nanojoules\"", 
+             RowBox[{
+               SuperscriptBox["\"Kelvins\"", "4"], " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{
+            RowBox[{"-", "0.741599`"}], 
+            
+            RowBox[{"\"K\"", "\[ThinSpace]", "\"MJ\"", "\[InvisibleSpace]", 
+              "\"/\"", "\[InvisibleSpace]", "\"mol\""}], 
+            "kelvin megajoules per mole", 
+            FractionBox[
+             RowBox[{"\"Kelvins\"", " ", "\"Megajoules\""}], "\"Moles\""]},
+           "Quantity"], ",", 
+          TemplateBox[{
+            RowBox[{"-", "11.32468`"}], 
+            
+            RowBox[{"\"kJ\"", "\[InvisibleSpace]", "\"/\"", 
+              "\[InvisibleSpace]", "\"mol\""}], "kilojoules per mole", 
+            FractionBox["\"Kilojoules\"", "\"Moles\""]},
+           "Quantity"], ",", 
+          TemplateBox[{"236.1663`", 
+            
+            RowBox[{"\"J\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", "\"K\"", "\[ThinSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], "joules per kelvin mole", 
+            FractionBox["\"Joules\"", 
+             RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{"0.`", 
+            
+            RowBox[{"\"kJ\"", "\[InvisibleSpace]", "\"/\"", 
+              "\[InvisibleSpace]", "\"mol\""}], "kilojoules per mole", 
+            FractionBox["\"Kilojoules\"", "\"Moles\""]},
+           "Quantity"]}], "}"}], 
+        RowBox[{
+         RowBox[{
+          
+          TemplateBox[{
+           "699.9999999999999`", "\"K\"", "kelvins", "\"Kelvins\""},
+           "Quantity"], "\[LessEqual]", "t"}], "&&", 
+         RowBox[{"t", "\[LessEqual]", 
+          
+          TemplateBox[{
+           "2000.0000000000002`", "\"K\"", "kelvins", "\"Kelvins\""},
+           "Quantity"]}]}]},
+       {
+        RowBox[{"{", 
+         RowBox[{
+          TemplateBox[{"20.91111`", 
+            
+            RowBox[{"\"J\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", "\"K\"", "\[ThinSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], "joules per kelvin mole", 
+            FractionBox["\"Joules\"", 
+             RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{"10.72071`", 
+            
+            RowBox[{"\"mJ\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", 
+              SuperscriptBox["\"K\"", "2"], "\[InvisibleSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], 
+            "millijoules per kelvin squared mole", 
+            FractionBox["\"Millijoules\"", 
+             RowBox[{
+               SuperscriptBox["\"Kelvins\"", "2"], " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{
+            RowBox[{"-", "2.020498`"}], 
+            
+            RowBox[{"\"\[Mu]J\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", 
+              SuperscriptBox["\"K\"", "3"], "\[InvisibleSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], 
+            "microjoules per kelvin cubed mole", 
+            FractionBox["\"Microjoules\"", 
+             RowBox[{
+               SuperscriptBox["\"Kelvins\"", "3"], " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{"0.146449`", 
+            
+            RowBox[{"\"nJ\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", 
+              SuperscriptBox["\"K\"", "4"], "\[InvisibleSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], 
+            "nanojoules per kelvin to the fourth mole", 
+            FractionBox["\"Nanojoules\"", 
+             RowBox[{
+               SuperscriptBox["\"Kelvins\"", "4"], " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{"9.245722`", 
+            
+            RowBox[{"\"K\"", "\[ThinSpace]", "\"MJ\"", "\[InvisibleSpace]", 
+              "\"/\"", "\[InvisibleSpace]", "\"mol\""}], 
+            "kelvin megajoules per mole", 
+            FractionBox[
+             RowBox[{"\"Kelvins\"", " ", "\"Megajoules\""}], "\"Moles\""]},
+           "Quantity"], ",", 
+          TemplateBox[{"5.337651`", 
+            
+            RowBox[{"\"kJ\"", "\[InvisibleSpace]", "\"/\"", 
+              "\[InvisibleSpace]", "\"mol\""}], "kilojoules per mole", 
+            FractionBox["\"Kilojoules\"", "\"Moles\""]},
+           "Quantity"], ",", 
+          TemplateBox[{"237.6185`", 
+            
+            RowBox[{"\"J\"", "\[InvisibleSpace]", "\"/(\"", 
+              "\[InvisibleSpace]", "\"K\"", "\[ThinSpace]", "\"mol\"", 
+              "\[InvisibleSpace]", "\")\""}], "joules per kelvin mole", 
+            FractionBox["\"Joules\"", 
+             RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+           "Quantity"], ",", 
+          TemplateBox[{"0.`", 
+            
+            RowBox[{"\"kJ\"", "\[InvisibleSpace]", "\"/\"", 
+              "\[InvisibleSpace]", "\"mol\""}], "kilojoules per mole", 
+            FractionBox["\"Kilojoules\"", "\"Moles\""]},
+           "Quantity"]}], "}"}], 
+        RowBox[{
+         RowBox[{
+          
+          TemplateBox[{
+           "1999.9999999999998`", "\"K\"", "kelvins", "\"Kelvins\""},
+           "Quantity"], "\[LessEqual]", "t"}], "&&", 
+         RowBox[{"t", "\[LessEqual]", 
+          
+          TemplateBox[{
+           "6000.000000000001`", "\"K\"", "kelvins", "\"Kelvins\""},
+           "Quantity"]}]}]},
+       {"0", 
+        TagBox["True",
+         "PiecewiseDefault",
+         AutoDelete->True]}
+      },
+      AllowedDimensions->{2, Automatic},
+      Editable->True,
+      GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Baseline}}},
+      GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{1.}}},
+      GridBoxSpacings->{"Columns" -> {
+          Offset[0.27999999999999997`], {
+           Offset[0.84]}, 
+          Offset[0.27999999999999997`]}, "Rows" -> {
+          Offset[0.2], {
+           Offset[0.4]}, 
+          Offset[0.2]}},
+      Selectable->True]}
+   },
+   GridBoxAlignment->{"Columns" -> {{Left}}, "Rows" -> {{Baseline}}},
+   GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{1.}}},
+   GridBoxSpacings->{"Columns" -> {
+       Offset[0.27999999999999997`], {
+        Offset[0.35]}, 
+       Offset[0.27999999999999997`]}, "Rows" -> {
+       Offset[0.2], {
+        Offset[0.4]}, 
+       Offset[0.2]}}],
+  "Piecewise",
+  DeleteWithContents->True,
+  Editable->False,
+  SelectWithContents->True,
+  Selectable->False,
+  StripWrapperBoxes->True]], "Output",
+ CellChangeTimes->{
+  3.8702570634163094`*^9, {3.870257216059901*^9, 3.8702572183177843`*^9}, 
+   3.870258947029586*^9, 3.870262662022987*^9, 3.870264662342025*^9, 
+   3.870367958120265*^9},
+ CellLabel->"Out[64]=",ExpressionUUID->"b7532cc9-5038-4754-a5e6-9941b765688a"]
+}, Open  ]],
+
+Cell["Everything together:", "CodeText",
+ CellChangeTimes->{{3.870257810599641*^9, 3.870257814836604*^9}, {
+  3.870257965816923*^9, 
+  3.870257992107913*^9}},ExpressionUUID->"42d23c7b-f6fb-4b18-aa67-\
+913aba76477b"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"MoleculeToShomateData", "[", 
+   RowBox[{"mol_", ",", " ", "t_"}], "]"}], " ", ":=", " ", 
+  RowBox[{"ListToPiecewise", "[", "\n", "\t", 
+   RowBox[{
+    RowBox[{"ParseTGPage", "@", 
+     RowBox[{"GenTGPage", "[", 
+      RowBox[{
+       RowBox[{"mol", "[", "\"\<InChIKey\>\"", "]"}], "[", 
+       RowBox[{"[", "2", "]"}], "]"}], "]"}]}], ",", "\n", "\t", "t"}], "\n", 
+   "]"}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.870257805287903*^9, 3.8702578698991613`*^9}, {
+  3.870257955342214*^9, 3.870258009137576*^9}, {3.870258952719549*^9, 
+  3.870258960990253*^9}},
+ CellLabel->"In[25]:=",ExpressionUUID->"f532c8a0-5850-4a43-94c8-bca7f6025a38"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Using the Data", "Section",
+ CellChangeTimes->{{3.8702581867724743`*^9, 
+  3.870258190024912*^9}},ExpressionUUID->"becf6c8d-e51b-40d5-8756-\
+a07a3537a81a"],
+
+Cell["\<\
+Finally, we can use the data to generate thermodynamics data.\
+\>", "Text",
+ CellChangeTimes->{{3.8702581300655537`*^9, 
+  3.870258150027666*^9}},ExpressionUUID->"7a04983c-3674-4112-acce-\
+b3a76d340a42"],
+
+Cell["Constant-pressure heat capacity:", "CodeText",
+ CellChangeTimes->{{3.8702596744500523`*^9, 
+  3.870259683167027*^9}},ExpressionUUID->"701e57d8-6fa8-46de-8bba-\
+89e39e470b7a"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"HeatCapacityConsPres", "[", 
+   RowBox[{"mol_", ",", " ", "t_"}], "]"}], " ", ":=", " ", 
+  RowBox[{
+   RowBox[{"MoleculeToShomateData", "[", 
+    RowBox[{"mol", ",", " ", "t"}], "]"}], ".", 
+   RowBox[{"{", 
+    RowBox[{"1", ",", "t", ",", 
+     SuperscriptBox["t", "2"], ",", 
+     SuperscriptBox["t", "3"], ",", 
+     SuperscriptBox["t", 
+      RowBox[{"-", "2"}]], ",", 
+     TemplateBox[{"0", 
+       RowBox[{"\"/\"", "\[InvisibleSpace]", "\"K\""}], "reciprocal kelvins", 
+       
+       FractionBox["1", "\"Kelvins\""]},
+      "Quantity"], ",", "0", ",", 
+     TemplateBox[{"0", 
+       RowBox[{"\"/\"", "\[InvisibleSpace]", "\"K\""}], "reciprocal kelvins", 
+       
+       FractionBox["1", "\"Kelvins\""]},
+      "Quantity"]}], "}"}]}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.870257799038406*^9, 3.870257800467436*^9}, {
+  3.870258023063924*^9, 3.8702580661050043`*^9}, {3.8702589748151007`*^9, 
+  3.870258986452639*^9}, {3.870259162098826*^9, 3.870259278101769*^9}, {
+  3.87025930832859*^9, 3.8702593480891523`*^9}},
+ CellLabel->"In[26]:=",ExpressionUUID->"f4de627c-b02c-4d15-b00e-3e785b08c386"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"HeatCapacityConsPres", "[", 
+  RowBox[{"test", ",", " ", 
+   TemplateBox[{"1000", "\"K\"", "kelvins", "\"Kelvins\""},
+    "Quantity"]}], "]"}]], "Input",
+ CellChangeTimes->{{3.870258046160701*^9, 3.870258050399764*^9}, {
+   3.8702589928301277`*^9, 3.8702589935069513`*^9}, 3.8702592680930653`*^9},
+ CellLabel->"In[67]:=",ExpressionUUID->"eab651f3-e30c-4ebe-86e2-0fffd9f49d2f"],
+
+Cell[BoxData[
+ TemplateBox[{"3.4863903`*^10", 
+   RowBox[{
+    "\"nJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+     "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+   "nanojoules per kelvin mole", 
+   FractionBox["\"Nanojoules\"", 
+    RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+  "Quantity"]], "Output",
+ CellChangeTimes->{{3.8702580518585052`*^9, 3.870258069681354*^9}, {
+   3.870258989891617*^9, 3.870259000955567*^9}, {3.870259182834519*^9, 
+   3.870259280040729*^9}, 3.870259312463483*^9, 3.870259350443169*^9, 
+   3.8702626621337852`*^9, 3.870264662492279*^9, 3.8703679582249117`*^9},
+ CellLabel->"Out[67]=",ExpressionUUID->"8bfcda7d-d17a-453c-9cd2-3847e07e0a08"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"EnthalpyOfFormation", "[", 
+   RowBox[{"mol_", ",", " ", "t_"}], "]"}], " ", ":=", 
+  RowBox[{
+   RowBox[{"MoleculeToShomateData", "[", 
+    RowBox[{"mol", ",", " ", "t"}], "]"}], ".", 
+   RowBox[{"{", 
+    RowBox[{"t", ",", 
+     RowBox[{
+      FractionBox["1", "2"], 
+      SuperscriptBox["t", "2"]}], ",", 
+     RowBox[{
+      FractionBox["1", "3"], 
+      SuperscriptBox["t", "3"]}], ",", " ", 
+     RowBox[{
+      FractionBox["1", "4"], 
+      SuperscriptBox["t", "4"]}], ",", 
+     RowBox[{"-", 
+      SuperscriptBox["t", 
+       RowBox[{"-", "1"}]]}], ",", "1", ",", 
+     TemplateBox[{"0", "\"K\"", "kelvin", "\"Kelvins\""},
+      "Quantity"], ",", "0"}], "}"}]}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.870259709119472*^9, 3.870259778267912*^9}, {
+  3.870259895115744*^9, 3.870259927112381*^9}, {3.8702599769200687`*^9, 
+  3.87026000820884*^9}, {3.870260053010252*^9, 3.870260057110683*^9}},
+ CellLabel->"In[27]:=",ExpressionUUID->"90f90fba-3711-42f4-9e20-08be0ab8a3e5"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"EnthalpyOfFormation", "[", 
+  RowBox[{"test", ",", " ", 
+   TemplateBox[{"1000", "\"K\"", "kelvins", "\"Kelvins\""},
+    "Quantity"]}], "]"}]], "Input",
+ CellChangeTimes->{{3.8702597803415403`*^9, 3.870259788439492*^9}},
+ CellLabel->"In[69]:=",ExpressionUUID->"34136f07-eed1-4a6b-acc8-b97cd4f19a13"],
+
+Cell[BoxData[
+ TemplateBox[{"2.2703455583333332`*^13", 
+   RowBox[{
+    "\"nJ\"", "\[InvisibleSpace]", "\"/\"", "\[InvisibleSpace]", "\"mol\""}], 
+   "nanojoules per mole", 
+   FractionBox["\"Nanojoules\"", "\"Moles\""]},
+  "Quantity"]], "Output",
+ CellChangeTimes->{
+  3.870259789861636*^9, {3.8702600012640676`*^9, 3.870260016585133*^9}, 
+   3.870260059094952*^9, 3.870262662224547*^9, 3.8702646625896482`*^9, 
+   3.870367958320938*^9},
+ CellLabel->"Out[69]=",ExpressionUUID->"1c2bb8e9-7c27-4b00-94e1-23bc1fd88110"]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"EntropyOfFormation", "[", 
+   RowBox[{"mol_", ",", " ", "t_"}], "]"}], " ", ":=", 
+  RowBox[{
+   RowBox[{"MoleculeToShomateData", "[", 
+    RowBox[{"mol", ",", " ", "t"}], "]"}], ".", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"Log", "[", 
+      FractionBox["t", 
+       TemplateBox[{"1000", "\"K\"", "kelvin", "\"Kelvins\""},
+        "Quantity"]], "]"}], ",", "t", ",", 
+     RowBox[{
+      FractionBox["1", "2"], 
+      SuperscriptBox["t", "2"]}], ",", 
+     RowBox[{
+      FractionBox["1", "3"], 
+      SuperscriptBox["t", "3"]}], ",", 
+     RowBox[{
+      RowBox[{"-", 
+       FractionBox["1", "2"]}], 
+      SuperscriptBox["t", 
+       RowBox[{"-", "2"}]]}], ",", 
+     TemplateBox[{"0", 
+       RowBox[{"\"/\"", "\[InvisibleSpace]", "\"K\""}], "reciprocal kelvins", 
+       
+       FractionBox["1", "\"Kelvins\""]},
+      "Quantity"], ",", "1", ",", " ", 
+     TemplateBox[{"0", 
+       RowBox[{"\"/\"", "\[InvisibleSpace]", "\"K\""}], "reciprocal kelvins", 
+       
+       FractionBox["1", "\"Kelvins\""]},
+      "Quantity"]}], "}"}]}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.8702598817300997`*^9, 3.870259883336947*^9}, {
+  3.870259946497283*^9, 3.8702599643165407`*^9}, {3.870260106480402*^9, 
+  3.8702601078203163`*^9}, {3.87026020403094*^9, 3.870260204125411*^9}, {
+  3.8702602630110188`*^9, 3.870260263288217*^9}, {3.87026298240366*^9, 
+  3.870262988346977*^9}},
+ CellLabel->"In[28]:=",ExpressionUUID->"b7b2e35c-e70e-4866-998b-4000637f2074"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"EntropyOfFormation", "[", 
+  RowBox[{"test", ",", " ", 
+   TemplateBox[{"1000", "\"K\"", "kelvins", "\"Kelvins\""},
+    "Quantity"]}], "]"}]], "Input",
+ CellChangeTimes->{{3.8702600684733543`*^9, 3.87026006985927*^9}},
+ CellLabel->"In[71]:=",ExpressionUUID->"50647fc8-21e3-491b-ab3a-1a59346443ac"],
+
+Cell[BoxData[
+ TemplateBox[{"2.43578776`*^11", 
+   RowBox[{
+    "\"nJ\"", "\[InvisibleSpace]", "\"/(\"", "\[InvisibleSpace]", "\"K\"", 
+     "\[ThinSpace]", "\"mol\"", "\[InvisibleSpace]", "\")\""}], 
+   "nanojoules per kelvin mole", 
+   FractionBox["\"Nanojoules\"", 
+    RowBox[{"\"Kelvins\"", " ", "\"Moles\""}]]},
+  "Quantity"]], "Output",
+ CellChangeTimes->{3.870260070809617*^9, 3.870260117729805*^9, 
+  3.870260206282798*^9, 3.870260265615983*^9, 3.8702626623168697`*^9, 
+  3.8702646626927147`*^9, 3.87036795839878*^9},
+ CellLabel->"Out[71]=",ExpressionUUID->"3ddeb89c-ecc6-49f7-9ac9-4822a00d508a"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{808, 648},
+WindowMargins->{{Automatic, 10}, {Automatic, 11}},
+TaggingRules-><|"TryRealOnly" -> False|>,
+FrontEndVersion->"13.2 for Mac OS X ARM (64-bit) (January 30, 2023)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"e5052fde-7543-4c08-af47-492757774536"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[583, 22, 191, 3, 160, "Title",ExpressionUUID->"51450e73-c7d6-429d-8152-dd7d33ccb4a6"],
+Cell[777, 27, 464, 8, 58, "Text",ExpressionUUID->"8bb44d2b-857e-4b29-9c18-6054dcadefeb"],
+Cell[1244, 37, 165, 3, 38, "CodeText",ExpressionUUID->"f716c5d0-6eb5-4b88-889a-d58a8550e98e"],
+Cell[CellGroupData[{
+Cell[1434, 44, 247, 4, 30, "Input",ExpressionUUID->"46c35f1b-00a8-4e53-92c4-c1735e18345a"],
+Cell[1684, 50, 15002, 293, 65, "Output",ExpressionUUID->"decda596-7f04-4134-ad97-20955175f817"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[16723, 348, 418, 8, 30, "Input",ExpressionUUID->"3a5aba0b-242f-44cf-9bad-ccf9ad92b18c"],
+Cell[17144, 358, 353, 5, 34, "Output",ExpressionUUID->"d908ef1d-5e2c-40ad-b6bd-2dbc1059a397"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[17534, 368, 157, 3, 67, "Section",ExpressionUUID->"1f610cc6-86e6-41c0-85b2-d2bd42f285a7"],
+Cell[17694, 373, 323, 7, 35, "Text",ExpressionUUID->"3b2debc2-c43b-41e5-ad69-83afe7ca798d"],
+Cell[18020, 382, 178, 3, 38, "CodeText",ExpressionUUID->"f6ec6139-834a-4a49-80e2-7598b358b76d"],
+Cell[18201, 387, 841, 17, 152, "Input",ExpressionUUID->"09c34015-5286-42fb-9e8e-2efb2c3685ba",
+ InitializationCell->True],
+Cell[19045, 406, 375, 9, 58, "Text",ExpressionUUID->"1a9cef45-274b-4989-8e0e-b20b22688d38"],
+Cell[19423, 417, 179, 3, 38, "CodeText",ExpressionUUID->"6ec8a7ed-72e1-40bb-98cf-b5e3e3180b14"],
+Cell[19605, 422, 2471, 58, 362, "Input",ExpressionUUID->"1e4d3404-4ebc-498f-a18e-817d8a486b1e",
+ InitializationCell->True],
+Cell[22079, 482, 154, 3, 38, "CodeText",ExpressionUUID->"317f3065-7eba-4dd2-8827-dd4baf65e2cd"],
+Cell[CellGroupData[{
+Cell[22258, 489, 468, 10, 30, "Input",ExpressionUUID->"9c24e436-9b2e-44ad-8dcd-deef3ea1e056"],
+Cell[22729, 501, 1404, 38, 181, "Output",ExpressionUUID->"3923c4ce-8f9e-4b7f-9880-d6cc60b3873b"]
+}, Open  ]],
+Cell[24148, 542, 427, 9, 58, "Text",ExpressionUUID->"049d1dd6-98e7-45dd-9ab1-7f371482ccd8"],
+Cell[CellGroupData[{
+Cell[24600, 555, 3128, 71, 83, "Input",ExpressionUUID->"3c803c8e-3710-4cbd-af8a-fe8c3a8982c1",
+ InitializationCell->True],
+Cell[27731, 628, 2975, 68, 72, "Output",ExpressionUUID->"fbd8e2a6-4b1d-447e-8807-ffe2408c35ec"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[30743, 701, 357, 6, 30, "Input",ExpressionUUID->"3b9a8195-1721-4308-b564-c346ca9979f9"],
+Cell[31103, 709, 9192, 223, 254, "Output",ExpressionUUID->"432e31eb-66af-414d-8f6e-01a4e952fe86"]
+}, Open  ]],
+Cell[40310, 935, 292, 6, 58, "Text",ExpressionUUID->"e39fe59d-6b73-437f-bacf-d51fdc5d4f65"],
+Cell[40605, 943, 161, 3, 38, "CodeText",ExpressionUUID->"b96f54d6-53e2-4abb-897b-183095ce7ee7"],
+Cell[40769, 948, 658, 14, 89, "Input",ExpressionUUID->"4a5bc719-f033-4e36-a893-b5e4f7d4f4e8",
+ InitializationCell->True],
+Cell[41430, 964, 156, 3, 38, "CodeText",ExpressionUUID->"3b48d45c-4450-46ed-a46e-5ca4f7f37ff4"],
+Cell[CellGroupData[{
+Cell[41611, 971, 458, 8, 30, "Input",ExpressionUUID->"e0c402fe-b3f7-4e08-ab35-18ed4765f21a"],
+Cell[42072, 981, 9832, 240, 254, "Output",ExpressionUUID->"09be4b22-942e-428a-819e-1c64b89fa0d6"]
+}, Open  ]],
+Cell[51919, 1224, 432, 11, 81, "Text",ExpressionUUID->"9981a8a4-059b-4d94-8548-dd188f8a2e98"],
+Cell[52354, 1237, 192, 3, 38, "CodeText",ExpressionUUID->"aef3eafa-d168-4277-932b-57144858d246"],
+Cell[52549, 1242, 1082, 25, 173, "Input",ExpressionUUID->"c382efbd-61dc-482a-ae13-5b531b3845dd",
+ InitializationCell->True],
+Cell[53634, 1269, 155, 3, 38, "CodeText",ExpressionUUID->"44568d4b-aef6-49f3-bec2-84dc296bd327"],
+Cell[CellGroupData[{
+Cell[53814, 1276, 297, 5, 30, "Input",ExpressionUUID->"70774fa5-4f35-4b1a-a137-7c1fe0be2ea7"],
+Cell[54114, 1283, 12327, 297, 285, "Output",ExpressionUUID->"b7532cc9-5038-4754-a5e6-9941b765688a"]
+}, Open  ]],
+Cell[66456, 1583, 215, 4, 38, "CodeText",ExpressionUUID->"42d23c7b-f6fb-4b18-aa67-913aba76477b"],
+Cell[66674, 1589, 697, 16, 110, "Input",ExpressionUUID->"f532c8a0-5850-4a43-94c8-bca7f6025a38",
+ InitializationCell->True]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[67408, 1610, 161, 3, 67, "Section",ExpressionUUID->"becf6c8d-e51b-40d5-8756-a07a3537a81a"],
+Cell[67572, 1615, 213, 5, 35, "Text",ExpressionUUID->"7a04983c-3674-4112-acce-b3a76d340a42"],
+Cell[67788, 1622, 180, 3, 38, "CodeText",ExpressionUUID->"701e57d8-6fa8-46de-8bba-89e39e470b7a"],
+Cell[67971, 1627, 1160, 28, 70, "Input",ExpressionUUID->"f4de627c-b02c-4d15-b00e-3e785b08c386",
+ InitializationCell->True],
+Cell[CellGroupData[{
+Cell[69156, 1659, 400, 7, 33, "Input",ExpressionUUID->"eab651f3-e30c-4ebe-86e2-0fffd9f49d2f"],
+Cell[69559, 1668, 707, 13, 40, "Output",ExpressionUUID->"8bfcda7d-d17a-453c-9cd2-3847e07e0a08"]
+}, Open  ]],
+Cell[70281, 1684, 1036, 27, 87, "Input",ExpressionUUID->"90f90fba-3711-42f4-9e20-08be0ab8a3e5",
+ InitializationCell->True],
+Cell[CellGroupData[{
+Cell[71342, 1715, 323, 6, 33, "Input",ExpressionUUID->"34136f07-eed1-4a6b-acc8-b97cd4f19a13"],
+Cell[71668, 1723, 517, 11, 38, "Output",ExpressionUUID->"1c2bb8e9-7c27-4b00-94e1-23bc1fd88110"]
+}, Open  ]],
+Cell[72200, 1737, 1511, 40, 93, "Input",ExpressionUUID->"b7b2e35c-e70e-4866-998b-4000637f2074",
+ InitializationCell->True],
+Cell[CellGroupData[{
+Cell[73736, 1781, 321, 6, 33, "Input",ExpressionUUID->"50647fc8-21e3-491b-ab3a-1a59346443ac"],
+Cell[74060, 1789, 605, 12, 40, "Output",ExpressionUUID->"3ddeb89c-ecc6-49f7-9ac9-4822a00d508a"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
