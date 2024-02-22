@@ -1,6 +1,6 @@
-% Package for the common premable commands for
-% Zhang Maiyun's Pearson College UWC documents
-% Copyright (c) 2020-2024 Zhang Maiyun
+% Package for the common preamble commands for
+% Zhang Maiyun's Pearson College UWC documents and beyond.
+% Copyright (C) 2020-2024 Zhang Maiyun
 %
 % Try to keep future versions compatible with older ones.
 % Files written for the older versions should produce approximately
@@ -45,6 +45,8 @@
 % (This matches ConTeXt defaults)
 
 %%% PACKAGES
+\RequirePackage{xurl} % Load first: allow multi-line URLs https://tex.stackexchange.com/a/54949
+\RequirePackage{xparse}
 \RequirePackage{graphicx} % support the \includegraphics command and options
 \RequirePackage{wrapfig} % for wrapping figures around text
 \RequirePackage{booktabs} % for much better looking tables
@@ -62,15 +64,16 @@
 \RequirePackage{amssymb}
 \RequirePackage{amsthm}
 \RequirePackage{mathtools}
+\RequirePackage{bm} % bold math symbols. After amsmath
 \RequirePackage{derivative} % for \pdv, \odv, \odif, etc.
 \RequirePackage{soul} % for much better underline, etc.
 \RequirePackage{plimsoll} % for the Standard State symbol \stst
 \RequirePackage[version=4]{mhchem} % typeset chemical formulas
 \RequirePackage{siunitx} % typeset SI units
-\sisetup{separate-uncertainty=true}
 \RequirePackage{textcomp} % some other symbols
 \RequirePackage[level]{fmtcount}
 \RequirePackage{xcolor} % color names
+\RequirePackage{fvextra} % before csquotes and after xcolor
 \RequirePackage{csquotes}
 
 %% Multilingual typesetting
@@ -166,14 +169,10 @@
 \lhead{}\chead{}\rhead{}
 \lfoot{}\cfoot{\thepage}\rfoot{}
 
-% Convenient centered three part table
-\newenvironment{ctpt}{\center\threeparttable}{\endthreeparttable\endcenter}
 
-% Circle any text from https://latex.org/forum/viewtopic.php?t=22367
-\newcommand*\circled[1]{\tikz[baseline= (char.base)]{
-  \node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
+%%% Definitions
 
-%% Math stuff
+%% Math
 % Theorems https://www.overleaf.com/learn/latex/Theorems_and_proofs
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]
@@ -184,16 +183,96 @@
 \newtheorem{definition}{Definition}[section]
 
 % More operators to my taste
-\DeclareMathOperator{\cis}{cis}
-\DeclareMathOperator{\Var}{Var}
-\DeclareMathOperator{\cov}{cov}
-\DeclareMathOperator{\sgn}{sgn}
-\newcommand*\dd{\mathrm{d}} % For old documents. Use \odif from the `derivative' package instead.
-\newcommand*\ii{\ensuremath{i}}
-\newcommand*\abs[1]{\left\lvert#1\right\rvert}
-\newcommand*\norm[1]{\left\lVert#1\right\rVert}
-\newcommand*\permu[2]{#1\text{P}#2}
-\newcommand*\combi[2]{#1\text{C}#2}
+\DeclareMathOperator{\cis}{cis} % cosine + i sine
+\DeclareMathOperator{\Var}{Var} % Variance
+\DeclareMathOperator{\cov}{cov} % Covariance
+\DeclareMathOperator{\sgn}{sgn} % Sign function
+\DeclareMathOperator{\Span}{Span} % Span of a set of vectors
+\DeclareMathOperator{\colspace}{colspace} % Column space of a matrix
+\DeclareMathOperator{\img}{img} % Image of a matrix/map
+\DeclareMathOperator{\rank}{rank} % Rank of a matrix
+\newcommand*{\dd}{\mathrm{d}} % For old documents. Use \odif from the `derivative' package instead.
+\newcommand*{\ii}{\ensuremath{i}} % Imaginary unit
+\newcommand*{\vect}[1]{\bm{\mathrm{#1}}} % Vec is bold no arrow
+\newcommand*{\arrowvec}[1]{\vec{#1}} % Arrowed vector
+\newcommand*{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand*{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand*{\permu}[2]{#1\text{P}#2} % Permutation
+\newcommand*{\combi}[2]{#1\text{C}#2} % Combination
+\newcommand*{\tr}{^\mathsf{T}} % Transpose
+% \matdim{m}{n}{A} produces A with m x n below
+\newcommand*{\matdim}[3]{\underset{#1 \times #2}{#3}}
+% Augmented matrix https://tex.stackexchange.com/a/2238
+\newenvironment{amatrix}[1]{\left[\begin{array}{@{}*{#1}{c}|c@{}}}{\end{array}\right]}
+\newcommand*{\closure}[1]{\overline{#1}} % Closure of a set
+\newcommand*{\interior}[1]{\mathring{#1}} % Interior of a set
+% I found any bold nabla to be ugly
+\newcommand*{\grad}{\arrowvec{\nabla}} % Gradient
+% Partial derivative as used in John and Barbara Hubbard's Vector Calculus
+% `\Ddif[variable]{function}` gives D_variable function
+% `\Ddif{function}` gives D function
+\NewDocumentCommand{\Ddif}{o m}{%
+    \IfNoValueTF{#1}{\mathbf{D} #2}{D_{#1} #2}%
+}
+% Tangent space
+\newcommand*{\Tspace}[2][]{\mathbf{T}_{#1} #2}
+% Jacobian of a function
+\newcommand*{\jadif}[1]{\mathbf{J} {#1}}
+
+%% siunitx
+\sisetup{%
+    separate-uncertainty=true,
+    separate-uncertainty-units=bracket,
+    per-mode=power}
+\DeclareSIUnit\parsec{pc}
+% Defined but deprecated
+\DeclareSIUnit\atomicmassunit{u}
+
+%% Physics
+% Typeset quantity dimension with a siunitx-like syntax
+% Just a very crude parser compared to siunitx...
+% Possible macros inside the argument of \qtydim:
+% \tothe{<exponent>}: same as in siunitx
+% \squared: same as in siunitx
+% \cubed: same as in siunitx
+% \time: T
+% \length: L
+% \mass: M
+% \current: I
+% \temperature: \Theta
+% \amount: N
+% \luminousintensity: J
+\newcommand*{\qtydim}[1]{%
+    \begingroup
+        \def\tothe{^}%
+        \def\squared{^2}%
+        \def\cubed{^3}%
+        \def\time{\mathrm{T}}%
+        \def\length{\mathrm{L}}%
+        \def\mass{\mathrm{M}}%
+        \def\current{\mathrm{I}}%
+        \def\temperature{\Theta}%
+        \def\amount{\mathrm{N}}%
+        \def\luminousintensity{\mathrm{J}}%
+        \ensuremath{#1}%
+    \endgroup
+}
+% Engineering notation vectors
+\newcommand*{\uvecx}{\hat{\vect{i}}}
+\newcommand*{\uvecy}{\hat{\vect{j}}}
+\newcommand*{\uvecz}{\hat{\vect{k}}}
+\newcommand*{\uvecr}{\hat{\vect{r}}}
+\newcommand*{\uvecphi}{\hat{\vect{\phi}}}
+\newcommand*{\uvectheta}{\hat{\vect{\theta}}}
+
+%% Other stuff
+
+% Convenient centered three part table
+\newenvironment{ctpt}{\center\threeparttable}{\endthreeparttable\endcenter}
+
+% Circle any text from https://latex.org/forum/viewtopic.php?t=22367
+\newcommand*{\circled}[1]{\tikz[baseline= (char.base)]{
+  \node[shape=circle,draw,inner sep=1pt] (char) {#1};}}
 
 % Centered title from https://stackoverflow.com/a/3142372
 \newcommand{\mkctitle}{
