@@ -1,11 +1,20 @@
 /// CW Keyer for ATTiny85
 
-#define OUT 5
-#define OUT2 6
+// For use with damellis/attiny core
+//                    +-\/-+
+// RESET/A0/PB5      1|    |8  Vcc
+// DIT (PULL UP) PB3 2|    |7  PB2/A1 SPEED POT
+// DAH (PULL UP) PB4 3|    |6  PB1 OUT2 high when active
+//               GND 4|    |5  PB0 OUT  high when active
+//                    +----+
+// Two outputs are identical, for maybe keying and an LED
+
+#define OUT 0
+#define OUT2 1
 // This needs to be analog input capable
 #define SPEED A1
-#define DIT 2
-#define DAH 3
+#define DIT 3
+#define DAH 4
 
 void setup() {
     pinMode(OUT, OUTPUT);
