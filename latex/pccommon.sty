@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2024/02/04 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2024/02/29 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pc@bibstyle{mla}
@@ -227,6 +227,10 @@
 \newcommand*{\Tspace}[2][]{\mathbf{T}_{#1} #2}
 % Jacobian of a function
 \newcommand*{\jadif}[1]{\mathbf{J} {#1}}
+% Taylor polynomial \taylor{order,function,center}
+\newcommand*{\pccommon@taylor@format}[3]{\mathcal{P}_{#2,#3}^{#1}}
+\def\pccommon@taylor@parseargs#1,#2,#3\relax{\pccommon@taylor@format{#1}{#2}{#3}}
+\newcommand*{\taylor}[1]{\pccommon@taylor@parseargs#1\relax}
 
 %% siunitx
 \sisetup{%
