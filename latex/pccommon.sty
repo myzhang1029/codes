@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2024/02/29 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2024/04/03 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pc@bibstyle{mla}
@@ -65,6 +65,7 @@
 \RequirePackage{amsthm}
 \RequirePackage{mathtools}
 \RequirePackage{bm} % bold math symbols. After amsmath
+\RequirePackage{bbm} % blackboard math symbols
 \RequirePackage{derivative} % for \pdv, \odv, \odif, etc.
 \RequirePackage{soul} % for much better underline, etc.
 \RequirePackage{plimsoll} % for the Standard State symbol \stst
@@ -191,15 +192,18 @@
 \DeclareMathOperator{\colspace}{colspace} % Column space of a matrix
 \DeclareMathOperator{\img}{img} % Image of a matrix/map
 \DeclareMathOperator{\rank}{rank} % Rank of a matrix
+\DeclareMathOperator{\vol}{vol} % Volume of something
 \newcommand*{\dd}{\mathrm{d}} % For old documents. Use \odif from the `derivative' package instead.
 \newcommand*{\ii}{\ensuremath{i}} % Imaginary unit
+\newcommand*{\charf}{\mathbbm{1}} % Characteristic function
+\newcommand*{\orderof}[1]{o(#1)} % Infinitesimal term of an order
 \newcommand*{\vect}[1]{\bm{\mathrm{#1}}} % Vec is bold no arrow
 \newcommand*{\arrowvec}[1]{\vec{#1}} % Arrowed vector
 \newcommand*{\abs}[1]{\left\lvert#1\right\rvert}
 \newcommand*{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand*{\permu}[2]{#1\text{P}#2} % Permutation
 \newcommand*{\combi}[2]{#1\text{C}#2} % Combination
-\newcommand*{\tr}{^\mathsf{T}} % Transpose
+\newcommand*{\tr}{^\intercal} % Transpose
 % \matdim{m}{n}{A} produces A with m x n below
 \newcommand*{\matdim}[3]{\underset{#1 \times #2}{#3}}
 % Augmented matrix https://tex.stackexchange.com/a/2238
@@ -209,22 +213,50 @@
 % I found any bold nabla to be ugly
 \newcommand*{\grad}{\arrowvec{\nabla}} % Gradient
 % Partial derivative as used in John and Barbara Hubbard's Vector Calculus
-% `\Ddif[variables]{function}` gives D_variable1 D_variable2 function
 % `\Ddif{function}` gives D function (full derivative)
-% Trailing optional parameters are passed to the derivative package
-\NewDocumentCommand{\Ddif}{o m o}{%
-    \IfNoValueTF{#1}{\mathbf{D} #2}{%
+% `\Ddif[variables]{function}` gives D_variable1 D_variable2 function
+% `\Ddif[variables][orders]{function}` gives D_variable1^order1 D_variable2^order2 function
+\NewDocumentCommand{\Ddif}{o o m}{%
+    \IfNoValueTF{#1}{\mathbf{D} #3}{
         \IfPackageAtLeastTF{derivative}{2023/07/26}{%
-            \IfNoValueTF{#3}{%
-                \mdv[style-var-!=mixed]{#2}!{#1}
-            }{%
-                \mdv[style-var-!=mixed, #3]{#2}!{#1}
-            }
+            \IfNoValueTF{#2}
+                {\mdv[style-var-!=mixed]{#3}!{#1}}
+                {\mdv[style-var-!=mixed, order={#2}]{#3}!{#1}}
         }{\PackageError{pccommon}{Please update the derivative package}{Needs at least v1.3}}%
     }
 }
+\ExplSyntaxOn
+% Vector differentials as used in John and Barbara Hubbard's Vector Calculus
+% `\vdif{x,y,z}` gives |dx dy dz|
+% `\vdif[2,n,1]{x,y,z}` gives |d^2x d^ny dz|
+% In Python I would use `zip`...
+\int_new:N \l__pccommon_varidx_int
+\NewDocumentCommand{\vdif}{o m}{
+    \abs{\IfNoValueTF{#1}
+        % No orders
+        {\clist_map_inline:nn{#2}{\odif{\vect{##1}}}}
+        % Has orders
+        {\ifnum\clist_count:n{#2}=\clist_count:n{#1}
+            % Correct alignment
+            {
+                \int_set:Nn \l__pccommon_varidx_int {1}
+                \clist_map_inline:nn{#1}{
+                    \ifx1##1
+                        % Skip if order is 1
+                        \odif{\vect{\clist_item:nn{#2}{\l__pccommon_varidx_int}}}
+                    \else
+                        \odif[order={##1}]{\vect{\clist_item:nn{#2}{\l__pccommon_varidx_int}}}
+                    \fi
+                    \int_incr:N \l__pccommon_varidx_int
+                }
+            }
+        \else
+            \PackageError{pccommon}{Orders mismatch variables}{}
+        \fi}}
+}
+\ExplSyntaxOff
 % Tangent space
-\newcommand*{\Tspace}[2][]{\mathbf{T}_{#1} #2}
+\newcommand*{\Tspace}[2]{\mathbf{T}_{#1} #2}
 % Jacobian of a function
 \newcommand*{\jadif}[1]{\mathbf{J} {#1}}
 % Taylor polynomial \taylor{order,function,center}
