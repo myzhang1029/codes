@@ -229,25 +229,27 @@
 % Vector differentials as used in John and Barbara Hubbard's Vector Calculus
 % `\vdif{x,y,z}` gives |dx dy dz|
 % `\vdif[2,n,1]{x,y,z}` gives |d^2x d^ny dz|
+% `\vdif*` typesets variables as scalars
+\newcommand*{\__pccommon_maybevect}[2]{\IfBooleanTF{#1}{#2}{\vect{#2}}}
 % In Python I would use `zip`...
-\int_new:N \l__pccommon_varidx_int
-\NewDocumentCommand{\vdif}{o m}{
-    \abs{\IfNoValueTF{#1}
+\int_new:N \g__pccommon_varidx_int
+\NewDocumentCommand{\vdif}{s o m}{
+    \abs{\IfNoValueTF{#2}
         % No orders
-        {\clist_map_inline:nn{#2}{\odif{\vect{##1}}}}
+        {\clist_map_inline:nn{#3}{\odif{\__pccommon_maybevect{#1}{##1}}}}
         % Has orders
-        {\ifnum\clist_count:n{#2}=\clist_count:n{#1}
+        {\ifnum\clist_count:n{#3}=\clist_count:n{#2}
             % Correct alignment
             {
-                \int_set:Nn \l__pccommon_varidx_int {1}
-                \clist_map_inline:nn{#1}{
+                \int_set:Nn \g__pccommon_varidx_int {1}
+                \clist_map_inline:nn{#2}{
                     \ifx1##1
                         % Skip if order is 1
-                        \odif{\vect{\clist_item:nn{#2}{\l__pccommon_varidx_int}}}
+                        \odif{\__pccommon_maybevect{#1}{\clist_item:nn{#3}{\g__pccommon_varidx_int}}}
                     \else
-                        \odif[order={##1}]{\vect{\clist_item:nn{#2}{\l__pccommon_varidx_int}}}
+                        \odif[order={##1}]{\__pccommon_maybevect{#1}{\clist_item:nn{#3}{\g__pccommon_varidx_int}}}
                     \fi
-                    \int_incr:N \l__pccommon_varidx_int
+                    \int_incr:N \g__pccommon_varidx_int
                 }
             }
         \else
