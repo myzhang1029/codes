@@ -21,18 +21,18 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2024/04/03 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2024/04/14 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
-\def\pc@bibstyle{mla}
-\DeclareOptionX{bibstyle}{\def\pc@bibstyle{#1}}
+\def\pccommon@bibstyle{mla}
+\DeclareOptionX{bibstyle}{\def\pccommon@bibstyle{#1}}
 % Select the size of the page
-\def\pc@paper{a4paper}
-\DeclareOptionX{paper}{\def\pc@paper{#1}}
+\def\pccommon@paper{a4paper}
+\DeclareOptionX{paper}{\def\pccommon@paper{#1}}
 % Omit to disable CJK fonts, `linux' for GNU/Linux,
 % `winold' for Windows <= XP, `winnew' for Windows >= Vista,
 % `macold' for macOS <= Yosemite, `macnew' for macOS >= EL Capitan
-\DeclareOptionX{cjkos}{\def\pc@cjkos{#1}}
+\DeclareOptionX{cjkos}{\def\pccommon@cjkos{#1}}
 \ProcessOptionsX
 
 %%% Engine selection
@@ -80,7 +80,7 @@
 %% Multilingual typesetting
 \RequirePackage{fontspec}
 % use main= so that subsequent stuff don't confuse babel
-\RequirePackage[french,main=english]{babel}
+\RequirePackage[provide=*,french,main=english]{babel}
 
 % Compatibility with old LaTeX
 \providecommand{\IfPackageAtLeastTF}[4]{%
@@ -90,9 +90,10 @@
 % CJK configuration
 % Note that this template is meant for a English-default document
 % with possible CJK characters.
+% Not using `import`; passing `provide=*` to babel instead
 % These are only available in LuaLaTeX
 \ifluatex{}
-    \babelprovide[import,intraspace=0 .15 0,onchar=ids fonts]{chinese}
+    \babelprovide[intraspace=0 .15 0,onchar=ids fonts]{chinese}
     \babelprovide[onchar=ids fonts]{french}
     \babelcharproperty{`“}{linebreak}{op}
     \babelcharproperty{`”}{linebreak}{cl}
@@ -102,43 +103,43 @@
     \let\bblorg@mapselect\bbl@mapselect
     \def\bbl@mapselect{\ifmmode\else\bblorg@mapselect\fi}}
 \else
-    \babelprovide[import,intraspace=0 .15 0]{chinese}
+    \babelprovide[intraspace=0 .15 0]{chinese}
 \fi
 
 % Set up CJK fonts
-\ifthenelse{\isundefined\pc@cjkos}{}{
-    \ifthenelse{\equal\pc@cjkos{macnew}}{
+\ifthenelse{\isundefined\pccommon@cjkos}{}{
+    \ifthenelse{\equal\pccommon@cjkos{macnew}}{
         % >= EL Capitan
         \babelfont[chinese]{rm}[UprightFont=* Light,BoldFont=* Bold,ItalicFont=Kaiti SC,BoldItalicFont=Kaiti SC Bold]{Songti SC}
         \babelfont[chinese]{sf}{PingFang SC}
         \babelfont[chinese]{tt}{STFangsong}
-    }{\ifthenelse{\equal\pc@cjkos{macold}}{
+    }{\ifthenelse{\equal\pccommon@cjkos{macold}}{
         % <= Yosemite
         \babelfont[chinese]{rm}[BoldFont=STHeiti,ItalicFont=STKaiti]{STSong}
         \babelfont[chinese]{sf}[BoldFont=STHeiti]{STXihei}
         \babelfont[chinese]{tt}{STFangsong}
-    }{\ifthenelse{\equal\pc@cjkos{winnew}}{
+    }{\ifthenelse{\equal\pccommon@cjkos{winnew}}{
         % >= Vista
         \babelfont[chinese]{rm}[BoldFont=SimHei,ItalicFont=KaiTi]{SimSun}
         \babelfont[chinese]{sf}[BoldFont={* Bold}]{Microsoft YaHei}
         \babelfont[chinese]{tt}{FangSong}
-    }{\ifthenelse{\equal\pc@cjkos{winold}}{
+    }{\ifthenelse{\equal\pccommon@cjkos{winold}}{
         % <= XP
         \babelfont[chinese]{rm}[BoldFont=SimHei,ItalicFont=KaiTi_GB2312]{SimSun}
         \babelfont[chinese]{sf}{SimHei}
         \babelfont[chinese]{tt}{FangSong_GB2312}
-    }{\ifthenelse{\equal\pc@cjkos{linux}}{
+    }{\ifthenelse{\equal\pccommon@cjkos{linux}}{
         % Fonts for Ubuntu
         \babelfont[chinese]{rm}[BoldFont=WenQuanYi Zen Hei,ItalicFont=AR PL UKai CN]{AR PL UMing CN}
         \babelfont[chinese]{sf}{WenQuanYi Zen Hei}
         \babelfont[chinese]{tt}{AR PL UMing CN}
     }{
-        \errmessage{Incorrect OS specification for CJK fonts: `\pc@cjkos'}
+        \errmessage{Incorrect OS specification for CJK fonts: `\pccommon@cjkos'}
     }}}}}
 }
 
 % Do this after languange stuff
-\RequirePackage[style=\pc@bibstyle,backend=biber]{biblatex}
+\RequirePackage[style=\pccommon@bibstyle,backend=biber]{biblatex}
 
 %% Stuff about drawing with TikZ and PGF
 \RequirePackage{tikz} % drawing support
@@ -160,7 +161,7 @@
 
 %%% PAGE DIMENSIONS
 \RequirePackage{geometry} % to change the page dimensions
-\geometry{\pc@paper}
+\geometry{\pccommon@paper}
 \geometry{margin=1in} % for example, change the margins to 2 inches all round
 
 %%% HEADERS & FOOTERS
@@ -313,6 +314,71 @@
 \newcommand*{\uvectheta}{\hat{\vect{\theta}}}
 
 %% Other stuff
+% Convert numbers to Chinese
+% Literal reading without decimal weights
+\newcommand*{\pccommon@mnonescirczero}[1]{%
+    \ifcase#1 〇\or 一\or 二\or 三\or 四\or 五\or 六\or 七\or 八\or 九\fi}
+\newcommand*{\chinesenumcirczero}[1]{%
+    \ifnum#1<10
+        \pccommon@mnonescirczero{#1}%
+    \else
+        \expandafter\chinesenumcirczero\expandafter{\number\numexpr#1/10\relax}%
+        \pccommon@mnonescirczero{\number\numexpr#1-10*(#1/10)\relax}%
+    \fi}
+% Normal reading
+% \chinesenum{1042}: 一千零四十二
+% \chinesenum{1000}: 一千
+% \chinesenum{9003}: 九千零三
+\newcommand*{\pccommon@mnones}[1]{%
+    \ifcase#1 零\or 一\or 二\or 三\or 四\or 五\or 六\or 七\or 八\or 九\fi}
+\newcommand*{\pccommon@mntens}[1]{%
+    \ifnum#1<10
+        \pccommon@mnones{#1}%
+    \else
+        \ifnum#1=10
+            十%
+        \else
+            \ifnum\numexpr(#1/10)*10\relax=#1
+                \pccommon@mnones{\numexpr#1/10\relax}十%
+            \else
+                \pccommon@mnones{\numexpr#1/10\relax}十\pccommon@mnones{\numexpr#1-10*(#1/10)\relax}%
+            \fi
+        \fi
+    \fi}
+\newcommand*{\pccommon@mnhundreds}[1]{%
+    \ifnum#1<100
+        \pccommon@mntens{#1}%
+    \else
+        \ifnum\numexpr(#1/100)*100\relax=#1
+            \pccommon@mnones{\numexpr#1/100\relax}百%
+        \else
+            \pccommon@mnones{\numexpr#1/100\relax}百%
+            \ifnum\numexpr#1-100*(#1/100)\relax<10
+                零%
+            \fi
+            \pccommon@mntens{\numexpr#1-100*(#1/100)\relax}%
+        \fi
+    \fi}
+\newcommand*{\pccommon@mnthousands}[1]{%
+    \ifnum#1<1000
+        \pccommon@mnhundreds{#1}%
+    \else
+        \ifnum\numexpr(#1/1000)*1000\relax=#1
+            \pccommon@mnones{\numexpr#1/1000\relax}千%
+        \else
+            \pccommon@mnones{\numexpr#1/1000\relax}千%
+                \ifnum\numexpr#1-1000*(#1/1000)\relax<100
+                    零%
+                \fi
+            \pccommon@mnhundreds{\numexpr#1-1000*(#1/1000)\relax}%
+        \fi
+    \fi}
+\newcommand*{\chinesenum}[1]{%
+    \ifnum#1<10000
+        \pccommon@mnthousands{#1}%
+    \else
+        \PackageError{pccommon}{Number for Chinese conversion too large}{}
+    \fi}
 
 % Convenient centered three part table
 \newenvironment{ctpt}{\center\threeparttable}{\endthreeparttable\endcenter}
