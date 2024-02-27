@@ -209,10 +209,19 @@
 % I found any bold nabla to be ugly
 \newcommand*{\grad}{\arrowvec{\nabla}} % Gradient
 % Partial derivative as used in John and Barbara Hubbard's Vector Calculus
-% `\Ddif[variable]{function}` gives D_variable function
-% `\Ddif{function}` gives D function
-\NewDocumentCommand{\Ddif}{o m}{%
-    \IfNoValueTF{#1}{\mathbf{D} #2}{D_{#1} #2}%
+% `\Ddif[variables]{function}` gives D_variable1 D_variable2 function
+% `\Ddif{function}` gives D function (full derivative)
+% Trailing optional parameters are passed to the derivative package
+\NewDocumentCommand{\Ddif}{o m o}{%
+    \IfNoValueTF{#1}{\mathbf{D} #2}{%
+        \IfPackageAtLeastTF{derivative}{2023/07/26}{%
+            \IfNoValueTF{#3}{%
+                \mdv[style-var-!=mixed]{#2}!{#1}
+            }{%
+                \mdv[style-var-!=mixed, #3]{#2}!{#1}
+            }
+        }{\PackageError{pccommon}{Please update the derivative package}{Needs at least v1.3}}%
+    }
 }
 % Tangent space
 \newcommand*{\Tspace}[2][]{\mathbf{T}_{#1} #2}
