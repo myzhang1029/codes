@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2024/05/20 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2024/06/05 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pccommon@bibstyle{mla}
@@ -236,6 +236,7 @@
 \DeclareMathOperator{\rank}{rank} % Rank of a matrix
 \DeclareMathOperator{\vol}{vol} % Volume of something
 \DeclareMathOperator{\trace}{tr} % Trace
+\DeclareMathOperator{\exd}{d} % Exterior derivative
 \newcommand*{\dd}{\mathrm{d}} % For old documents. Use \odif from the `derivative' package instead.
 \newcommand*{\ii}{\ensuremath{i}} % Imaginary unit
 \newcommand*{\charf}{\mathbbm{1}} % Characteristic function
@@ -244,6 +245,7 @@
 \newcommand*{\ilap}[1]{\mathcal{L}^{-1}\left\{#1\right\}}
 \newcommand*{\vect}[1]{\bm{\mathrm{#1}}} % Vec is bold no arrow
 \newcommand*{\arrowvec}[1]{\vec{#1}} % Arrowed vector
+\newcommand*{\hatvect}[1]{\hat{\vect{#1}}} % Unit vector
 \newcommand*{\abs}[1]{\left\lvert#1\right\rvert}
 \newcommand*{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand*{\permu}[2]{#1\text{P}#2} % Permutation
@@ -257,6 +259,8 @@
 \newcommand*{\interior}[1]{\mathring{#1}} % Interior of a set
 % I found any bold nabla to be ugly
 \newcommand*{\grad}{\arrowvec{\nabla}} % Gradient
+\newcommand*{\curl}{\grad\times} % Curl
+\newcommand*{\divg}{\grad\cdot} % Divergence
 % Partial derivative as used in John and Barbara Hubbard's Vector Calculus
 % `\Ddif{function}` gives D function (full derivative)
 % `\Ddif[variables]{function}` gives D_variable1 D_variable2 function
@@ -397,12 +401,12 @@
     \endgroup
 }
 % Engineering notation vectors
-\newcommand*{\uvecx}{\hat{\vect{i}}}
-\newcommand*{\uvecy}{\hat{\vect{j}}}
-\newcommand*{\uvecz}{\hat{\vect{k}}}
-\newcommand*{\uvecr}{\hat{\vect{r}}}
-\newcommand*{\uvecphi}{\hat{\vect{\phi}}}
-\newcommand*{\uvectheta}{\hat{\vect{\theta}}}
+\newcommand*{\uvecx}{\hatvect{i}}
+\newcommand*{\uvecy}{\hatvect{j}}
+\newcommand*{\uvecz}{\hatvect{k}}
+\newcommand*{\uvecr}{\hatvect{r}}
+\newcommand*{\uvecphi}{\hatvect{\phi}}
+\newcommand*{\uvectheta}{\hatvect{\theta}}
 
 %% Other stuff
 % Convert numbers to Chinese
