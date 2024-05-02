@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2024/04/14 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2024/05/02 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pccommon@bibstyle{mla}
@@ -194,6 +194,7 @@
 \DeclareMathOperator{\img}{img} % Image of a matrix/map
 \DeclareMathOperator{\rank}{rank} % Rank of a matrix
 \DeclareMathOperator{\vol}{vol} % Volume of something
+\DeclareMathOperator{\trace}{tr} % Trace
 \newcommand*{\dd}{\mathrm{d}} % For old documents. Use \odif from the `derivative' package instead.
 \newcommand*{\ii}{\ensuremath{i}} % Imaginary unit
 \newcommand*{\charf}{\mathbbm{1}} % Characteristic function
@@ -223,7 +224,7 @@
             \IfNoValueTF{#2}
                 {\mdv[style-var-!=mixed]{#3}!{#1}}
                 {\mdv[style-var-!=mixed, order={#2}]{#3}!{#1}}
-        }{\PackageError{pccommon}{Please update the derivative package}{Needs at least v1.3}}%
+        }{\PackageError{pccommon}{Please~update~the~derivative~package}{Needs~at~least~v1.3}}
     }
 }
 \ExplSyntaxOn
@@ -254,8 +255,36 @@
                 }
             }
         \else
-            \PackageError{pccommon}{Orders mismatch variables}{}
+            \PackageError{pccommon}{Orders~mismatch~variables}{}
         \fi}}
+}
+% Elementary differential forms:
+% `\dform{1,2,3}` gives dx_1 dx_2 dx_3
+% `\dform[x,y,z]{1,2,3}` gives dx_1 dy_2 dz_3
+% `\dform*{x,y,z}` gives dx dy dz
+\NewDocumentCommand{\dform}{s o m}{
+    \IfBooleanTF{#1}
+        % Variable names mode (simple)
+        {\odif{#3}}
+        % Indices mode
+        {
+            \IfNoValueTF{#2}
+                % No variable names, use x
+                {\clist_map_inline:nn{#3}{\odif{x\c_math_subscript_token{##1}}}}
+                % Has variable names
+                {\ifnum\clist_count:n{#2}=\clist_count:n{#3}
+                    % Correct alignment
+                    {
+                        \int_set:Nn \g__pccommon_varidx_int {1}
+                        \clist_map_inline:nn{#3}{
+                            \odif{{\clist_item:nn{#2}{\g__pccommon_varidx_int}}\c_math_subscript_token{##1}}
+                            \int_incr:N \g__pccommon_varidx_int
+                        }
+                    }
+                \else
+                    \PackageError{pccommon}{Variables~mismatch~indices}{}
+                \fi}
+        }
 }
 \ExplSyntaxOff
 % Tangent space
@@ -377,7 +406,7 @@
     \ifnum#1<10000
         \pccommon@mnthousands{#1}%
     \else
-        \PackageError{pccommon}{Number for Chinese conversion too large}{}
+        \PackageError{pccommon}{Number~for~Chinese~conversion~too~large}{}
     \fi}
 
 % Convenient centered three part table
