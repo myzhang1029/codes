@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2024/05/02 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2024/05/20 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pccommon@bibstyle{mla}
@@ -29,11 +29,52 @@
 % Select the size of the page
 \def\pccommon@paper{a4paper}
 \DeclareOptionX{paper}{\def\pccommon@paper{#1}}
+\DeclareOptionX{a0paper}{\def\pccommon@paper{a0paper}}
+\DeclareOptionX{a1paper}{\def\pccommon@paper{a1paper}}
+\DeclareOptionX{a2paper}{\def\pccommon@paper{a2paper}}
+\DeclareOptionX{a3paper}{\def\pccommon@paper{a3paper}}
+\DeclareOptionX{a4paper}{\def\pccommon@paper{a4paper}}
+\DeclareOptionX{a5paper}{\def\pccommon@paper{a5paper}}
+\DeclareOptionX{a6paper}{\def\pccommon@paper{a6paper}}
+\DeclareOptionX{b0paper}{\def\pccommon@paper{b0paper}}
+\DeclareOptionX{b1paper}{\def\pccommon@paper{b1paper}}
+\DeclareOptionX{b2paper}{\def\pccommon@paper{b2paper}}
+\DeclareOptionX{b3paper}{\def\pccommon@paper{b3paper}}
+\DeclareOptionX{b4paper}{\def\pccommon@paper{b4paper}}
+\DeclareOptionX{b5paper}{\def\pccommon@paper{b5paper}}
+\DeclareOptionX{b6paper}{\def\pccommon@paper{b6paper}}
+\DeclareOptionX{c0paper}{\def\pccommon@paper{c0paper}}
+\DeclareOptionX{c1paper}{\def\pccommon@paper{c1paper}}
+\DeclareOptionX{c2paper}{\def\pccommon@paper{c2paper}}
+\DeclareOptionX{c3paper}{\def\pccommon@paper{c3paper}}
+\DeclareOptionX{c4paper}{\def\pccommon@paper{c4paper}}
+\DeclareOptionX{c5paper}{\def\pccommon@paper{c5paper}}
+\DeclareOptionX{c6paper}{\def\pccommon@paper{c6paper}}
+\DeclareOptionX{b0j}{\def\pccommon@paper{b0j}}
+\DeclareOptionX{b1j}{\def\pccommon@paper{b1j}}
+\DeclareOptionX{b2j}{\def\pccommon@paper{b2j}}
+\DeclareOptionX{b3j}{\def\pccommon@paper{b3j}}
+\DeclareOptionX{b4j}{\def\pccommon@paper{b4j}}
+\DeclareOptionX{b5j}{\def\pccommon@paper{b5j}}
+\DeclareOptionX{b6j}{\def\pccommon@paper{b6j}}
+\DeclareOptionX{letterpaper}{\def\pccommon@paper{letterpaper}}
+\DeclareOptionX{executivepaper}{\def\pccommon@paper{executivepaper}}
+\DeclareOptionX{legalpaper}{\def\pccommon@paper{legalpaper}}
 % Omit to disable CJK fonts, `linux' for GNU/Linux,
 % `winold' for Windows <= XP, `winnew' for Windows >= Vista,
 % `macold' for macOS <= Yosemite, `macnew' for macOS >= EL Capitan
 \DeclareOptionX{cjkos}{\def\pccommon@cjkos{#1}}
-\ProcessOptionsX
+% Misc command options
+%% Wedge between 1-forms:
+%% default is none if not specified,
+%% \wedge if specified as an option,
+%% or any other symbol if specified as keyval.
+\def\pccommon@dformwedge{}
+\DeclareOptionX{dformwedge}[\wedge]{\def\pccommon@dformwedge{#1}}
+% hyperref options
+\def\pccommon@hyperrefoptions{hidelinks}
+\DeclareOptionX{hyperref}{\def\pccommon@hyperrefoptions{#1}}
+\ProcessOptionsX*
 
 %%% Engine selection
 \RequirePackage{iftex}
@@ -157,7 +198,7 @@
 \renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
 \renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
 
-\RequirePackage[hidelinks]{hyperref} % Load hyperref BEFORE geometry
+\RequirePackage[\pccommon@hyperrefoptions]{hyperref} % Load hyperref BEFORE geometry
 
 %%% PAGE DIMENSIONS
 \RequirePackage{geometry} % to change the page dimensions
@@ -199,13 +240,15 @@
 \newcommand*{\ii}{\ensuremath{i}} % Imaginary unit
 \newcommand*{\charf}{\mathbbm{1}} % Characteristic function
 \newcommand*{\orderof}[1]{o(#1)} % Infinitesimal term of an order
+\newcommand*{\lap}[1]{\mathcal{L}\left\{#1\right\}} % Laplace transform
+\newcommand*{\ilap}[1]{\mathcal{L}^{-1}\left\{#1\right\}}
 \newcommand*{\vect}[1]{\bm{\mathrm{#1}}} % Vec is bold no arrow
 \newcommand*{\arrowvec}[1]{\vec{#1}} % Arrowed vector
 \newcommand*{\abs}[1]{\left\lvert#1\right\rvert}
 \newcommand*{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand*{\permu}[2]{#1\text{P}#2} % Permutation
 \newcommand*{\combi}[2]{#1\text{C}#2} % Combination
-\newcommand*{\tr}{^\intercal} % Transpose
+\newcommand*{\tr}{^{\text{\textsf{T}}}} % Transpose: use textsf to work around bugs with some fonts
 % \matdim{m}{n}{A} produces A with m x n below
 \newcommand*{\matdim}[3]{\underset{#1 \times #2}{#3}}
 % Augmented matrix https://tex.stackexchange.com/a/2238
@@ -234,7 +277,7 @@
 % `\vdif*` typesets variables as scalars
 \newcommand*{\__pccommon_maybevect}[2]{\IfBooleanTF{#1}{#2}{\vect{#2}}}
 % In Python I would use `zip`...
-\int_new:N \g__pccommon_varidx_int
+\int_new:N \l__pccommon_varidx_int
 \NewDocumentCommand{\vdif}{s o m}{
     \abs{\IfNoValueTF{#2}
         % No orders
@@ -243,15 +286,15 @@
         {\ifnum\clist_count:n{#3}=\clist_count:n{#2}
             % Correct alignment
             {
-                \int_set:Nn \g__pccommon_varidx_int {1}
+                \int_set:Nn \l__pccommon_varidx_int {1}
                 \clist_map_inline:nn{#2}{
                     \ifx1##1
                         % Skip if order is 1
-                        \odif{\__pccommon_maybevect{#1}{\clist_item:nn{#3}{\g__pccommon_varidx_int}}}
+                        \odif{\__pccommon_maybevect{#1}{\clist_item:nn{#3}{\l__pccommon_varidx_int}}}
                     \else
-                        \odif[order={##1}]{\__pccommon_maybevect{#1}{\clist_item:nn{#3}{\g__pccommon_varidx_int}}}
+                        \odif[order={##1}]{\__pccommon_maybevect{#1}{\clist_item:nn{#3}{\l__pccommon_varidx_int}}}
                     \fi
-                    \int_incr:N \g__pccommon_varidx_int
+                    \int_incr:N \l__pccommon_varidx_int
                 }
             }
         \else
@@ -262,23 +305,42 @@
 % `\dform{1,2,3}` gives dx_1 dx_2 dx_3
 % `\dform[x,y,z]{1,2,3}` gives dx_1 dy_2 dz_3
 % `\dform*{x,y,z}` gives dx dy dz
+% Package option `dformwedge` to print \wedge between 1-forms
+% Helper function  i :-> \odif{x_i}
+\newcommand{\__pccommon_odifxidx}[1]{\odif{x\c_math_subscript_token{#1}}}
+\tl_new:N \l__pccommon_dform_first_tl
+\clist_new:N \l__pccommon_dform_tail_clist
+% latex3 args: nn
 \NewDocumentCommand{\dform}{s o m}{
+    % Pop the first one in #3 for inserting wedge
+    \clist_set:Nn \l__pccommon_dform_tail_clist {#3}
+    \clist_pop:NN \l__pccommon_dform_tail_clist \l__pccommon_dform_first_tl
     \IfBooleanTF{#1}
         % Variable names mode (simple)
-        {\odif{#3}}
+        {
+            % First one
+            \exp_args:NV\odif\l__pccommon_dform_first_tl
+            % Rest
+            \clist_map_inline:Nn\l__pccommon_dform_tail_clist{\pccommon@dformwedge\odif{##1}}
+        }
         % Indices mode
         {
             \IfNoValueTF{#2}
                 % No variable names, use x
-                {\clist_map_inline:nn{#3}{\odif{x\c_math_subscript_token{##1}}}}
+                {
+                    \exp_args:NV\__pccommon_odifxidx\l__pccommon_dform_first_tl
+                    \clist_map_inline:Nn\l__pccommon_dform_tail_clist{\pccommon@dformwedge\__pccommon_odifxidx{##1}}
+                }
                 % Has variable names
                 {\ifnum\clist_count:n{#2}=\clist_count:n{#3}
                     % Correct alignment
                     {
-                        \int_set:Nn \g__pccommon_varidx_int {1}
-                        \clist_map_inline:nn{#3}{
-                            \odif{{\clist_item:nn{#2}{\g__pccommon_varidx_int}}\c_math_subscript_token{##1}}
-                            \int_incr:N \g__pccommon_varidx_int
+                        \odif{{\clist_item:nn{#2}{1}}\c_math_subscript_token{\l__pccommon_dform_first_tl}}
+                        \int_set:Nn \l__pccommon_varidx_int {2}
+                        \clist_map_inline:Nn\l__pccommon_dform_tail_clist{
+                            \pccommon@dformwedge
+                            \odif{{\clist_item:nn{#2}{\l__pccommon_varidx_int}}\c_math_subscript_token{##1}}
+                            \int_incr:N \l__pccommon_varidx_int
                         }
                     }
                 \else
