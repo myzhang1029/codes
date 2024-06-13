@@ -8,4 +8,4 @@ edition = "2018"
 [dependencies]
 tar = "0.4"
 ureq = "2"
-zstd = "0.12"
+zstd = "0.13"
