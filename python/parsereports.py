@@ -31,11 +31,11 @@ import gzip
 import imaplib
 import io
 import json
+import re
 import sys
 import zipfile
 from email.message import Message
 from pathlib import Path
-from typing import Optional
 from xml.etree import ElementTree as ET
 
 # Alias for the type of the storage dictionary
@@ -51,22 +51,25 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 
-def text_or_none(element: Optional[ET.Element]) -> Optional[str]:
+def text_or_none(report: ET.Element, path: str) -> str | None:
     """Get the text of an XML element or `None` if it is missing."""
+    element = report.find(path)
     return element.text if element is not None else None
 
 
-def text_assert_some(element: Optional[ET.Element]) -> Optional[str]:
+def text_assert_some(report: ET.Element, path: str) -> str | None:
     """Get the text of an XML element or raise an error if it is missing."""
+    element = report.find(path)
     if element is None:
-        raise InvalidReportError("Element is missing")
+        raise InvalidReportError(f"Element {path} is missing")
     return element.text
 
 
-def int_assert_some(element: Optional[ET.Element]) -> int:
+def int_assert_some(report: ET.Element, path: str) -> int:
     """Get the text of an XML element as an integer or raise an error if it is missing."""
+    element = report.find(path)
     if element is None or element.text is None:
-        raise InvalidReportError("Element is missing")
+        raise InvalidReportError(f"Element {path} is missing")
     return int(element.text)
 
 
@@ -97,31 +100,29 @@ def decode_json_report(payload: str, storage: StorageDict) -> bool:
 
 def decode_xml_report(payload: str, storage: StorageDict) -> bool:
     """Decode an XML report (DMARC probably)."""
+    # https://stackoverflow.com/a/35165997
+    payload = re.sub(r"""\s(xmlns="[^"]+"|xmlns='[^']+')""", '', payload, count=1)
     report = ET.fromstring(payload)
-    org_name = text_assert_some(report.find("report_metadata/org_name"))
-    date_start = int_assert_some(
-        report.find("report_metadata/date_range/begin"))
+    org_name = text_assert_some(report, "report_metadata/org_name")
+    date_start = int_assert_some(report, "report_metadata/date_range/begin")
     json_date_start = datetime.datetime.fromtimestamp(
         date_start, datetime.timezone.utc).isoformat()
-    date_end = int_assert_some(
-        report.find("report_metadata/date_range/end"))
+    date_end = int_assert_some(report, "report_metadata/date_range/end")
     json_date_end = datetime.datetime.fromtimestamp(
         date_end, datetime.timezone.utc).isoformat()
-    report_id = text_assert_some(report.find("report_metadata/report_id"))
+    report_id = text_assert_some(report, "report_metadata/report_id")
     for record in report.findall("record"):
-        source_ip = text_assert_some(record.find("row/source_ip"))
-        count = int_assert_some(record.find("row/count"))
-        pe_dkim_result = text_assert_some(
-            record.find("row/policy_evaluated/dkim"))
-        pe_spf_result = text_assert_some(
-            record.find("row/policy_evaluated/spf"))
-        from_domain = text_or_none(record.find("identifiers/header_from"))
-        envelope_to = text_or_none(record.find("identifiers/envelope_to"))
-        dkim_domain = text_or_none(record.find("auth_results/dkim/domain"))
-        dkim_result = text_assert_some(record.find("auth_results/dkim/result"))
-        dkim_selector = text_or_none(record.find("auth_results/dkim/selector"))
-        spf_domain = text_or_none(record.find("auth_results/spf/domain"))
-        spf_result = text_assert_some(record.find("auth_results/spf/result"))
+        source_ip = text_assert_some(record, "row/source_ip")
+        count = int_assert_some(record, "row/count")
+        pe_dkim_result = text_assert_some(record, "row/policy_evaluated/dkim")
+        pe_spf_result = text_assert_some(record, "row/policy_evaluated/spf")
+        from_domain = text_or_none(record, "identifiers/header_from")
+        envelope_to = text_or_none(record, "identifiers/envelope_to")
+        dkim_domain = text_or_none(record, "auth_results/dkim/domain")
+        dkim_result = text_or_none(record, "auth_results/dkim/result")
+        dkim_selector = text_or_none(record, "auth_results/dkim/selector")
+        spf_domain = text_or_none(record, "auth_results/spf/domain")
+        spf_result = text_or_none(record, "auth_results/spf/result")
         storage["dmarc"].append({
             "org_name": org_name,
             "date_start": json_date_start,
@@ -142,7 +143,7 @@ def decode_xml_report(payload: str, storage: StorageDict) -> bool:
     return True
 
 
-def decode_report(payload: str, filename: Optional[str], storage: StorageDict) -> bool:
+def decode_report(payload: str, filename: str | None, storage: StorageDict) -> bool:
     """Decode an uncompressed report."""
     if not filename:
         try:
@@ -170,7 +171,7 @@ def decode_report(payload: str, filename: Optional[str], storage: StorageDict) -
         return False
 
 
-def decode_one_attachment(payload: bytes, filename: Optional[str], content_type: Optional[str], storage: StorageDict) -> bool:
+def decode_one_attachment(payload: bytes, filename: str | None, content_type: str | None, storage: StorageDict) -> bool:
     """Decode one attachment.
 
     Returns `True` if processed, `False` if not.
@@ -225,7 +226,7 @@ def decode_one_message(msg: Message, storage: StorageDict) -> bool:
     return used
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 6:
         eprint(
             "Usage: parsereports.py <username> <password> <server> <port> <stotagefile>")
@@ -241,14 +242,18 @@ def main():
     }
     with imaplib.IMAP4_SSL(server, port) as imap:
         assert imap.login(username, password)[0] == "OK"
+        status: str
+        data: list[bytes | None]
         status, data = imap.select("INBOX")
         assert status == "OK"
+        assert data[0], "Invalid response"
         num_msgs = int(data[0].decode("utf-8"))
         # Process all messages
         for i in range(num_msgs):
-            status, data = imap.fetch(str(i + 1), "(RFC822)")
+            status, payload = imap.fetch(str(i + 1), "(RFC822)")
             assert status == "OK"
-            msg = email.message_from_bytes(data[0][1])
+            assert payload[0], "Fetched no data"
+            msg = email.message_from_bytes(payload[0][1])
             try:
                 used = decode_one_message(msg, new)
             except InvalidReportError as e:
