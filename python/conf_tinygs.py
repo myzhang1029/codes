@@ -4,6 +4,8 @@
 #  conf_tinygs.py
 #
 #  Copyright (C) 2024 Zhang Maiyun <maz005@ucsd.edu>
+#   As a project developed during Maiyun's participation in the UCSD SRIP program,
+#   The University of California may have claims to this work.
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -20,11 +22,7 @@
 #
 
 
-"""Configure TinyGS Gateways.
-
-As a project developed during Maiyun's participation in the UCSD SRIP program,
-The University of California may have claims to this work.
-"""
+"""Configure TinyGS Gateways."""
 
 
 import sys
