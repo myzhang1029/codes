@@ -1,0 +1,507 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='WolframDesktop 13.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       161,          7]
+NotebookDataLength[     21413,        497]
+NotebookOptionsPosition[     20449,        471]
+NotebookOutlinePosition[     20883,        488]
+CellTagsIndexPosition[     20840,        485]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"#", ",", 
+      RowBox[{"Sequence", "@@", 
+       RowBox[{"Table", "[", 
+        RowBox[{
+         RowBox[{"ChemicalData", "[", 
+          RowBox[{"#", ",", "i"}], "]"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"i", ",", 
+           RowBox[{"{", 
+            RowBox[{
+            "\"\<BoilingPoint\>\"", ",", "\"\<IUPACName\>\"", ",", 
+             "\"\<Formula\>\""}], "}"}]}], "}"}]}], "]"}]}]}], "}"}], "&"}], "/@", 
+   RowBox[{"{", 
+    RowBox[{
+     TemplateBox[{"\"heptacosane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Heptacosane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Heptacosane\\\"]\"", "\"chemical\""},
+      "Entity"], ",", 
+     TemplateBox[{"\"tetratriacontane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Tetratriacontane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Tetratriacontane\\\"]\"", 
+       "\"chemical\""},
+      "Entity"], ",", 
+     TemplateBox[{"\"tricosane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Tricosane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Tricosane\\\"]\"", "\"chemical\""},
+      "Entity"], ",", 
+     TemplateBox[{"\"pristane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Pristane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Pristane\\\"]\"", "\"chemical\""},
+      "Entity"], ",", 
+     TemplateBox[{"\"N-eicosane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Eicosane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Eicosane\\\"]\"", "\"chemical\""},
+      "Entity"], ",", 
+     TemplateBox[{"\"isononane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Isononane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Isononane\\\"]\"", "\"chemical\""},
+      "Entity"], ",", 
+     TemplateBox[{"\"2-methylnonane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"2Methylnonane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"2Methylnonane\\\"]\"", "\"chemical\""},
+      
+      "Entity"], ",", 
+     TemplateBox[{"\"isodecane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Isodecane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Isodecane\\\"]\"", "\"chemical\""},
+      "Entity"]}], "}"}]}], "//", "Grid"}]], "Input",
+ CellChangeTimes->{{3.867065744690112*^9, 3.867065803789276*^9}, {
+  3.8670658357146378`*^9, 3.8670658378469954`*^9}, {3.867065880258456*^9, 
+  3.8670658821272*^9}, {3.867065970102668*^9, 3.867066026899591*^9}, {
+  3.867066180056222*^9, 3.867066181452023*^9}, {3.8670662744296093`*^9, 
+  3.8670662748857613`*^9}, {3.867066359781054*^9, 3.8670663603463793`*^9}, {
+  3.867067466117508*^9, 3.867067496530352*^9}, {3.867067565900959*^9, 
+  3.8670675682308607`*^9}, {3.867067676571937*^9, 3.867067687678418*^9}},
+ CellLabel->
+  "In[255]:=",ExpressionUUID->"e4d3dc6c-148d-4115-af1a-e681a7e5a3a2"],
+
+Cell[BoxData[
+ TagBox[GridBox[{
+    {
+     TemplateBox[{"\"heptacosane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Heptacosane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Heptacosane\\\"]\"", "\"chemical\""},
+      "Entity"], 
+     TemplateBox[{
+      "270.`", "\"\[Degree]C\"", "degrees Celsius", "\"DegreesCelsius\""},
+      "Quantity"], "\<\"heptacosane\"\>", 
+     StyleBox[
+      TemplateBox[{"\"C\"", 
+        SubscriptBox["\"H\"", "3"], 
+        SubscriptBox[
+         TemplateBox[{"\"(\"", "\"C\"", 
+           SubscriptBox["\"H\"", "2"], "\")\""}, "RowDefault"], "25"], 
+        "\"C\"", 
+        SubscriptBox["\"H\"", "3"]},
+       "RowDefault"],
+      StripOnInput->False,
+      ScriptBaselineShifts->{0.5, 0.75}]},
+    {
+     TemplateBox[{"\"tetratriacontane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Tetratriacontane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Tetratriacontane\\\"]\"", 
+       "\"chemical\""},
+      "Entity"], 
+     TemplateBox[{
+      "285.`", "\"\[Degree]C\"", "degrees Celsius", "\"DegreesCelsius\""},
+      "Quantity"], "\<\"tetratriacontane\"\>", 
+     StyleBox[
+      TemplateBox[{"\"C\"", 
+        SubscriptBox["\"H\"", "3"], 
+        SubscriptBox[
+         TemplateBox[{"\"(\"", "\"C\"", 
+           SubscriptBox["\"H\"", "2"], "\")\""}, "RowDefault"], "32"], 
+        "\"C\"", 
+        SubscriptBox["\"H\"", "3"]},
+       "RowDefault"],
+      StripOnInput->False,
+      ScriptBaselineShifts->{0.5, 0.75}]},
+    {
+     TemplateBox[{"\"tricosane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Tricosane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Tricosane\\\"]\"", "\"chemical\""},
+      "Entity"], 
+     TemplateBox[{
+      "199.5`", "\"\[Degree]C\"", "degrees Celsius", "\"DegreesCelsius\""},
+      "Quantity"], "\<\"tricosane\"\>", 
+     StyleBox[
+      TemplateBox[{"\"C\"", 
+        SubscriptBox["\"H\"", "3"], 
+        SubscriptBox[
+         TemplateBox[{"\"(\"", "\"C\"", 
+           SubscriptBox["\"H\"", "2"], "\")\""}, "RowDefault"], "21"], 
+        "\"C\"", 
+        SubscriptBox["\"H\"", "3"]},
+       "RowDefault"],
+      StripOnInput->False,
+      ScriptBaselineShifts->{0.5, 0.75}]},
+    {
+     TemplateBox[{"\"pristane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Pristane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Pristane\\\"]\"", "\"chemical\""},
+      "Entity"], 
+     TemplateBox[{
+      "68.`", "\"\[Degree]C\"", "degrees Celsius", "\"DegreesCelsius\""},
+      "Quantity"], "\<\"2,6,10,14-tetramethylpentadecane\"\>", 
+     StyleBox[
+      TemplateBox[{
+        SubscriptBox[
+         TemplateBox[{"\"(\"", "\"C\"", 
+           SubscriptBox["\"H\"", "3"], "\")\""}, "RowDefault"], "2"], "\"C\"",
+         "\"H\"", 
+        SubscriptBox[
+         TemplateBox[{"\"(\"", "\"C\"", 
+           SubscriptBox["\"H\"", "2"], "\")\""}, "RowDefault"], "3"], "\"C\"",
+         "\"H\"", 
+        TemplateBox[{"\"(\"", "\"C\"", 
+          SubscriptBox["\"H\"", "3"], "\")\""}, "RowDefault"], 
+        SubscriptBox[
+         TemplateBox[{"\"(\"", "\"C\"", 
+           SubscriptBox["\"H\"", "2"], "\")\""}, "RowDefault"], "3"], "\"C\"",
+         "\"H\"", 
+        TemplateBox[{"\"(\"", "\"C\"", 
+          SubscriptBox["\"H\"", "3"], "\")\""}, "RowDefault"], 
+        SubscriptBox[
+         TemplateBox[{"\"(\"", "\"C\"", 
+           SubscriptBox["\"H\"", "2"], "\")\""}, "RowDefault"], "3"], "\"C\"",
+         "\"H\"", 
+        SubscriptBox[
+         TemplateBox[{"\"(\"", "\"C\"", 
+           SubscriptBox["\"H\"", "3"], "\")\""}, "RowDefault"], "2"]},
+       "RowDefault"],
+      StripOnInput->False,
+      ScriptBaselineShifts->{0.5, 0.75}]},
+    {
+     TemplateBox[{"\"N-eicosane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Eicosane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Eicosane\\\"]\"", "\"chemical\""},
+      "Entity"], 
+     TemplateBox[{
+      "220.`", "\"\[Degree]C\"", "degrees Celsius", "\"DegreesCelsius\""},
+      "Quantity"], "\<\"icosane\"\>", 
+     StyleBox[
+      TemplateBox[{"\"C\"", 
+        SubscriptBox["\"H\"", "3"], 
+        SubscriptBox[
+         TemplateBox[{"\"(\"", "\"C\"", 
+           SubscriptBox["\"H\"", "2"], "\")\""}, "RowDefault"], "18"], 
+        "\"C\"", 
+        SubscriptBox["\"H\"", "3"]},
+       "RowDefault"],
+      StripOnInput->False,
+      ScriptBaselineShifts->{0.5, 0.75}]},
+    {
+     TemplateBox[{"\"isononane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Isononane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Isononane\\\"]\"", "\"chemical\""},
+      "Entity"], 
+     TemplateBox[{
+      "129.`3.", "\"\[Degree]C\"", "degrees Celsius", "\"DegreesCelsius\""},
+      "Quantity"], "\<\"2-methyloctane\"\>", 
+     StyleBox[
+      TemplateBox[{
+        SubscriptBox["\"C\"", "9"], 
+        SubscriptBox["\"H\"", "20"]},
+       "RowDefault"],
+      StripOnInput->False,
+      ScriptBaselineShifts->{0.5, 0.75}]},
+    {
+     TemplateBox[{"\"2-methylnonane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"2Methylnonane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"2Methylnonane\\\"]\"", "\"chemical\""},
+      
+      "Entity"], 
+     TemplateBox[{
+      "167.`3.", "\"\[Degree]C\"", "degrees Celsius", "\"DegreesCelsius\""},
+      "Quantity"], "\<\"2-methylnonane\"\>", 
+     StyleBox[
+      TemplateBox[{
+        SubscriptBox["\"C\"", "10"], 
+        SubscriptBox["\"H\"", "22"]},
+       "RowDefault"],
+      StripOnInput->False,
+      ScriptBaselineShifts->{0.5, 0.75}]},
+    {
+     TemplateBox[{"\"isodecane\"", 
+       RowBox[{"Entity", "[", 
+         RowBox[{"\"Chemical\"", ",", "\"Isodecane\""}], "]"}], 
+       "\"Entity[\\\"Chemical\\\", \\\"Isodecane\\\"]\"", "\"chemical\""},
+      "Entity"], 
+     TemplateBox[{
+      "152.`3.", "\"\[Degree]C\"", "degrees Celsius", "\"DegreesCelsius\""},
+      "Quantity"], "\<\"2-methylnonane\"\>", 
+     StyleBox[
+      TemplateBox[{
+        SubscriptBox["\"C\"", "10"], 
+        SubscriptBox["\"H\"", "22"]},
+       "RowDefault"],
+      StripOnInput->False,
+      ScriptBaselineShifts->{0.5, 0.75}]}
+   },
+   AutoDelete->False,
+   GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+  "Grid"]], "Output",
+ CellChangeTimes->{{3.867067557079238*^9, 3.867067568680937*^9}, 
+   3.86706769271312*^9},
+ CellLabel->
+  "Out[255]=",ExpressionUUID->"44ea026c-64f8-4ea0-ae39-8d47330d467e"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"ChemicalData", "[", 
+    RowBox[{"#", ",", "\"\<MoleculePlot\>\""}], "]"}], "&"}], "/@", 
+  RowBox[{"{", 
+   RowBox[{
+    TemplateBox[{"\"2-methylnonane\"", 
+      RowBox[{"Entity", "[", 
+        RowBox[{"\"Chemical\"", ",", "\"2Methylnonane\""}], "]"}], 
+      "\"Entity[\\\"Chemical\\\", \\\"2Methylnonane\\\"]\"", "\"chemical\""},
+     "Entity"], ",", 
+    TemplateBox[{"\"isodecane\"", 
+      RowBox[{"Entity", "[", 
+        RowBox[{"\"Chemical\"", ",", "\"Isodecane\""}], "]"}], 
+      "\"Entity[\\\"Chemical\\\", \\\"Isodecane\\\"]\"", "\"chemical\""},
+     "Entity"]}], "}"}]}]], "Input",
+ CellChangeTimes->{{3.867067544998309*^9, 3.867067589002708*^9}},
+ CellLabel->
+  "In[253]:=",ExpressionUUID->"ddcd6553-b4c0-4a09-9819-31e726d08793"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   Graphics3DBox[
+    {AbsoluteThickness[3], EdgeForm[None], Specularity[
+      GrayLevel[1], 100], GraphicsComplex3DBox[CompressedData["
+1:eJwtVA1QVFUU3sFEUzR0lIlgCFckiBgtwJ9w7eC6CJLKgwUWFttl4bE77Ab7
+Q9CyK4LEIJmiowIZzvqHziBSUZnTjM4RrGEydHUyKsYcLScCMSulMfu79569
+M2/uu/e8c853vvOdt8hUlSMHKRSK5eyZxp529U7bz7M3w42Y4MYDTfFw3vfM
+0hs/bYTBh3HFbUoz5JyNap64WgjfXf4z98dECVJe+ywzpH8THtWc+eOfB1qY
+cTlc+l6/EJ5tnpDO9rhgHQv3uDUVXl3RmmbUFAB3l+LM+M6oRVHVGIp13S+o
+Iy8pYfgrvioxe1dH5fzBlcjdoxYasZyv/lq8y47Npwpx5JhdNWuGAfvW36pb
+UOOBWfzi5S3A3Zr8WhD2bS74JfbFmb22LBT27VZQ8ZetHooTYUCBw2tHkder
+JnxLktDBPxwrpfo0eSDORgnzfadOf+ubT3adhe5DS6HrYvQHzqFVKHiRZLrf
+IYPAfcIEIUEJLWHxGvQsYIif18Mb+55+In+NDo8zmCOjuZjEl1WGljCWcXY2
+8RZbDU345RFNugYteye9r6TEg/BX2ilPYzow1oMSOiQQ/pdKqc7bOkzsP/Tr
+yW8yoLht4GFcTDnyrdinJdwZZsrbYqd9UKJ87TLxEOLFj4dqzvuK0invcDbG
+80D7a1Dw97kFf7+20RTqz0URv9MDok9zzKDga6gMRFx3A/Ay505mwQVWxpmE
+POqL2gOib+0y/DU5gaumRePBd9lyO0k3j5WQwcx9/zkpTsTrpIteA+EfqqA4
+BW7gdNSVFZEOpmzk974Xr7C2db+nQoFH56J+J9WisG8rp7O6mnTV1YBC10UB
+nkaq8KWZvZFF6zKhmhew+0k03vErR0v0pHs5B3p/YwQYV+PXCXL47T2pIPCf
+M9P+yABlqTc376pNCeiynPCvLAFOm06lB6YWRm0mzuWNekoH+6eCDZ1j6ci8
+OioPSshYS+y/YwDzR+OuT0rSqD9jLmjgPE+PQjcXtm0D8fCpFW91zes+50iG
+ih8cb+++r4YpVs6AW8aBsh6jdjwTd/I5a1URX29WICPnYrR/A+mxL6Cbe1V4
+mI15TOwKqvO6ifpy042LRx/VV9hyyD5eQDwuriX7sAlFvdZCmteWgB6um+CL
+LDZQywyk2+R66OG8debBc2wsI//VAqe7rdhDvIWbgLc/wr+W/g9/O8HC6z+9
+nPpktBP+YAfx92E+ruHAl1iJB2sN8DG0zNGSLlfbKH6YF++fZEjSAnodd6CI
+o3Oj4DW4lObJ4MS3OG59PX33wET6Sbbj/+7dZnM=
+      "], {
+       {RGBColor[0.65, 0.7, 0.7], SphereBox[11, 24.], SphereBox[12, 24.], 
+        SphereBox[13, 24.], SphereBox[14, 24.], SphereBox[15, 24.], 
+        SphereBox[16, 24.], SphereBox[17, 24.], SphereBox[18, 24.], 
+        SphereBox[19, 24.], SphereBox[20, 24.], SphereBox[21, 24.], 
+        SphereBox[22, 24.], SphereBox[23, 24.], SphereBox[24, 24.], 
+        SphereBox[25, 24.], SphereBox[26, 24.], SphereBox[27, 24.], 
+        SphereBox[28, 24.], SphereBox[29, 24.], SphereBox[30, 24.], 
+        SphereBox[31, 24.], SphereBox[32, 24.]}, 
+       {RGBColor[0.4, 0.4, 0.4], SphereBox[1, 34.], SphereBox[2, 34.], 
+        SphereBox[3, 34.], SphereBox[4, 34.], SphereBox[5, 34.], 
+        SphereBox[6, 34.], SphereBox[7, 34.], SphereBox[8, 34.], 
+        SphereBox[9, 34.], SphereBox[10, 34.]}, 
+       {RGBColor[0.65, 0.7, 0.7], CylinderBox[{33, 11}, 15.], 
+        CylinderBox[{34, 12}, 15.], CylinderBox[{35, 13}, 15.], 
+        CylinderBox[{36, 14}, 15.], CylinderBox[{37, 15}, 15.], 
+        CylinderBox[{38, 16}, 15.], CylinderBox[{39, 17}, 15.], 
+        CylinderBox[{40, 18}, 15.], CylinderBox[{41, 19}, 15.], 
+        CylinderBox[{42, 20}, 15.], CylinderBox[{43, 21}, 15.], 
+        CylinderBox[{44, 22}, 15.], CylinderBox[{45, 23}, 15.], 
+        CylinderBox[{46, 24}, 15.], CylinderBox[{47, 25}, 15.], 
+        CylinderBox[{48, 26}, 15.], CylinderBox[{49, 27}, 15.], 
+        CylinderBox[{50, 28}, 15.], CylinderBox[{51, 29}, 15.], 
+        CylinderBox[{52, 30}, 15.], CylinderBox[{53, 31}, 15.], 
+        CylinderBox[{54, 32}, 15.]}, 
+       {RGBColor[0.4, 0.4, 0.4], CylinderBox[{1, 2}, 15.], 
+        CylinderBox[{1, 3}, 15.], CylinderBox[{1, 33}, 15.], 
+        CylinderBox[{1, 34}, 15.], CylinderBox[{2, 4}, 15.], 
+        CylinderBox[{2, 35}, 15.], CylinderBox[{2, 36}, 15.], 
+        CylinderBox[{3, 5}, 15.], CylinderBox[{3, 37}, 15.], 
+        CylinderBox[{3, 38}, 15.], CylinderBox[{4, 8}, 15.], 
+        CylinderBox[{4, 9}, 15.], CylinderBox[{4, 39}, 15.], 
+        CylinderBox[{5, 6}, 15.], CylinderBox[{5, 40}, 15.], 
+        CylinderBox[{5, 41}, 15.], CylinderBox[{6, 7}, 15.], 
+        CylinderBox[{6, 42}, 15.], CylinderBox[{6, 43}, 15.], 
+        CylinderBox[{7, 10}, 15.], CylinderBox[{7, 44}, 15.], 
+        CylinderBox[{7, 45}, 15.], CylinderBox[{8, 46}, 15.], 
+        CylinderBox[{8, 47}, 15.], CylinderBox[{8, 48}, 15.], 
+        CylinderBox[{9, 49}, 15.], CylinderBox[{9, 50}, 15.], 
+        CylinderBox[{9, 51}, 15.], CylinderBox[{10, 52}, 15.], 
+        CylinderBox[{10, 53}, 15.], CylinderBox[{10, 54}, 15.]}}]},
+    Boxed->False,
+    ImageSize->325.4100192385145,
+    Lighting->"Neutral",
+    ViewPoint->{
+     1.298566188177811, -2.3972384011742824`, -1.9978423118095985`}], ",", 
+   Graphics3DBox[
+    {AbsoluteThickness[3], EdgeForm[None], Specularity[
+      GrayLevel[1], 100], GraphicsComplex3DBox[CompressedData["
+1:eJwtVA1QVFUU3sFEUzR0lIlgCFckiBgtwJ9w7eC6CJLKgwUWFttl4bE77Ab7
+Q9CyK4LEIJmiowIZzvqHziBSUZnTjM4RrGEydHUyKsYcLScCMSulMfu79569
+M2/uu/e8c853vvOdt8hUlSMHKRSK5eyZxp529U7bz7M3w42Y4MYDTfFw3vfM
+0hs/bYTBh3HFbUoz5JyNap64WgjfXf4z98dECVJe+ywzpH8THtWc+eOfB1qY
+cTlc+l6/EJ5tnpDO9rhgHQv3uDUVXl3RmmbUFAB3l+LM+M6oRVHVGIp13S+o
+Iy8pYfgrvioxe1dH5fzBlcjdoxYasZyv/lq8y47Npwpx5JhdNWuGAfvW36pb
+UOOBWfzi5S3A3Zr8WhD2bS74JfbFmb22LBT27VZQ8ZetHooTYUCBw2tHkder
+JnxLktDBPxwrpfo0eSDORgnzfadOf+ubT3adhe5DS6HrYvQHzqFVKHiRZLrf
+IYPAfcIEIUEJLWHxGvQsYIif18Mb+55+In+NDo8zmCOjuZjEl1WGljCWcXY2
+8RZbDU345RFNugYteye9r6TEg/BX2ilPYzow1oMSOiQQ/pdKqc7bOkzsP/Tr
+yW8yoLht4GFcTDnyrdinJdwZZsrbYqd9UKJ87TLxEOLFj4dqzvuK0invcDbG
+80D7a1Dw97kFf7+20RTqz0URv9MDok9zzKDga6gMRFx3A/Ay505mwQVWxpmE
+POqL2gOib+0y/DU5gaumRePBd9lyO0k3j5WQwcx9/zkpTsTrpIteA+EfqqA4
+BW7gdNSVFZEOpmzk974Xr7C2db+nQoFH56J+J9WisG8rp7O6mnTV1YBC10UB
+nkaq8KWZvZFF6zKhmhew+0k03vErR0v0pHs5B3p/YwQYV+PXCXL47T2pIPCf
+M9P+yABlqTc376pNCeiynPCvLAFOm06lB6YWRm0mzuWNekoH+6eCDZ1j6ci8
+OioPSshYS+y/YwDzR+OuT0rSqD9jLmjgPE+PQjcXtm0D8fCpFW91zes+50iG
+ih8cb+++r4YpVs6AW8aBsh6jdjwTd/I5a1URX29WICPnYrR/A+mxL6Cbe1V4
+mI15TOwKqvO6ifpy042LRx/VV9hyyD5eQDwuriX7sAlFvdZCmteWgB6um+CL
+LDZQywyk2+R66OG8debBc2wsI//VAqe7rdhDvIWbgLc/wr+W/g9/O8HC6z+9
+nPpktBP+YAfx92E+ruHAl1iJB2sN8DG0zNGSLlfbKH6YF++fZEjSAnodd6CI
+o3Oj4DW4lObJ4MS3OG59PX33wET6Sbbj/+7dZnM=
+      "], {
+       {RGBColor[0.65, 0.7, 0.7], SphereBox[11, 24.], SphereBox[12, 24.], 
+        SphereBox[13, 24.], SphereBox[14, 24.], SphereBox[15, 24.], 
+        SphereBox[16, 24.], SphereBox[17, 24.], SphereBox[18, 24.], 
+        SphereBox[19, 24.], SphereBox[20, 24.], SphereBox[21, 24.], 
+        SphereBox[22, 24.], SphereBox[23, 24.], SphereBox[24, 24.], 
+        SphereBox[25, 24.], SphereBox[26, 24.], SphereBox[27, 24.], 
+        SphereBox[28, 24.], SphereBox[29, 24.], SphereBox[30, 24.], 
+        SphereBox[31, 24.], SphereBox[32, 24.]}, 
+       {RGBColor[0.4, 0.4, 0.4], SphereBox[1, 34.], SphereBox[2, 34.], 
+        SphereBox[3, 34.], SphereBox[4, 34.], SphereBox[5, 34.], 
+        SphereBox[6, 34.], SphereBox[7, 34.], SphereBox[8, 34.], 
+        SphereBox[9, 34.], SphereBox[10, 34.]}, 
+       {RGBColor[0.65, 0.7, 0.7], CylinderBox[{33, 11}, 15.], 
+        CylinderBox[{34, 12}, 15.], CylinderBox[{35, 13}, 15.], 
+        CylinderBox[{36, 14}, 15.], CylinderBox[{37, 15}, 15.], 
+        CylinderBox[{38, 16}, 15.], CylinderBox[{39, 17}, 15.], 
+        CylinderBox[{40, 18}, 15.], CylinderBox[{41, 19}, 15.], 
+        CylinderBox[{42, 20}, 15.], CylinderBox[{43, 21}, 15.], 
+        CylinderBox[{44, 22}, 15.], CylinderBox[{45, 23}, 15.], 
+        CylinderBox[{46, 24}, 15.], CylinderBox[{47, 25}, 15.], 
+        CylinderBox[{48, 26}, 15.], CylinderBox[{49, 27}, 15.], 
+        CylinderBox[{50, 28}, 15.], CylinderBox[{51, 29}, 15.], 
+        CylinderBox[{52, 30}, 15.], CylinderBox[{53, 31}, 15.], 
+        CylinderBox[{54, 32}, 15.]}, 
+       {RGBColor[0.4, 0.4, 0.4], CylinderBox[{1, 2}, 15.], 
+        CylinderBox[{1, 3}, 15.], CylinderBox[{1, 33}, 15.], 
+        CylinderBox[{1, 34}, 15.], CylinderBox[{2, 4}, 15.], 
+        CylinderBox[{2, 35}, 15.], CylinderBox[{2, 36}, 15.], 
+        CylinderBox[{3, 5}, 15.], CylinderBox[{3, 37}, 15.], 
+        CylinderBox[{3, 38}, 15.], CylinderBox[{4, 8}, 15.], 
+        CylinderBox[{4, 9}, 15.], CylinderBox[{4, 39}, 15.], 
+        CylinderBox[{5, 6}, 15.], CylinderBox[{5, 40}, 15.], 
+        CylinderBox[{5, 41}, 15.], CylinderBox[{6, 7}, 15.], 
+        CylinderBox[{6, 42}, 15.], CylinderBox[{6, 43}, 15.], 
+        CylinderBox[{7, 10}, 15.], CylinderBox[{7, 44}, 15.], 
+        CylinderBox[{7, 45}, 15.], CylinderBox[{8, 46}, 15.], 
+        CylinderBox[{8, 47}, 15.], CylinderBox[{8, 48}, 15.], 
+        CylinderBox[{9, 49}, 15.], CylinderBox[{9, 50}, 15.], 
+        CylinderBox[{9, 51}, 15.], CylinderBox[{10, 52}, 15.], 
+        CylinderBox[{10, 53}, 15.], CylinderBox[{10, 54}, 15.]}}]},
+    Boxed->False,
+    ImageSize->325.4100192385145,
+    Lighting->"Neutral",
+    ViewPoint->{
+     1.298566188177811, -2.3972384011742824`, -1.9978423118095985`}]}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.8670675893565474`*^9},
+ CellLabel->
+  "Out[253]=",ExpressionUUID->"9ec83334-adcd-4259-910a-c3d77024bda5"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"MoleculeMatchQ", "[", 
+  RowBox[{
+   TemplateBox[{"\"2-methylnonane\"", 
+     RowBox[{"Entity", "[", 
+       RowBox[{"\"Chemical\"", ",", "\"2Methylnonane\""}], "]"}], 
+     "\"Entity[\\\"Chemical\\\", \\\"2Methylnonane\\\"]\"", "\"chemical\""},
+    "Entity"], ",", 
+   TemplateBox[{"\"isodecane\"", 
+     RowBox[{"Entity", "[", 
+       RowBox[{"\"Chemical\"", ",", "\"Isodecane\""}], "]"}], 
+     "\"Entity[\\\"Chemical\\\", \\\"Isodecane\\\"]\"", "\"chemical\""},
+    "Entity"]}], "]"}]], "Input",
+ CellChangeTimes->{{3.8670676526386538`*^9, 3.867067658570754*^9}},
+ CellLabel->
+  "In[254]:=",ExpressionUUID->"fc1d6931-6bd4-468b-84f9-21f1014e3219"],
+
+Cell[BoxData["True"], "Output",
+ CellChangeTimes->{3.867067659936249*^9},
+ CellLabel->
+  "Out[254]=",ExpressionUUID->"03fbc3e5-a2d8-42e5-9a76-39301a40ce26"]
+}, Open  ]]
+},
+WindowSize->{808, 648},
+WindowMargins->{{Automatic, 43}, {0, Automatic}},
+TaggingRules-><|"TryRealOnly" -> False|>,
+FrontEndVersion->"13.1 for Mac OS X ARM (64-bit) (June 21, 2022)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"1213a5b7-5f29-4b43-a698-6dd85bc8229f"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[583, 22, 3048, 69, 135, "Input",ExpressionUUID->"e4d3dc6c-148d-4115-af1a-e681a7e5a3a2"],
+Cell[3634, 93, 6533, 176, 263, "Output",ExpressionUUID->"44ea026c-64f8-4ea0-ae39-8d47330d467e"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10204, 274, 791, 19, 40, "Input",ExpressionUUID->"ddcd6553-b4c0-4a09-9819-31e726d08793"],
+Cell[10998, 295, 8565, 148, 344, "Output",ExpressionUUID->"9ec83334-adcd-4259-910a-c3d77024bda5"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[19600, 448, 674, 15, 40, "Input",ExpressionUUID->"fc1d6931-6bd4-468b-84f9-21f1014e3219"],
+Cell[20277, 465, 156, 3, 34, "Output",ExpressionUUID->"03fbc3e5-a2d8-42e5-9a76-39301a40ce26"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
+

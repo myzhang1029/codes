@@ -1,0 +1,129 @@
+Notebook[{Cell[
+CellGroupData[{Cell[
+"\<Wolfram High School Summer Camp Homework\>",
+"Title",CellChangeTimes -> {{3.800625388543873`*^9,3.8006253951064568`*^9}},ExpressionUUID -> "ef72069f-f66d-4bbf-b732-a5b8d41492aa"],Cell[
+
+"\<Welcome to the Wolfram High School Summer Camp! We\[CloseCurlyQuote]re really excited to have you! So that we\[CloseCurlyQuote]re all on the same page, and prepared to make the most of the Camp experience this year, we\[CloseCurlyQuote]ve put together some homework for you to do to before we start.\>",
+"Text",CellChangeTimes -> {{3.800625397903721`*^9,3.800625405271454`*^9},{3.800625458644349`*^9,3.800625517168378`*^9}},
+ExpressionUUID -> "80e0528a-8ac6-4084-8ab2-59abdddc05dd"],Cell[
+"\<Below, you\[CloseCurlyQuote]ll find a list of chapters from the Elementary Introduction to Wolfram Language (EIWL) book. For each chapter, we recommend that you as many of the exercises as you can.\>",
+"Text",CellChangeTimes -> {{3.8006256918623667`*^9,3.800625757008625`*^9}},ExpressionUUID -> "2aae0a8f-4784-4199-aefb-2b0fa5b1030e"],Cell[
+
+"\<There are two ways you can work through EIWL - as an interactive textbook or as a video course. You can choose which mode works best for your learning style.\>",
+"Text",CellChangeTimes -> {{3.800625676264372`*^9,3.8006256780169077`*^9},{3.8006257462369623`*^9,3.8006257836060038`*^9},{3.861270124312973`*^9,3.861270128071713`*^9}},
+ExpressionUUID -> "7da40c4d-e356-4eb4-aa3a-4946c8cbb372"],Cell[
+CellGroupData[{Cell[
+TextData[
+ButtonBox["Interactive Textbook",BaseStyle -> "Hyperlink",ButtonData -> {URL["https://www.wolfram.com/language/elementary-introduction/2nd-ed/"],None},
+ButtonNote -> "https://www.wolfram.com/language/elementary-introduction/2nd-ed/"]],
+"Subsection",CellChangeTimes -> {{3.800625792021674`*^9,3.800625801406043`*^9}},ExpressionUUID -> "5f27f016-04a4-4c3b-8aff-1c09fb185e61"],Cell[
+
+"\<To complete the exercises, click \[OpenCurlyDoubleQuote]Check Your Answers In The Cloud\[CloseCurlyDoubleQuote].\>",
+"Text",CellChangeTimes -> {{3.800626339944364`*^9,3.80062638885639`*^9}},ExpressionUUID -> "64a6fc57-9c75-41b8-9d60-713a1413714a"]},
+Open],ExpressionUUID -> "7453ae4f-0197-49dc-9f34-45fa3d7b77ac"],Cell[
+CellGroupData[
+{Cell[
+TextData[ButtonBox["Video Course",BaseStyle -> "Hyperlink",ButtonData -> {URL[
+"https://www.wolfram.com/wolfram-u/an-elementary-introduction-to-the-wolfram-language/"],None},
+ButtonNote -> "https://www.wolfram.com/wolfram-u/an-elementary-introduction-to-the-wolfram-language/"]],
+"Subsection",CellChangeTimes -> {{3.800625813369972`*^9,3.8006258180148497`*^9}},
+ExpressionUUID -> "0e121e98-aece-4c79-b70b-76d89bd5e74b"],Cell[
+"\<To complete the exercises, click the \[OpenCurlyDoubleQuote]Exercises\[CloseCurlyDoubleQuote] tab in the top right of the screen.\>",
+"Text",CellChangeTimes -> {{3.8006263689773207`*^9,3.80062638652494`*^9}},ExpressionUUID -> "4d188e5f-7b13-42b2-a75e-33b4d29ea3b7"]},
+Open],ExpressionUUID -> "9b625072-e1ff-421a-afa7-52ebcf287745"],Cell[
+CellGroupData[
+{Cell[
+"\<Chapters to Complete\>","Section",CellChangeTimes -> {{3.800625822989257`*^9,3.80062583296413`*^9}},
+ExpressionUUID -> "a5fb8844-bb89-47c1-8a01-1bb834131dc5"],Cell[
+TextData[{StyleBox[
+"1",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["Starting",FontSlant -> Italic],StyleBox[" ",
+FontSlant -> Italic],StyleBox["out",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[
+":",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic]}]],StyleBox["Elementary",
+FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Arithmetic",FontSlant -> Italic],"\n",StyleBox[
+"2",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["Introducing",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["Functions",FontSlant -> Italic],"\n",StyleBox[
+"3",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["First",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"Look",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["at",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["Lists",FontSlant -> Italic],"\n",StyleBox["5",
+FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["Operations",FontSlant -> Italic],StyleBox[" ",
+FontSlant -> Italic],StyleBox["on",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"Lists",FontSlant -> Italic],"\n",StyleBox["6",FontSlant -> Italic],StyleBox[RowBox[
+{StyleBox[":",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic]}]],StyleBox[
+"Making",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Tables",
+FontSlant -> Italic],"\n",StyleBox["13",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[
+":",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic]}]],StyleBox["Arrays",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["or",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"Lists",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["of",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["Lists",FontSlant -> Italic],"\n",StyleBox["30",
+FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["Rearranging",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["Lists",FontSlant -> Italic],"\n",StyleBox["31",
+FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["Parts",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"of",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Lists",FontSlant -> Italic],"\n",StyleBox[
+"34",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["Associations",FontSlant -> Italic],"\n",StyleBox[
+"38",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["Assigning",FontSlant -> Italic],StyleBox[" ",
+FontSlant -> Italic],StyleBox["Names",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"to",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Things",FontSlant -> Italic],"\n",StyleBox[
+"16",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["Real",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"World",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Data",FontSlant -> Italic],"\n",StyleBox[
+"25",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["Ways",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"to",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Apply",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["Functions",FontSlant -> Italic],"\n",StyleBox[
+"26",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["Pure",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"Anonymous",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Functions",
+FontSlant -> Italic],"\n",StyleBox["27",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[
+":",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic]}]],StyleBox["Applying",
+FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Functions",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["Repeatedly",FontSlant -> Italic],"\n",StyleBox[
+"28",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["Tests",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"and",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Conditionals",
+FontSlant -> Italic],"\n",StyleBox["29",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[
+":",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic]}]],StyleBox["More",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["about",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"Pure",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Functions",
+FontSlant -> Italic],"\n",StyleBox["32",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[
+":",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic]}]],StyleBox["Patterns",
+FontSlant -> Italic],"\n",StyleBox["39",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[
+":",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic]}]],StyleBox["Immediate",
+FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["and",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["Delayed",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"Values",FontSlant -> Italic],"\n",StyleBox["40",FontSlant -> Italic],StyleBox[RowBox[
+{StyleBox[":",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic]}]],StyleBox[
+"Defining",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Your",
+FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Own",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["Functions",FontSlant -> Italic],"\n",StyleBox[
+"41",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[":",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic]}]],StyleBox["More",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox[
+"About",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Patterns",
+FontSlant -> Italic]}],"Text",CellChangeTimes -> {{3800625881.417651`,3800625970.162671`}},
+ExpressionUUID -> "51ac2284-6278-4280-82bd-e0bc4e6f2386"],Cell[
+CellGroupData[{Cell[
+
+"\<Extra Reading\>","Subsubsection",CellChangeTimes -> {{3.800625977139627`*^9,3.8006259885521297`*^9}},
+ExpressionUUID -> "20ab6430-99a9-4bfb-b098-5cdb6e6cb8c5"],Cell[
+"\<You should read these chapters for more practice on how to code well in Wolfram Language.\>",
+"Text",CellChangeTimes -> {{3.800626016340021`*^9,3.8006260456152763`*^9}},ExpressionUUID -> "27fc1079-d2cf-46fc-ba86-d1726b81e1b4"],Cell[
+TextData[
+{StyleBox["46",FontSlant -> Italic],StyleBox[RowBox[{StyleBox[" ",FontSlant -> Italic],StyleBox[
+":",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic]}]],StyleBox["Writing",
+FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["Good",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["Code",FontSlant -> Italic],"\n",StyleBox["47",
+FontSlant -> Italic],StyleBox[RowBox[{StyleBox[" ",FontSlant -> Italic],StyleBox[
+":",FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic]}]],StyleBox["Debugging",
+FontSlant -> Italic],StyleBox[" ",FontSlant -> Italic],StyleBox["your",FontSlant -> Italic],StyleBox[
+" ",FontSlant -> Italic],StyleBox["Code",FontSlant -> Italic]}],"Text",CellChangeTimes -> {{3800625989.909175`,3800625990.949107`}},
+ExpressionUUID -> "36c64601-a727-45e6-b328-a436f93531a8"]},Open],ExpressionUUID -> "7e88de65-4ffc-4837-8329-058014cfb98e"]},
+Open],ExpressionUUID -> "f8871670-035f-477c-8ece-53f9c1299376"]},Open],ExpressionUUID -> "c1ceb894-4942-4e93-ba5c-43bd663a6737"]},
+StyleDefinitions -> "Default.nb",WindowSize -> {965,855},WindowMargins -> {{362,Automatic},{Automatic,69}},
+FrontEndVersion -> "13. for Wolfram Cloud 1.62 (April 8, 2022)",ExpressionUUID -> "1fa484ff-9b5c-4a6a-88ef-1658f69aec29"]
