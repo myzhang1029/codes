@@ -71,8 +71,7 @@ fn read_fill_text(tmp_file: &mut File, eofstr: &str) -> io::Result<()> {
 
 /// Read from stdin and fill the temporary file (Binary)
 fn read_fill_bin(tmp_file: &mut File) -> io::Result<()> {
-    io::copy(&mut io::stdin(), tmp_file)?;
-    Ok(())
+    io::copy(&mut io::stdin(), tmp_file).map(|_| ())
 }
 
 /// Make temporary file according to the arguments
