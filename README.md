@@ -1,6 +1,6 @@
 # codes
 
-Some ungrouped code snippets I wrote which might be helpful or reusable.
+Some ~~ungrouped~~ code snippets I wrote which might be helpful or reusable.
 
 For description, please open the file/subdirectory.
 
@@ -13,6 +13,7 @@ I know that "code" is an uncountable noun. It just works, doesn't it?
 - [expfit_guess.py](python/expfit_guess.py): Guess the parameters of an exponential fit.
 - [differential_watt_meter](rpi-pico/differential_watt_meter): A differential watt meter using Raspberry Pi Pico.
 - [discharger](rpi-pico/discharger): Discharge a battery to a set voltage using Raspberry Pi Pico.
+- [init.m](Wolfram/init.m): My Mathematica startup script.
 - [prime2.c](c/prime2.c): List prime numbers up to a given number.
 - [prime3.c](c/prime3.c), [prime4.c](c/prime4.c), [prime5.c](c/prime5.c): List prime numbers in a given range with the Sieve of Eratosthenes.
 
