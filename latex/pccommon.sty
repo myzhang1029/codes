@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2024/06/05 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2024/11/21 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pccommon@bibstyle{mla}
@@ -239,6 +239,8 @@
 \DeclareMathOperator{\vol}{vol} % Volume of something
 \DeclareMathOperator{\trace}{tr} % Trace
 \DeclareMathOperator{\exd}{d} % Exterior derivative
+\DeclareMathOperator{\sinc}{sinc} % Sinc function
+\DeclareMathOperator{\rect}{rect} % Rectangular function
 \newcommand*{\dd}{\mathrm{d}} % For old documents. Use \odif from the `derivative' package instead.
 \newcommand*{\ii}{\ensuremath{i}} % Imaginary unit
 \newcommand*{\charf}{\mathbbm{1}} % Characteristic function
@@ -255,6 +257,8 @@
 \newcommand*{\permu}[2]{#1\text{P}#2} % Permutation
 \newcommand*{\combi}[2]{#1\text{C}#2} % Combination
 \newcommand*{\tr}{^{\text{\textsf{T}}}} % Transpose: use textsf to work around bugs with some fonts
+\newcommand*{\ctr}{^*} % Conjugate transpose
+\newcommand*{\conj}[1]{\overline{#1}} % Complex conjugate
 % \matdim{m}{n}{A} produces A with m x n below
 \newcommand*{\matdim}[3]{\underset{#1 \times #2}{#3}}
 % Augmented matrix https://tex.stackexchange.com/a/2238
@@ -266,6 +270,14 @@
 \newcommand*{\curl}{\grad\times} % Curl
 \newcommand*{\divg}{\grad\cdot} % Divergence
 \newcommand*{\laplacian}{\nabla^2} % Laplacian
+
+%% Engineering-mode math. Can be used as \begin{engineeringmode}...\end{engineeringmode}
+\newcommand{\engineeringmode}{%
+    \renewcommand*{\ii}{j} % Imaginary unit is j
+    \renewcommand*{\conj}[1]{{##1}^*} % Complex conjugate
+    \renewcommand*{\ctr}{^\dagger} % Conjugate transpose
+}
+
 % Partial derivative as used in John and Barbara Hubbard's Vector Calculus
 % `\Ddif{function}` gives D function (full derivative)
 % `\Ddif[variables]{function}` gives D_variable1 D_variable2 function
