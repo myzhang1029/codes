@@ -1,6 +1,6 @@
 % Package for the common preamble commands for
 % Zhang Maiyun's Pearson College UWC documents and beyond.
-% Copyright (C) 2020-2024 Zhang Maiyun
+% Copyright (C) 2020-2025 Zhang Maiyun
 %
 % Try to keep future versions compatible with older ones.
 % Files written for the older versions should produce approximately
@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2025/01/14 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2025/01/23 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pccommon@bibstyle{mla}
@@ -272,6 +272,8 @@
 \newenvironment{amatrix}[1]{\left[\begin{array}{@{}*{#1}{c}|c@{}}}{\end{array}\right]}
 \newcommand*{\closure}[1]{\overline{#1}} % Closure of a set
 \newcommand*{\interior}[1]{\mathring{#1}} % Interior of a set
+\newcommand*{\Tspace}[2]{\mathbf{T}_{#1} #2} % Tangent space
+\newcommand*{\jadif}[1]{\mathbf{J} {#1}} % Jacobian of a function
 % I found any bold nabla to be ugly
 \newcommand*{\grad}{\arrowvec{\nabla}} % Gradient
 \newcommand*{\curl}{\grad\times} % Curl
@@ -303,7 +305,9 @@
 % `\vdif{x,y,z}` gives |dx dy dz|
 % `\vdif[2,n,1]{x,y,z}` gives |d^2x d^ny dz|
 % `\vdif*` typesets variables as scalars
-\newcommand*{\__pccommon_maybevect}[2]{\IfBooleanTF{#1}{#2}{\vect{#2}}}
+\cs_new_protected:Npn \__pccommon_maybevect #1 #2 {
+    \IfBooleanTF{#1}{#2}{\vect{#2}}
+}
 % In Python I would use `zip`...
 \int_new:N \l__pccommon_varidx_int
 \NewDocumentCommand{\vdif}{s o m}{
@@ -335,7 +339,9 @@
 % `\dform*{x,y,z}` gives dx dy dz
 % Package option `dformwedge` to print \wedge between 1-forms
 % Helper function  i :-> \odif{x_i}
-\newcommand{\__pccommon_odifxidx}[1]{\odif{x\c_math_subscript_token{#1}}}
+\cs_new_protected:Npn \__pccommon_odifxidx #1 {
+    \odif{x\c_math_subscript_token{#1}}
+}
 \tl_new:N \l__pccommon_dform_first_tl
 \clist_new:N \l__pccommon_dform_tail_clist
 % latex3 args: nn
@@ -376,21 +382,27 @@
                 \fi}
         }
 }
-\ExplSyntaxOff
-% Tangent space
-\newcommand*{\Tspace}[2]{\mathbf{T}_{#1} #2}
-% Jacobian of a function
-\newcommand*{\jadif}[1]{\mathbf{J} {#1}}
 % Taylor polynomial \taylor{order,function,center}
-\newcommand*{\pccommon@taylor@format}[3]{\mathcal{P}_{#2,#3}^{#1}}
-\def\pccommon@taylor@parseargs#1,#2,#3\relax{\pccommon@taylor@format{#1}{#2}{#3}}
-\newcommand*{\taylor}[1]{\pccommon@taylor@parseargs#1\relax}
+\cs_new_protected:Npn \__pccommon_taylor_format:nnn #1 #2 #3 {
+    \mathcal{P}\c_math_subscript_token{#2,#3}^{#1}
+}
+\clist_new:N \l__pccommon_taylor_args_clist
+\NewDocumentCommand{\taylor}{m}{
+    \clist_set:Nn \l__pccommon_taylor_args_clist {#1}
+    \__pccommon_taylor_format:nnn
+        {\clist_item:Nn \l__pccommon_taylor_args_clist {1}}
+        {\clist_item:Nn \l__pccommon_taylor_args_clist {2}}
+        {\clist_item:Nn \l__pccommon_taylor_args_clist {3}}
+}
+\ExplSyntaxOff
 
 %% siunitx
 \sisetup{%
     separate-uncertainty=true,
     separate-uncertainty-units=bracket,
-    per-mode=power}
+    per-mode=power,
+    output-complex-root=\ii,
+    complex-root-position=after-number}
 \DeclareSIUnit\parsec{pc}
 % Defined but deprecated
 \DeclareSIUnit\atomicmassunit{u}
