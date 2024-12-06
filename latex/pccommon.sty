@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2024/12/05 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2025/01/14 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pccommon@bibstyle{mla}
@@ -227,6 +227,13 @@
 
 % More operators to my taste
 \DeclareMathOperator{\cis}{cis} % cosine + i sine
+\DeclareMathOperator{\Arg}{Arg} % Principal argument
+\let\GoRe\Re % Gothic font Re
+\let\GoIm\Im % Gothic font Im
+\let\Re\relax % Upright Re
+\let\Im\relax % Upright Im
+\DeclareMathOperator{\Re}{Re} % Real part
+\DeclareMathOperator{\Im}{Im} % Imaginary part
 \DeclareMathOperator{\lcm}{lcm} % Least common multiple
 \DeclareMathOperator{\ord}{ord} % Order of an element
 \DeclareMathOperator{\Var}{Var} % Variance
@@ -256,7 +263,7 @@
 \newcommand*{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand*{\permu}[2]{#1\text{P}#2} % Permutation
 \newcommand*{\combi}[2]{#1\text{C}#2} % Combination
-\newcommand*{\tr}{^{\text{\textsf{T}}}} % Transpose: use textsf to work around bugs with some fonts
+\newcommand*{\tr}{^{\text{\upshape\sffamily T}}} % Transpose: use textsf to work around bugs with some fonts
 \newcommand*{\ctr}{^*} % Conjugate transpose
 \newcommand*{\conj}[1]{\overline{#1}} % Complex conjugate
 % \matdim{m}{n}{A} produces A with m x n below
