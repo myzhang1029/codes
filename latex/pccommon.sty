@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2024/11/21 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2024/12/05 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pccommon@bibstyle{mla}
@@ -241,7 +241,7 @@
 \DeclareMathOperator{\exd}{d} % Exterior derivative
 \DeclareMathOperator{\sinc}{sinc} % Sinc function
 \DeclareMathOperator{\rect}{rect} % Rectangular function
-\newcommand*{\dd}{\mathrm{d}} % For old documents. Use \odif from the `derivative' package instead.
+\newcommand*{\dd}{\odif} % For old documents. Use \odif from the `derivative' package instead.
 \newcommand*{\ii}{\ensuremath{i}} % Imaginary unit
 \newcommand*{\charf}{\mathbbm{1}} % Characteristic function
 \newcommand*{\orderof}[1]{o(#1)} % Infinitesimal term of an order
@@ -418,8 +418,8 @@
     \endgroup
 }
 % Engineering notation vectors
-\newcommand*{\uvecx}{\hatvect{i}}
-\newcommand*{\uvecy}{\hatvect{j}}
+\newcommand*{\uvecx}{\hatvect{\imath}}
+\newcommand*{\uvecy}{\hatvect{\jmath}}
 \newcommand*{\uvecz}{\hatvect{k}}
 \newcommand*{\uvecr}{\hatvect{r}}
 \newcommand*{\uvecphi}{\hatvect{\phi}}
