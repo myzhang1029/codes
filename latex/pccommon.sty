@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2025/01/23 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2025/02/15 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pccommon@bibstyle{mla}
@@ -185,12 +185,15 @@
 %% Stuff about drawing with TikZ and PGF
 \RequirePackage{tikz} % drawing support
 \usetikzlibrary{calc} % tikz point calculations
+\usetikzlibrary{arrows.meta} % tikz arrows
+\usetikzlibrary{cd} % commutative diagrams
 \RequirePackage{pgfplots} % plotting in tikz
 \RequirePackage{pgfplotstable}
 \pgfplotsset{compat=1.17, compat/show suggested version=false}
 \usepgfplotslibrary{units}
 \RequirePackage[american, europeanresistors, american voltages, straightvoltages, fetbodydiode]{circuitikz} % draw circuits
 \RequirePackage{chemfig} % draw chemical structures
+\RequirePackage{quiver} % q.uiver.app commutative diagrams
 
 %%% ToC (table of contents) APPEARANCE
 \RequirePackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
@@ -226,14 +229,17 @@
 \newtheorem{definition}{Definition}[section]
 
 % More operators to my taste
-\DeclareMathOperator{\cis}{cis} % cosine + i sine
-\DeclareMathOperator{\Arg}{Arg} % Principal argument
 \let\GoRe\Re % Gothic font Re
 \let\GoIm\Im % Gothic font Im
 \let\Re\relax % Upright Re
 \let\Im\relax % Upright Im
+\let\oldemptyset\emptyset % Save the old empty set
+\let\emptyset\varnothing % Use the varnothing symbol
 \DeclareMathOperator{\Re}{Re} % Real part
 \DeclareMathOperator{\Im}{Im} % Imaginary part
+\DeclareMathOperator{\cis}{cis} % cosine + i sine
+\DeclareMathOperator{\Arg}{Arg} % Principal argument
+\DeclareMathOperator{\Log}{Log} % Principal logarithm
 \DeclareMathOperator{\lcm}{lcm} % Least common multiple
 \DeclareMathOperator{\ord}{ord} % Order of an element
 \DeclareMathOperator{\Var}{Var} % Variance
@@ -280,12 +286,30 @@
 \newcommand*{\divg}{\grad\cdot} % Divergence
 \newcommand*{\laplacian}{\nabla^2} % Laplacian
 
+% Bra-ket notation
+\DeclarePairedDelimiter\bra{\langle}{\rvert}
+\DeclarePairedDelimiter\ket{\lvert}{\rangle}
+\DeclarePairedDelimiterX\braket[2]{\langle}{\rangle}{#1\,\delimsize\vert\,\mathopen{}#2}
+
 %% Engineering-mode math. Can be used as \begin{engineeringmode}...\end{engineeringmode}
 \newcommand{\engineeringmode}{%
-    \renewcommand*{\ii}{j} % Imaginary unit is j
+    \renewcommand*{\ii}{\ensuremath{j}} % Imaginary unit is j
     \renewcommand*{\conj}[1]{{##1}^*} % Complex conjugate
     \renewcommand*{\ctr}{^\dagger} % Conjugate transpose
 }
+%% Physics-mode math. Can be used as \begin{physicsmode}...\end{physicsmode}
+\newcommand{\physicsmode}{%
+    \renewcommand*{\ii}{\ensuremath{i}} % Imaginary unit is i
+    \renewcommand*{\conj}[1]{{##1}^*} % Complex conjugate
+    \renewcommand*{\ctr}{^\dagger} % Conjugate transpose
+}
+%% Math/normal-mode math. Can be used as \begin{normalmode}...\end{normalmode} to temporarily disable the above
+\newcommand{\normalmode}{%
+    \renewcommand*{\ii}{\ensuremath{i}} % Imaginary unit
+    \renewcommand*{\conj}[1]{\overline{##1}} % Complex conjugate
+    \renewcommand*{\ctr}{^*} % Conjugate transpose
+}
+
 
 % Partial derivative as used in John and Barbara Hubbard's Vector Calculus
 % `\Ddif{function}` gives D function (full derivative)
