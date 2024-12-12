@@ -79,6 +79,9 @@ def make_expfit_guess(
     # First cast to NumPy arrays because our indexing don't work with lists or pandas Series
     t = np.asanyarray(t_input)
     v = np.asanyarray(v_input)
+    # Let's hope that the inputs have the same non-zero length
+    if not len(t) or not len(v) or len(t) != len(v):
+        raise ValueError("Time and voltage arrays must have the same non-zero length")
     # Estimate the asymptote of the exponential decay
     asymptote = np.mean(v[-5:])
     ahead = v[-10:-5]
@@ -110,8 +113,19 @@ def make_expfit_guess(
     best_group_indices = indices_in_window[start_didx:end_didx]
     # Return the closest time to one_time_constant_value_good plus minus edge
     voltages_in_window = v[best_group_indices]
-    closest_index = np.argmin(np.abs(voltages_in_window - v_at_tau_good))
-    tau = t[best_group_indices][closest_index]
-    tau_ew = np.max((t[best_group_indices[-1]] - tau,
-                     tau - t[best_group_indices[0]]))
+    if not len(voltages_in_window):
+        # There are no points in the window
+        # Hopefully we can get away with choosing the closest point
+        # If there is significant noise, this will be a terrible guess
+        # To somewhat account for the possibility of a very noisy signal, take
+        # the next two closest points and use the maximum time difference
+        # as the error in the guess
+        closest_indices = np.argsort(np.abs(v - v_at_tau_good))[0:3]
+        tau = t[closest_indices[0]]
+        tau_ew = np.max(np.abs(t[closest_indices] - tau))
+    else:
+        closest_index = np.argmin(np.abs(voltages_in_window - v_at_tau_good))
+        tau = t[best_group_indices][closest_index]
+        tau_ew = np.max((t[best_group_indices[-1]] - tau,
+                         tau - t[best_group_indices[0]]))
     return amplitude, tau, asymptote, amplitude_ew, tau_ew, asymptote_ew
