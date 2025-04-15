@@ -7,5 +7,5 @@ edition = "2018"
 
 [dependencies]
 tar = "^0.4, >=0.4.36"
-ureq = "2"
+ureq = "3"
 zstd = "0.13"

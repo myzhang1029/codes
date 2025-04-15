@@ -30,14 +30,8 @@ const URI: &str = "https://objectstorage.ca-toronto-1.oraclecloud.com/n/yzoe51nh
 /// Get the archive
 fn get_file() -> Result<impl io::Read, Box<ureq::Error>> {
     let resp = ureq::get(URI).call()?;
-    match resp.status() {
-        200_u16 => {
-            let bufreader = resp.into_reader();
-            Ok(bufreader)
-        }
-        // <= 400 && != 200
-        other => Err(ureq::Error::Status(other, resp).into()),
-    }
+    let bufreader = resp.into_body().into_reader();
+    Ok(bufreader)
 }
 
 /// Unpack a single file from the tar archive
