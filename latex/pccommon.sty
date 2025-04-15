@@ -265,6 +265,7 @@
 \newcommand*{\vect}[1]{\bm{\mathrm{#1}}} % Vec is bold no arrow
 \newcommand*{\arrowvec}[1]{\vec{#1}} % Arrowed vector
 \newcommand*{\hatvect}[1]{\hat{\vect{#1}}} % Unit vector
+\newcommand*{\tvect}[1]{\tilde{\vect{#1}}} % Vector phasor
 \newcommand*{\abs}[1]{\left\lvert#1\right\rvert}
 \newcommand*{\norm}[1]{\left\lVert#1\right\rVert}
 \newcommand*{\permu}[2]{#1\text{P}#2} % Permutation
@@ -284,7 +285,7 @@
 \newcommand*{\grad}{\arrowvec{\nabla}} % Gradient
 \newcommand*{\curl}{\grad\times} % Curl
 \newcommand*{\divg}{\grad\cdot} % Divergence
-\newcommand*{\laplacian}{\nabla^2} % Laplacian
+\newcommand*{\laplacian}{\Delta} % Laplacian
 
 % Bra-ket notation
 \DeclarePairedDelimiter\bra{\langle}{\rvert}
@@ -296,18 +297,21 @@
     \renewcommand*{\ii}{\ensuremath{j}} % Imaginary unit is j
     \renewcommand*{\conj}[1]{{##1}^*} % Complex conjugate
     \renewcommand*{\ctr}{^\dagger} % Conjugate transpose
+    \renewcommand*{\laplacian}{\nabla^2} % Laplacian
 }
 %% Physics-mode math. Can be used as \begin{physicsmode}...\end{physicsmode}
 \newcommand{\physicsmode}{%
     \renewcommand*{\ii}{\ensuremath{i}} % Imaginary unit is i
     \renewcommand*{\conj}[1]{{##1}^*} % Complex conjugate
     \renewcommand*{\ctr}{^\dagger} % Conjugate transpose
+    \renewcommand*{\laplacian}{\nabla^2} % Laplacian
 }
 %% Math/normal-mode math. Can be used as \begin{normalmode}...\end{normalmode} to temporarily disable the above
 \newcommand{\normalmode}{%
     \renewcommand*{\ii}{\ensuremath{i}} % Imaginary unit
     \renewcommand*{\conj}[1]{\overline{##1}} % Complex conjugate
     \renewcommand*{\ctr}{^*} % Conjugate transpose
+    \renewcommand*{\laplacian}{\Delta} % Laplacian
 }
 
 
