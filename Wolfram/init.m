@@ -94,3 +94,41 @@ ESet[var_, value_] := (
     var = value;
 )
 Attributes[ESet] = {HoldFirst, SequenceHold};
+
+(* Complex to polar form *)
+ToPolar[z_] :=
+ With[{n = Simplify@Abs[z], a = Simplify@Arg[z]}, Defer[n E^(I a)]]
+Attributes[ESinc] = {Listable, NumericFunction};
+
+(* Twin y plot (based on https://reference.wolfram.com/language/howto/GeneratePlotsWithTwoVerticalScales.html) *)
+TwoAxisPlot[{f_, g_}, options___] :=
+ Module[{fgraph, ggraph, frange, grange, fticks,
+   gticks}, {fgraph, ggraph} =
+   MapIndexed[
+    Plot[#, options, Axes -> True,
+      PlotStyle -> ColorData[1][#2[[1]]]] &, {f, g}]; {frange,
+    grange} = (PlotRange /.
+        AbsoluteOptions[#, PlotRange])[[2]] & /@ {fgraph, ggraph};
+  fticks = N@FindDivisions[frange, 5];
+  gticks =
+   Quiet@Transpose@{fticks,
+      ToString[NumberForm[#, 2], StandardForm] & /@
+       Rescale[fticks, frange, grange]};
+  Show[fgraph,
+   ggraph /. Graphics[graph_, s___] :>
+     Graphics[
+      GeometricTransformation[graph,
+       RescalingTransform[{{0, 1}, grange}, {{0, 1}, frange}]], s],
+   Axes -> False, Frame -> True,
+   FrameStyle -> {ColorData[1] /@ {1, 2}, {Automatic, Automatic}},
+   FrameTicks -> {{fticks, gticks}, {Automatic, Automatic}}]]
+
+(* FT to Time Domain Numeric Plot
+ * This function takes a function in the frequency domain and plots the time-domain result.
+ * It does not attempt to evaluate the inverse transform but instead uses numerical integration.
+ * Therefore, it is useful for complicated functions but will be much slower for simple functions with a known inverse FT.
+ *)
+PlotFourierTransformed[ft_, {tmin_, tmax_}, tscale_:1, scalarFn_:Abs, plotOptions___] := Block[
+    {ftcore = Simplify[1/Abs[tscale] ft[\[Omega]/tscale]]},
+    Plot[scalarFn[1/(2\[Pi]) NIntegrate[Evaluate[ftcore Exp[I \[Omega] t]], {\[Omega], -Infinity, Infinity}]], {t, tmin, tmax}, plotOptions]
+]
