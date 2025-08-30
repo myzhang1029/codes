@@ -178,11 +178,11 @@ def decode_one_attachment(payload: bytes, filename: str | None, content_type: st
     """
     print(f"Attachment name: {filename}")
     print(f"Attachment type: {content_type}")
-    if content_type in ("application/gzip", "application/tlsrpt+gzip"):
+    if content_type in ("application/gzip", "application/tlsrpt+gzip") or filename and filename.endswith(".gz"):
         plaintext = gzip.decompress(payload).decode("utf-8")
         if filename and filename.endswith(".gz"):
             filename = filename[:-3]
-    elif content_type == "application/zip":
+    elif content_type == "application/zip" or filename and filename.endswith(".zip"):
         with zipfile.ZipFile(io.BytesIO(payload)) as z:
             print(f"Zip file contains: {z.namelist()}")
             if len(
