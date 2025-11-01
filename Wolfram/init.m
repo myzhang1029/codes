@@ -24,6 +24,17 @@ MeanAround2[data : {___Around}] := With[
 ]
 MeanAround2[data : {___Quantity}] := Quantity[MeanAround2@QuantityMagnitude@data, QuantityUnit@First@data]
 
+FallingFactorial[n_, k_] := Gamma[1 + n]/Gamma[1 - k + n]
+
+(* Quantum *)
+StandardBasis[index_, dim_ : 2, start_ : 1] := UnitVector[dim, index - start + 1]
+
+(* Standard bases expressed as Dirac notation coefficients *)
+DiracBasis[indices_List, eachDim_ : 2] := Flatten@Apply[KroneckerProduct, StandardBasis[#, eachDim, 0] & /@ indices]
+
+(* Tensor product of Pauli matrices *)
+PauliProductMatrix[indices___] := KroneckerProduct @@ PauliMatrix[{indices}]
+
 (* Engineering *)
 
 (* The hypotenuse of a right-angle triangle *)
