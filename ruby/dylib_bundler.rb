@@ -68,18 +68,17 @@ def fix_dylib(machopath, targetdir, rpath_search)
   chmod "u+w", machopath
   macho = MachO.open(machopath)
 
-  referred_dylibs = macho.linked_dylibs.select do |libpathstr|
-    # Do not copy macOS system libraries, but always copy any Homebrew libraries
-    # And best-effort deal with @rpath ones
-    libpathstr.start_with?(HOMEBREW_PREFIX, "@rpath") ||
-      (libpathstr.start_with?("/") && !libpathstr.start_with?("/usr/lib") &&
-       !libpathstr.start_with?("/System/Library"))
-  end
-  referred_dylibs.each do |libpathstr|
-    if libpathstr.start_with?("@rpath")
+  macho.linked_dylibs.each do |libpathstr|
+    # Do not copy macOS system libraries
+    next if libpathstr.start_with?("/usr/lib", "/System/Library")
+
+    if libpathstr.start_with?("/")
+      # Simple logic for absolute path references (we already skipped system libraries)
+      libpath = Pathname.new(libpathstr)
+      copy_macho_dep(libpath, targetdir, macho, libpathstr, rpath_search)
+    elsif libpathstr.start_with?("@rpath") || !libpathstr.start_with?("@")
+      # A @rpath/.., or a relative path. We deal with them on a best-effort basis.
       lib_fromrpath = libpathstr.delete_prefix("@rpath/")
-      # If `@rpath/` is not the prefix, something is very wrong with this loader command
-      raise RuntimeError if lib_fromrpath == libpathstr
 
       if (targetdir + lib_fromrpath).exist?
         # This framework or dylib is already in `targetdir`
@@ -96,9 +95,7 @@ def fix_dylib(machopath, targetdir, rpath_search)
       else
         opoo "Warning: Cannot resolve rpath #{libpathstr}"
       end
-    else
-      libpath = Pathname.new(libpathstr)
-      copy_macho_dep(libpath, targetdir, macho, libpathstr, rpath_search)
+      # else: a @... path that we don't know how to handle. Leave it as-is
     end
   end
   # Libraries added by the Scopy build script uses @rpath; make sure they still work
