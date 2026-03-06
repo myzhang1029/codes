@@ -56,6 +56,10 @@ dBV[dbv_] := Quantity[10^(dbv/20), "Volts"]
 ] *)
 dBu[dbu_] := Quantity[10^(dbu/20) Sqrt[3/5], "Volts"]
 
+(* Parallel Resistance *)
+Parallel[values___] := 1/Total[1/{values}]
+Attributes[Parallel] = {NumericFunction, Orderless}
+
 (* Irregular-Time Discrete Fourier Transform *)
 IDFT[(\[Omega]_)?(NumericQ[#] || QuantityQ[#] &), times_, vals_] :=
  Mean[vals E^(-I \[Omega] times)]
