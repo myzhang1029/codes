@@ -1,6 +1,6 @@
 % Package for the common preamble commands for
 % Zhang Maiyun's Pearson College UWC documents and beyond.
-% Copyright (C) 2020-2025 Zhang Maiyun
+% Copyright (C) 2020-2026 Zhang Maiyun
 %
 % Try to keep future versions compatible with older ones.
 % Files written for the older versions should produce approximately
@@ -21,7 +21,7 @@
 %TC: macro \pgfplotsset [ignore]
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pccommon}[2025/02/15 Pearson College UWC common]
+\ProvidesPackage{pccommon}[2026/03/06 Pearson College UWC common]
 \RequirePackage{xkeyval}
 % Select the style of the citations
 \def\pccommon@bibstyle{mla}
@@ -81,7 +81,7 @@
 \RequirePackage{ifthen}
 
 %%% SECTION TITLE APPEARANCE
-\RequirePackage{sectsty}
+%\RequirePackage{sectsty}
 %\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
 % (This matches ConTeXt defaults)
 
@@ -222,6 +222,7 @@
 % Theorems https://www.overleaf.com/learn/latex/Theorems_and_proofs
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{porism}{Porism}[theorem]  % Consequence of a proof; cr/ Prof. Leo Goldmakher
 \newtheorem{lemma}[theorem]{Lemma}
 \theoremstyle{remark}
 \newtheorem*{remark}{Remark}
@@ -286,11 +287,14 @@
 \newcommand*{\curl}{\grad\times} % Curl
 \newcommand*{\divg}{\grad\cdot} % Divergence
 \newcommand*{\laplacian}{\Delta} % Laplacian
+% Identity element/operator
+\NewDocumentCommand{\Id}{o}{\IfValueTF{#1}{\mathbbm{1}_{#1}}{\mathbbm{1}}}
 
 % Bra-ket notation
 \DeclarePairedDelimiter\bra{\langle}{\rvert}
 \DeclarePairedDelimiter\ket{\lvert}{\rangle}
-\DeclarePairedDelimiterX\braket[2]{\langle}{\rangle}{#1\,\delimsize\vert\,\mathopen{}#2}
+\DeclarePairedDelimiterX\braket[2]{\langle}{\rangle}{#1\mathopen{\delimsize\vert}#2}
+\DeclarePairedDelimiterX\brakett[3]{\langle}{\rangle}{#1\mathopen{\delimsize\vert}#2\mathopen{\delimsize\vert}#3}
 
 %% Engineering-mode math. Can be used as \begin{engineeringmode}...\end{engineeringmode}
 \newcommand{\engineeringmode}{%
@@ -328,6 +332,7 @@
         }{\PackageError{pccommon}{Please~update~the~derivative~package}{Needs~at~least~v1.3}}
     }
 }
+% Here comes my expl3 wonderland :)
 \ExplSyntaxOn
 % Vector differentials as used in John and Barbara Hubbard's Vector Calculus
 % `\vdif{x,y,z}` gives |dx dy dz|
@@ -422,6 +427,20 @@
         {\clist_item:Nn \l__pccommon_taylor_args_clist {2}}
         {\clist_item:Nn \l__pccommon_taylor_args_clist {3}}
 }
+
+% Matrices (see also \matdim{m}{n}{A} above to annotate a single element without the field)
+% \mat{A} gives M(\mathbb{A}), \mat*{A} gives M(A),
+% \mat[2,3]{A} gives M_{2\times 3}(\mathbb{A}), \mat[2]{A} gives M_{2\times 2}(\mathbb{A})
+% (starred variants are similar)
+\NewDocumentCommand{\mat}{s o m}{
+    M\IfValueT{#2}{
+        \c_math_subscript_token{
+            \clist_item:nn{#2}{1}\times\clist_item:nn{#2}{\int_compare:nTF{\clist_count:n{#2}=1}{1}{2}}
+        }
+    }(\IfBooleanTF{#1}{#3}{\mathbb{#3}})
+}
+% Linear maps: \lin{V} gives \mathcal{L}(V), \lin[V,W]{V} gives \mathcal{L}(V,W)
+\NewDocumentCommand{\lin}{m}{\mathcal{L}(#1)}
 \ExplSyntaxOff
 
 %% siunitx
