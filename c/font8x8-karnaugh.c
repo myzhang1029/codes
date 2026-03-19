@@ -199,15 +199,10 @@ static uint16_t implicant_merge(uint16_t left, uint16_t right) {
     // Now, two implicants can be merged if the following hold:
     // 1. They have the same DC mask.
     // 2. They differ in exactly one cared bit.
-    uint8_t left_dc_mask = left >> 8;
-    uint8_t right_dc_mask = right >> 8;
-    if (left_dc_mask != right_dc_mask)
+    uint16_t cmp = left ^ right;
+    if (cmp >> 8 || cmp & (cmp-1))
         return 0;
-    uint8_t diff = (left ^ right) & 0xff;
-    if (!IS_POW2(diff))
-        return 0;
-    left = mark_dc(left, diff);
-    return left;
+    return mark_dc(left, cmp);
 }
 
 /// @brief  Perform a modified Quine–McCluskey algorithm in place.
