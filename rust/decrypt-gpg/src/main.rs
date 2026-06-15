@@ -11,21 +11,21 @@ macro_rules! decrypt_type {
         let (key, mut secret) = $sec_key.take_secret();
         let key = Key::$key_type(key);
         if secret.is_encrypted() {
-            secret.decrypt_in_place(&key, $password)?;
+            secret.decrypt_in_place(&key, $password).unwrap();
         }
-        Ok(key.add_secret(secret).0)
+        key.add_secret(secret).0
     }};
 }
-fn decrypt_maybe<KeyType: KeyRole>(
-    sec_key: Key<SecretParts, KeyType>,
+fn decrypt_maybe<R: KeyRole>(
+    sec_key: Key<SecretParts, R>,
     password: &Password,
-) -> Result<Key<SecretParts, KeyType>, sequoia_openpgp::anyhow::Error> {
+) -> Key<SecretParts, R> {
     match sec_key {
         Key::V4(sec_key) => decrypt_type!(sec_key, password, V4),
         Key::V6(sec_key) => decrypt_type!(sec_key, password, V6),
         _ => {
             eprintln!("Encountered unsupported key type: {}", sec_key.version());
-            Ok(sec_key)
+            sec_key
         }
     }
 }
@@ -42,11 +42,9 @@ fn main() {
         .map(|pkt| {
             eprintln!("{:?}", pkt.kind());
             match pkt {
-                Packet::SecretKey(seckey) => {
-                    Packet::SecretKey(decrypt_maybe(seckey, password).unwrap())
-                }
+                Packet::SecretKey(seckey) => Packet::SecretKey(decrypt_maybe(seckey, password)),
                 Packet::SecretSubkey(seckey) => {
-                    Packet::SecretSubkey(decrypt_maybe(seckey, password).unwrap())
+                    Packet::SecretSubkey(decrypt_maybe(seckey, password))
                 }
 
                 _ => pkt,
