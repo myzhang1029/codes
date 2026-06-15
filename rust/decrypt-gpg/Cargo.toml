@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 rpassword = "7"
-sequoia-openpgp = "2"
+sequoia-openpgp = { version = "2", features = ["compression"], default-features = false }
