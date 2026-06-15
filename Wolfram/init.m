@@ -35,6 +35,12 @@ DiracBasis[indices_List, eachDim_ : 2] := Flatten@Apply[KroneckerProduct, Standa
 (* Tensor product of Pauli matrices *)
 PauliProductMatrix[indices___] := KroneckerProduct @@ PauliMatrix[{indices}]
 
+(* Hydrogen radial function *)
+HydrogenRadialR[n_, l_, r_, a_ : 1] :=
+ Sqrt[(2/(n a))^3 (n - l - 1)!/(2 n (n + l)!)] E^(-r/(n a)) ((2 r)/(
+   n a))^l LaguerreL[n - l - 1, 2 l + 1, (2 r)/(n a)]
+Attributes[HydrogenRadialR] = {Listable, NumericFunction}
+
 (* Engineering *)
 
 (* The hypotenuse of a right-angle triangle *)
@@ -99,6 +105,24 @@ LegendreTransform[f_, v_, p_] := Module[
 ]
 
 (* Other miscellaneous things *)
+
+(* Display an integer as factors *)
+FactoredInteger[num_Integer] :=
+ If[num == 0, HoldForm[0],
+  Times @@
+   Map[HoldForm[base^exp] /. {base -> #[[1]], exp -> #[[2]]} &,
+    FactorInteger[num]]]
+
+factoredFormInner[num_Integer] := If[num == 0, 0,
+  (* Do not remove the IntepretationBox *)
+  RowBox@
+   Riffle[InterpretationBox[SuperscriptBox[b, e], b^
+        e] /. {b -> #[[1]], e -> #[[2]]} & /@ FactorInteger[num], " "]]
+factoredFormInner[num_Rational] :=
+ FractionBox @@ (factoredFormInner /@ {Numerator[num],
+     Denominator[num]})
+FactoredForm[expr_] :=
+ DisplayForm[expr /. x_Integer | x_Rational :> factoredFormInner[x]]
 
 (* Make an augmented matrix *)
 AugmentedMatrix[mat_, vec_] := Transpose@Append[Transpose[mat], vec]
