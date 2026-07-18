@@ -39,7 +39,7 @@ _pad_mac()
 _mac_to_eui64()
 {
     # Translate the first octet
-    awk -F'[:-]' '{
+    tr A-Z a-z | awk -F'[:-]' '{
         m = "0123456789abcdef"
         e = "23016745ab89efcd"
         c1 = substr($1, 1, length($1)-1)
@@ -347,6 +347,9 @@ COMMAND="$1"
 shift || true
 
 case "${COMMAND}" in
+    h|help)
+        echo "Commands: s|scan, m|mac, 4|ip4|ipv4, v|vendor, l|eui64, r|resolve" >&2
+        ;;
     s|scan)
         scan_ips "$@"
         ;;
