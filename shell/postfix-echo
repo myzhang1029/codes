@@ -1,0 +1,8 @@
+#!/bin/bash
+# /usr/local/libexec/postfix/echo
+
+# Usage:
+# echo          unix  -       n       n       -       -       pipe
+#         flags=q user=nobody argv=/usr/local/libexec/postfix/echo $sender $recipient
+
+cat <(printf 'From: %s\nTo: %s\nSubject: Email Echo\nReturn-Path:%s\n\n' "$2" "$1" "$2") - | /usr/sbin/sendmail.postfix -oi -t -r "$2"
