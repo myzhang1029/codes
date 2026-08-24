@@ -8,8 +8,10 @@
 
 if [ $# -eq 0 ]; then
     reuse=--reuse-cmdline
-elif ! [ "$1" = "-" ]; then
-    kernel="$1"
+else
+    if ! [ "$1" = "-" ]; then
+        kernel="$1"
+    fi
     shift
 fi
 if [ $# -eq 0 ]; then
