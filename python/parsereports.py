@@ -211,7 +211,7 @@ def decode_one_message(msg: Message, storage: StorageDict) -> bool:
         for part in msg.walk():
             content_type = part.get_content_type()
             content_disposition = str(part.get("Content-Disposition"))
-            if "attachment" in content_disposition:
+            if "attachment" in content_disposition or "filename" in content_disposition:
                 filename = part.get_filename()
                 body = part.get_payload(decode=True)
                 used = decode_one_attachment(
