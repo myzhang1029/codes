@@ -3,7 +3,7 @@
 #
 #  parsereports.py
 #
-#  Copyright (C) 2024 Zhang Maiyun <me@maiyun.me>
+#  Copyright (C) 2024,2026 Zhang Maiyun <me@maiyun.me>
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -82,34 +82,34 @@ def decode_json_report(payload: str, storage: StorageDict) -> bool:
     report_id = report.get("report-id")
     for policy in report.get("policies", []):
         domain = policy.get("policy", {}).get("policy-domain")
-        success_count = policy.get("summary", {}).get(
-            "total-successful-session-count")
-        failure_count = policy.get("summary", {}).get(
-            "total-failure-session-count")
-        storage["tlsrpt"].append({
-            "org_name": org_name,
-            "date_start": date_start,
-            "date_end": date_end,
-            "report_id": report_id,
-            "domain": domain,
-            "success_count": success_count,
-            "failure_count": failure_count,
-        })
+        success_count = policy.get("summary", {}).get("total-successful-session-count")
+        failure_count = policy.get("summary", {}).get("total-failure-session-count")
+        storage["tlsrpt"].append(
+            {
+                "org_name": org_name,
+                "date_start": date_start,
+                "date_end": date_end,
+                "report_id": report_id,
+                "domain": domain,
+                "success_count": success_count,
+                "failure_count": failure_count,
+            }
+        )
     return True
 
 
 def decode_xml_report(payload: str, storage: StorageDict) -> bool:
     """Decode an XML report (DMARC probably)."""
     # https://stackoverflow.com/a/35165997
-    payload = re.sub(r"""\s(xmlns="[^"]+"|xmlns='[^']+')""", '', payload, count=1)
+    payload = re.sub(r"""\s(xmlns="[^"]+"|xmlns='[^']+')""", "", payload, count=1)
     report = ET.fromstring(payload)
     org_name = text_assert_some(report, "report_metadata/org_name")
     date_start = int_assert_some(report, "report_metadata/date_range/begin")
     json_date_start = datetime.datetime.fromtimestamp(
-        date_start, datetime.timezone.utc).isoformat()
+        date_start, datetime.UTC
+    ).isoformat()
     date_end = int_assert_some(report, "report_metadata/date_range/end")
-    json_date_end = datetime.datetime.fromtimestamp(
-        date_end, datetime.timezone.utc).isoformat()
+    json_date_end = datetime.datetime.fromtimestamp(date_end, datetime.UTC).isoformat()
     report_id = text_assert_some(report, "report_metadata/report_id")
     for record in report.findall("record"):
         source_ip = text_assert_some(record, "row/source_ip")
@@ -123,23 +123,25 @@ def decode_xml_report(payload: str, storage: StorageDict) -> bool:
         dkim_selector = text_or_none(record, "auth_results/dkim/selector")
         spf_domain = text_or_none(record, "auth_results/spf/domain")
         spf_result = text_or_none(record, "auth_results/spf/result")
-        storage["dmarc"].append({
-            "org_name": org_name,
-            "date_start": json_date_start,
-            "date_end": json_date_end,
-            "report_id": report_id,
-            "source_ip": source_ip,
-            "count": count,
-            "pe_dkim_result": pe_dkim_result,
-            "pe_spf_result": pe_spf_result,
-            "from_domain": from_domain,
-            "envelope_to": envelope_to,
-            "dkim_domain": dkim_domain,
-            "dkim_result": dkim_result,
-            "dkim_selector": dkim_selector,
-            "spf_domain": spf_domain,
-            "spf_result": spf_result,
-        })
+        storage["dmarc"].append(
+            {
+                "org_name": org_name,
+                "date_start": json_date_start,
+                "date_end": json_date_end,
+                "report_id": report_id,
+                "source_ip": source_ip,
+                "count": count,
+                "pe_dkim_result": pe_dkim_result,
+                "pe_spf_result": pe_spf_result,
+                "from_domain": from_domain,
+                "envelope_to": envelope_to,
+                "dkim_domain": dkim_domain,
+                "dkim_result": dkim_result,
+                "dkim_selector": dkim_selector,
+                "spf_domain": spf_domain,
+                "spf_result": spf_result,
+            }
+        )
     return True
 
 
@@ -171,27 +173,37 @@ def decode_report(payload: str, filename: str | None, storage: StorageDict) -> b
         return False
 
 
-def decode_one_attachment(payload: bytes, filename: str | None, content_type: str | None, storage: StorageDict) -> bool:
+def decode_one_attachment(
+    payload: bytes, filename: str | None, content_type: str | None, storage: StorageDict
+) -> bool:
     """Decode one attachment.
 
     Returns `True` if processed, `False` if not.
     """
     print(f"Attachment name: {filename}")
     print(f"Attachment type: {content_type}")
-    if content_type in ("application/gzip", "application/tlsrpt+gzip") or filename and filename.endswith(".gz"):
+    if (
+        content_type in ("application/gzip", "application/tlsrpt+gzip")
+        or filename
+        and filename.endswith(".gz")
+    ):
         plaintext = gzip.decompress(payload).decode("utf-8")
         if filename and filename.endswith(".gz"):
             filename = filename[:-3]
     elif content_type == "application/zip" or filename and filename.endswith(".zip"):
         with zipfile.ZipFile(io.BytesIO(payload)) as z:
             print(f"Zip file contains: {z.namelist()}")
-            if len(
-                    z.namelist()) != 1:
-                raise InvalidReportError(
-                    "Zip file contains more than one file")
+            if len(z.namelist()) != 1:
+                raise InvalidReportError("Zip file contains more than one file")
             plaintext = z.read(z.namelist()[0]).decode("utf-8")
             filename = z.namelist()[0]
-    elif content_type in ("text/plain", "application/json", "application/tlsrpt", "application/xml", "text/xml"):
+    elif content_type in (
+        "text/plain",
+        "application/json",
+        "application/tlsrpt",
+        "application/xml",
+        "text/xml",
+    ):
         plaintext = payload.decode("utf-8")
     else:
         eprint(f"Unknown content type: {content_type}")
@@ -204,7 +216,7 @@ def decode_one_message(msg: Message, storage: StorageDict) -> bool:
     used = False
     subject, encoding = email.header.decode_header(msg["Subject"])[0]
     if isinstance(subject, bytes):
-        subject = subject.decode(encoding)
+        subject = subject.decode(str(encoding))
     subject = subject.replace("\r", "").replace("\n", " ")
     print(f"Subject: {subject}")
     if msg.is_multipart():
@@ -214,8 +226,7 @@ def decode_one_message(msg: Message, storage: StorageDict) -> bool:
             if "attachment" in content_disposition or "filename" in content_disposition:
                 filename = part.get_filename()
                 body = part.get_payload(decode=True)
-                used = decode_one_attachment(
-                    body, filename, content_type, storage)
+                used = decode_one_attachment(body, filename, content_type, storage)
     else:
         content_type = msg.get_content_type()
         content_disposition = str(msg.get("Content-Disposition"))
@@ -229,7 +240,8 @@ def decode_one_message(msg: Message, storage: StorageDict) -> bool:
 def main() -> None:
     if len(sys.argv) != 6:
         eprint(
-            "Usage: parsereports.py <username> <password> <server> <port> <stotagefile>")
+            "Usage: parsereports.py <username> <password> <server> <port> <stotagefile>"
+        )
         sys.exit(1)
     username = sys.argv[1]
     password = sys.argv[2]
