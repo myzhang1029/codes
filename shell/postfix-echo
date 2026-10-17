@@ -5,4 +5,12 @@
 # echo          unix  -       n       n       -       -       pipe
 #         flags=q user=nobody argv=/usr/local/libexec/postfix/echo $sender $recipient
 
-cat <(printf 'From: %s\nTo: %s\nSubject: Email Echo\nReturn-Path:%s\n\n' "$2" "$1" "$2") - | /usr/sbin/sendmail.postfix -oi -t -r "$2"
+case "$1" in
+    *@*.dn42)
+        echo "sending echo reply to $1" | logger -t postfix-echo -p mail.info -s
+        cat <(printf 'From: %s\nTo: %s\nSubject: Email Echo\nReturn-Path:%s\n\n' "$2" "$1" "$2") - | /usr/sbin/sendmail.postfix -oi -t -r "$2"
+        ;;
+    *)
+        echo "not replying to $1" | logger -t postfix-echo -p mail.info -s
+        ;;
+esac
