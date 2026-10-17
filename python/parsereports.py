@@ -260,13 +260,18 @@ def main() -> None:
                 eprint(f"Error in message {i + 1}: {e}")
                 used = False
             print(f"Used: {used}")
-            # Mark for deletion if processed
+            # Move to trash if processed
             if used:
+                status, data = imap.copy(str(i + 1), "Trash")
+                print(*(x.decode("utf-8") for x in data if x))
+                assert status == "OK"
                 status, data = imap.store(str(i + 1), "+FLAGS", "\\Deleted")
+                print(*(x.decode("utf-8") for x in data if x))
                 assert status == "OK"
             print("=" * 80)
         # Delete all marked messages
         status, data = imap.expunge()
+        print(*(x.decode("utf-8") for x in data if x))
         assert status == "OK"
     print("Processed reports:")
     print(json.dumps(new, indent=2))
