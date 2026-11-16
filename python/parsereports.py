@@ -32,11 +32,14 @@ import imaplib
 import io
 import json
 import re
+import ssl
 import sys
 import zipfile
 from email.message import Message
 from pathlib import Path
 from xml.etree import ElementTree as ET
+
+import gssapi
 
 # Alias for the type of the storage dictionary
 StorageDict = dict[str, list[dict[str, str | int | None]]]
@@ -49,6 +52,44 @@ class InvalidReportError(Exception):
 def eprint(*args, **kwargs):
     """Print to stderr."""
     print(*args, file=sys.stderr, **kwargs)
+
+
+def login_gssapi(
+    imap: imaplib.IMAP4_SSL, server: str, username: str
+) -> tuple[str, list[bytes]]:
+    ctx = gssapi.SecurityContext(
+        name=gssapi.Name(
+            f"imap@{server}",
+            name_type=gssapi.NameType.hostbased_service,
+        ),
+        mech=gssapi.MechType.kerberos,
+        usage="initiate",
+        flags=[
+            gssapi.RequirementFlag.mutual_authentication,
+            gssapi.RequirementFlag.integrity,
+        ],
+    )
+
+    e: Exception | None = None
+
+    def authenticate(challenge: bytes) -> bytes | None:
+        nonlocal e
+        if not ctx.complete:
+            return ctx.step(challenge or None) or b""
+        offer = ctx.unwrap(challenge).message
+        if len(offer) != 4:
+            e = imaplib.IMAP4.error("Invalid GSSAPI security-layer offer")
+            return None
+        if not offer[0] & 1:
+            e = imaplib.IMAP4.error("Server requires a SASL security layer")
+            return None
+        response = b"\x01\x00\x00\x00" + username.encode("utf-8")
+        return ctx.wrap(response, encrypt=False).message
+
+    try:
+        return imap.authenticate("GSSAPI", authenticate)
+    except imaplib.IMAP4.error as exc:
+        raise exc from e
 
 
 def text_or_none(report: ET.Element, path: str) -> str | None:
@@ -201,6 +242,7 @@ def decode_one_attachment(
         "text/plain",
         "application/json",
         "application/tlsrpt",
+        "application/tlsrpt+json",
         "application/xml",
         "text/xml",
     ):
@@ -216,6 +258,8 @@ def decode_one_message(msg: Message, storage: StorageDict) -> bool:
     used = False
     subject, encoding = email.header.decode_header(msg["Subject"])[0]
     if isinstance(subject, bytes):
+        if encoding is None:
+            encoding = "utf-8"
         subject = subject.decode(str(encoding))
     subject = subject.replace("\r", "").replace("\n", " ")
     print(f"Subject: {subject}")
@@ -252,10 +296,16 @@ def main() -> None:
         "tlsrpt": [],
         "dmarc": [],
     }
-    with imaplib.IMAP4_SSL(server, port) as imap:
-        assert imap.login(username, password)[0] == "OK"
+    with imaplib.IMAP4_SSL(
+        server, port, ssl_context=ssl.create_default_context()
+    ) as imap:
         status: str
         data: list[bytes | None]
+        if password == "-":
+            status = login_gssapi(imap, server, username)
+        else:
+            status = imap.login(username, password)
+        assert status[0] == "OK"
         status, data = imap.select("INBOX")
         assert status == "OK"
         assert data[0], "Invalid response"
